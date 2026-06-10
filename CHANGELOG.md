@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.13.1
+
+- Removed duplicate `Package: name@version` output from `dockyard package test`.
+- Added Docker preflight checks before `dockyard package test --smoke`.
+- Improved smoke test errors so Docker Desktop / Docker daemon issues point users to `dockyard doctor`.
+- Documented that `--smoke` requires a reachable Docker daemon.
+
+## v0.13
+
+- Added `dockyard package test PACKAGE_SOURCE` for package-author validation pipelines.
+- Added optional `dockyard package test --smoke` for examples that can be safely started and stopped with Docker Compose.
+- Added `--env-file`, `--require-lock`, `--overlay`, `--strict`, and JSON support to package tests.
+- Updated command reference and packaging docs with package test workflows.
+
+
 ## v0.12.0
 
 - Added `dockyard package lint PACKAGE_DIR`.

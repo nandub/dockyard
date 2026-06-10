@@ -387,3 +387,13 @@ dockyard package lint ./examples/nginx --strict
 ```
 
 Use this before changing `examples/`, package templates, archive behavior, values/schema generation, or packaging docs. The command checks required package docs, forbidden local artifacts, schema descriptions, sensitive markers, default rendering, and policy findings.
+
+
+## Package validation pipeline
+
+Use `dockyard package test PACKAGE_SOURCE` when adding or changing example packages. The default mode is non-destructive and runs quality checks, rendering, policy checks, and `docker compose config`. Use `--smoke` only for examples that are safe to start locally and cleanly stop with `docker compose down`.
+
+## Package smoke tests
+
+`dockyard package test --smoke` is allowed only for examples that are safe to start and stop locally. It must use a temporary Compose project name and must not write Dockyard release state. Always preflight Docker availability before smoke operations and return actionable errors that point users to `dockyard doctor` when Docker Desktop or the Docker daemon is not reachable.
+

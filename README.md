@@ -39,6 +39,9 @@ dockyard compat
 dockyard compat ./examples/nginx
 dockyard compat --release example
 dockyard package lint ./examples/nginx --strict
+dockyard package test ./examples/nginx --strict
+# Requires Docker daemon / Docker Desktop:
+dockyard package test ./examples/nginx --smoke
 ```
 
 ## Examples
@@ -251,6 +254,9 @@ dockyard compat
 dockyard compat ./examples/nginx
 dockyard compat --release example
 dockyard package lint ./examples/nginx --strict
+dockyard package test ./examples/nginx --strict
+# Requires Docker daemon / Docker Desktop:
+dockyard package test ./examples/nginx --smoke
 ```
 
 ## Examples

@@ -53,6 +53,41 @@ dockyard install dashboard-prod ../dockyard-artifacts/team-dashboard-0.1.0.docky
   --require-lock
 ```
 
+
+
+## Test a package
+
+Use `dockyard package test` before publishing or sharing a package:
+
+```bash
+dockyard package test ../dockyard-work/team-dashboard   -f ../deploy-values/dashboard-prod.yaml
+```
+
+The default test pipeline is non-destructive. It:
+
+```text
+prepares the source directory, archive, or OCI package
+runs package quality checks
+validates values and schema
+renders Compose with the selected values
+runs Dockyard policy checks
+runs docker compose config
+```
+
+For examples that are safe to run locally, add `--smoke`:
+
+```bash
+dockyard package test ../dockyard-work/example-app   -f ../deploy-values/local.yaml   --smoke
+```
+
+Smoke tests use a temporary Compose project name and do not write Dockyard release state. They run `docker compose up`, show container status with `docker compose ps --all`, and then run `docker compose down`. Smoke tests require Docker and a reachable Docker daemon. If a smoke test fails before Compose starts, run `dockyard doctor` and verify Docker Desktop or your Docker daemon is running.
+
+Use `--strict` before publishing public examples:
+
+```bash
+dockyard package test ../dockyard-work/example-app   -f ../deploy-values/local.yaml   --strict
+```
+
 ## Create a package archive
 
 ```bash
