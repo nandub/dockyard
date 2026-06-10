@@ -50,3 +50,39 @@ func TestInspectSchemaQualityAcceptsDescriptionsAndSensitiveMarker(t *testing.T)
 		t.Fatalf("expected no missing sensitive markers, got %v", missingSensitive)
 	}
 }
+
+func TestHasBlockingFindingsStrictFailsWarnings(t *testing.T) {
+	report := Report{
+		Checks: []Check{
+			{Name: "LICENSE", Severity: SeverityWarn, Message: "missing"},
+		},
+	}
+
+	if !HasBlockingFindings(report, Options{Strict: true}) {
+		t.Fatal("expected strict mode to fail on warnings")
+	}
+}
+
+func TestHasBlockingFindingsAllowAdvisorySkipsAdvisoryWarnings(t *testing.T) {
+	report := Report{
+		Checks: []Check{
+			{Name: "LICENSE", Severity: SeverityWarn, Message: "missing", Advisory: true},
+		},
+	}
+
+	if HasBlockingFindings(report, Options{Strict: true, AllowAdvisory: true}) {
+		t.Fatal("expected advisory warning to be allowed")
+	}
+}
+
+func TestHasBlockingFindingsAllowAdvisoryStillFailsNonAdvisoryWarnings(t *testing.T) {
+	report := Report{
+		Checks: []Check{
+			{Name: "values.schema.json", Severity: SeverityWarn, Message: "missing"},
+		},
+	}
+
+	if !HasBlockingFindings(report, Options{Strict: true, AllowAdvisory: true}) {
+		t.Fatal("expected non-advisory warning to fail even when advisory warnings are allowed")
+	}
+}

@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.14.1
+
+- Normalized `--strict` behavior for package quality commands: warnings now fail by default.
+- Added `--allow-advisory` to `dockyard package lint` and `dockyard package test`.
+- Marked missing package-local `LICENSE` as an advisory warning that can be allowed for private/internal packages.
+- Added package-local `LICENSE` files to public examples so strict release gates can pass cleanly.
+- Added tests for strict/advisory quality behavior.
+- Updated command reference, packaging docs, v1 readiness docs, README, and AGENTS.md.
+
+## v0.14.0
+
+Release-candidate preparation pass.
+
+- Added `dockyard compat --strict` to treat compatibility warnings as failures.
+- Expanded v1.0 readiness documentation with a release-candidate gate.
+- Updated command reference with strict compatibility usage.
+- Updated README and AGENTS.md with release-candidate validation guidance.
+
 ## v0.13.1
 
 - Removed duplicate `Package: name@version` output from `dockyard package test`.

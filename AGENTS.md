@@ -397,3 +397,31 @@ Use `dockyard package test PACKAGE_SOURCE` when adding or changing example packa
 
 `dockyard package test --smoke` is allowed only for examples that are safe to start and stop locally. It must use a temporary Compose project name and must not write Dockyard release state. Always preflight Docker availability before smoke operations and return actionable errors that point users to `dockyard doctor` when Docker Desktop or the Docker daemon is not reachable.
 
+
+
+## v1.0 / release-candidate work
+
+Avoid expanding the CLI surface unless the change directly improves stability, compatibility, release quality, or documentation accuracy.
+
+Before changing file formats, update:
+
+- `internal/format`
+- `docs/v1-readiness.md`
+- `docs/compose-compatibility.md` when behavior affects Compose support
+- `CHANGELOG.md`
+
+For release-candidate checks, prefer:
+
+```sh
+make verify
+dockyard compat ./examples/nginx --strict
+dockyard package lint ./examples/nginx --strict
+dockyard package test ./examples/nginx --strict
+```
+
+Use `dockyard package test --smoke` only when Docker is available.
+
+
+## Strict mode and advisory warnings
+
+`--strict` must mean warnings fail across compatibility and package-quality commands. For package quality checks, use `--allow-advisory` only for explicitly advisory warnings such as private packages that rely on repository-level licensing instead of a package-local `LICENSE`.

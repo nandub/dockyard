@@ -39,8 +39,8 @@ Use values files for deployment settings. Use `--env-file` for environment-backe
 
 ```bash
 dockyard lock PACKAGE_DIR [-f values.yaml]
-dockyard package lint PACKAGE_DIR [--strict] [--json]
-dockyard package test PACKAGE_SOURCE [--strict] [--smoke] [--env-file file]
+dockyard package lint PACKAGE_DIR [--strict] [--allow-advisory] [--json]
+dockyard package test PACKAGE_SOURCE [--strict] [--allow-advisory] [--smoke] [--env-file file]
 dockyard package PACKAGE_DIR --locked [-f values.yaml] -o app-0.1.0.dockyard.tgz
 dockyard verify PACKAGE_ARCHIVE [-f values.yaml] [--require-lock]
 dockyard push PACKAGE_ARCHIVE oci://registry/repository/name:tag
@@ -88,9 +88,43 @@ Show supported Dockyard format versions or check a package/release for compatibi
 ```bash
 dockyard compat
 dockyard compat ./examples/nginx
+dockyard compat ./examples/nginx --strict
 dockyard compat nginx-0.1.0.dockyard.tgz
 dockyard compat --release example
 dockyard compat --json
 ```
 
 The command is intended for v1.0 readiness work and for diagnosing package, archive, lockfile, and release-state format issues.
+
+
+## Release-candidate checks
+
+For v1.0 release-candidate preparation, run:
+
+```bash
+dockyard compat ./examples/nginx --strict
+dockyard package lint ./examples/nginx --strict
+dockyard package test ./examples/nginx --strict
+```
+
+Use `--strict` to treat warnings as failures for release-candidate gates. `package lint` and `package test` also support `--allow-advisory` for advisory warnings such as a missing package-local `LICENSE` in private/internal packages.
+
+
+### Strict package gates
+
+`--strict` has the same meaning across compatibility and package-quality commands: warnings become command failures.
+
+```bash
+dockyard compat ./examples/nginx --strict
+dockyard package lint ./examples/nginx --strict
+dockyard package test ./examples/nginx --strict
+```
+
+For private/internal packages that intentionally rely on repository-level licensing instead of a package-local `LICENSE`, use:
+
+```bash
+dockyard package lint ./internal-package --strict --allow-advisory
+dockyard package test ./internal-package --strict --allow-advisory
+```
+
+Public examples in this repository include package-local `LICENSE` files so the strict gate can pass without `--allow-advisory`.

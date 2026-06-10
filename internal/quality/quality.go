@@ -26,6 +26,7 @@ type Check struct {
 	Severity Severity `json:"severity"`
 	Message  string   `json:"message"`
 	Details  []string `json:"details,omitempty"`
+	Advisory bool     `json:"advisory,omitempty"`
 }
 
 type Report struct {
@@ -35,7 +36,8 @@ type Report struct {
 }
 
 type Options struct {
-	Strict bool
+	Strict        bool
+	AllowAdvisory bool
 }
 
 func LintPackage(packageDir string, opts Options) (Report, error) {
@@ -67,6 +69,21 @@ func HasFailures(report Report) bool {
 	return false
 }
 
+func HasBlockingFindings(report Report, opts Options) bool {
+	for _, check := range report.Checks {
+		if check.Severity == SeverityFail {
+			return true
+		}
+		if opts.Strict && check.Severity == SeverityWarn {
+			if opts.AllowAdvisory && check.Advisory {
+				continue
+			}
+			return true
+		}
+	}
+	return false
+}
+
 func checkRequiredFiles(packageDir string, strict bool) []Check {
 	files := []struct {
 		name         string
@@ -90,7 +107,7 @@ func checkRequiredFiles(packageDir string, strict bool) []Check {
 			if strict && file.strictFatal {
 				severity = SeverityFail
 			}
-			checks = append(checks, Check{Name: file.name, Severity: severity, Message: file.missingNotes})
+			checks = append(checks, Check{Name: file.name, Severity: severity, Message: file.missingNotes, Advisory: file.name == "LICENSE"})
 			continue
 		}
 		checks = append(checks, Check{Name: file.name, Severity: SeverityOK, Message: "present"})

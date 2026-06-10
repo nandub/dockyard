@@ -1,0 +1,41 @@
+{
+  "apiVersion": "dockyard.dev/lockfile/v1alpha1",
+  "generatedAt": "2026-06-10T23:42:35.2852342Z",
+  "packageName": "nginx",
+  "packageVersion": "0.1.0",
+  "appVersion": "1.27",
+  "valuesSha256": "bb065fb5c9e1634d14eabb3ce460463c61f5a57cc728ed246ec6149589391f96",
+  "renderedComposeSha256": "e894c2c608b4c237032cecd94a81947e796c06ac45e4c3fe0884e4c625cfee43",
+  "images": [
+    {
+      "service": "web",
+      "image": "nginx:1.27"
+    }
+  ],
+  "files": [
+    {
+      "path": "Dockyard.yaml",
+      "sha256": "4db98b7943c672baece5394aaf5c731b5e1ce80d4a163c951693077b8d53ae81"
+    },
+    {
+      "path": "README.md",
+      "sha256": "4d6c15294c5eda606d7cf298c34adae71338a403f35f870a0d1b6e2aa24519d4"
+    },
+    {
+      "path": "SECURITY.md",
+      "sha256": "ab28841ee7de895d8bec93ed32fa46f98d6e2140d932f84ef8819ab03fb2f98c"
+    },
+    {
+      "path": "compose.yaml",
+      "sha256": "f15eca190c986c9ba1bbf871efa5d159ee551ae37ec5abe4e9ef24bba1a4fc06"
+    },
+    {
+      "path": "values.schema.json",
+      "sha256": "1381720b1787c0882d7351328d647a2fb69ae0197c79df98445e85c55d2d72e9"
+    },
+    {
+      "path": "values.yaml",
+      "sha256": "2f0dd9994e035ba84572265a7a1a2abeae3de128e1cdf38ec71952c6f03acecd"
+    }
+  ]
+}

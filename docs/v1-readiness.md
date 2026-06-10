@@ -1,6 +1,6 @@
 # v1.0 readiness
 
-Dockyard v0.11 starts the v1.0 compatibility pass. The goal is to make file formats, command behavior, and release state predictable before declaring a stable v1.0.
+Dockyard v0.14 is the release-candidate preparation pass. The goal is to make file formats, command behavior, and release state predictable before declaring a stable v1.0.
 
 ## Format stability
 
@@ -88,3 +88,38 @@ dockyard package lint PACKAGE_DIR --strict
 ```
 
 `compat` checks format support. `package lint` checks package quality and publication readiness.
+
+
+## v0.14 release-candidate gate
+
+Before cutting a `v1.0.0-rc.1` tag, run this checklist from a clean checkout:
+
+```bash
+go mod tidy
+make verify
+make dev-build
+dockyard version
+dockyard compat
+dockyard compat ./examples/nginx --strict
+dockyard package lint ./examples/nginx --strict
+dockyard package test ./examples/nginx --strict
+```
+
+When Docker is available, also run:
+
+```bash
+dockyard package test ./examples/nginx --smoke
+```
+
+On Windows, use the generated executable:
+
+```powershell
+.\bin\dockyard.exe compat .\examples\nginx --strict
+.\bin\dockyard.exe package test .\examples\nginx --smoke
+```
+
+### Strict compatibility checks
+
+`dockyard compat --strict`, `dockyard package lint --strict`, and `dockyard package test --strict` treat warnings as failures. Use `--allow-advisory` with package lint/test only when private packages intentionally allow advisory warnings such as a missing package-local `LICENSE`.
+
+Warnings are still useful during normal development; strict mode is intended for packages or release state that should be ready for publishing.

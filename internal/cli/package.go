@@ -50,6 +50,7 @@ func newPackageCommand() *cobra.Command {
 
 func newPackageLintCommand() *cobra.Command {
 	var strict bool
+	var allowAdvisory bool
 	var jsonOut bool
 
 	cmd := &cobra.Command{
@@ -63,19 +64,20 @@ linting. Use --strict before publishing package examples or registry-ready
 packages.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			report, err := quality.LintPackage(args[0], quality.Options{Strict: strict})
+			qualityOpts := quality.Options{Strict: strict, AllowAdvisory: allowAdvisory}
+			report, err := quality.LintPackage(args[0], qualityOpts)
 			if err != nil {
 				return err
 			}
 			if jsonOut {
-				if quality.HasFailures(report) {
+				if quality.HasBlockingFindings(report, qualityOpts) {
 					_ = printJSON(report)
 					return fmt.Errorf("package quality checks failed")
 				}
 				return printJSON(report)
 			}
 			printQualityReport(report)
-			if quality.HasFailures(report) {
+			if quality.HasBlockingFindings(report, qualityOpts) {
 				return fmt.Errorf("package quality checks failed")
 			}
 			return nil
@@ -83,6 +85,7 @@ packages.`,
 	}
 
 	cmd.Flags().BoolVar(&strict, "strict", false, "treat package quality warnings as failures")
+	cmd.Flags().BoolVar(&allowAdvisory, "allow-advisory", false, "allow advisory warnings such as a missing package-local LICENSE when --strict is used")
 	cmd.Flags().BoolVar(&jsonOut, "json", false, "output JSON")
 	return cmd
 }
@@ -111,6 +114,7 @@ type packageTestReport struct {
 
 func newPackageTestCommand() *cobra.Command {
 	var strict bool
+	var allowAdvisory bool
 	var smoke bool
 	var jsonOut bool
 	var opts packageBuildOptions
@@ -128,7 +132,7 @@ With --smoke, Dockyard also runs docker compose up/down using a temporary
 Compose project name. Smoke tests do not write Dockyard release state.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			report, err := runPackageTest(args[0], strict, smoke, opts)
+			report, err := runPackageTest(args[0], quality.Options{Strict: strict, AllowAdvisory: allowAdvisory}, smoke, opts)
 			if jsonOut {
 				if err != nil {
 					_ = printJSON(report)
@@ -142,6 +146,7 @@ Compose project name. Smoke tests do not write Dockyard release state.`,
 	}
 
 	cmd.Flags().BoolVar(&strict, "strict", false, "run package quality checks in strict mode")
+	cmd.Flags().BoolVar(&allowAdvisory, "allow-advisory", false, "allow advisory warnings such as a missing package-local LICENSE when --strict is used")
 	cmd.Flags().BoolVar(&smoke, "smoke", false, "run docker compose up/down with a temporary Compose project")
 	cmd.Flags().BoolVar(&jsonOut, "json", false, "output JSON")
 	cmd.Flags().StringVarP(&opts.valuesFile, "values", "f", "", "values override file")
@@ -154,7 +159,7 @@ Compose project name. Smoke tests do not write Dockyard release state.`,
 	return cmd
 }
 
-func runPackageTest(source string, strict bool, smoke bool, opts packageBuildOptions) (packageTestReport, error) {
+func runPackageTest(source string, qualityOpts quality.Options, smoke bool, opts packageBuildOptions) (packageTestReport, error) {
 	report := packageTestReport{Source: source}
 
 	prepared, err := preparePackageSource(source, true)
@@ -163,14 +168,14 @@ func runPackageTest(source string, strict bool, smoke bool, opts packageBuildOpt
 	}
 	defer prepared.cleanup()
 
-	qualityReport, err := quality.LintPackage(prepared.Dir, quality.Options{Strict: strict})
+	qualityReport, err := quality.LintPackage(prepared.Dir, qualityOpts)
 	report.Quality = qualityReport
 	report.PackageName = qualityReport.PackageName
 	report.PackageVersion = qualityReport.PackageVersion
 	if err != nil {
 		return report, err
 	}
-	if quality.HasFailures(qualityReport) {
+	if quality.HasBlockingFindings(qualityReport, qualityOpts) {
 		return report, fmt.Errorf("package quality checks failed")
 	}
 

@@ -26,6 +26,7 @@ type compatCheck struct {
 
 func newCompatCommand(global *globalOptions) *cobra.Command {
 	var jsonOut bool
+	var strict bool
 	var releaseName string
 
 	cmd := &cobra.Command{
@@ -44,12 +45,12 @@ With --release, Dockyard checks the current release metadata format.`,
 				if err != nil {
 					return err
 				}
-				return printCompatResult(result, jsonOut)
+				return printCompatResult(result, jsonOut, strict)
 			}
 
 			if len(args) == 0 {
 				result := compatResult{Formats: format.SupportedFormats()}
-				return printCompatResult(result, jsonOut)
+				return printCompatResult(result, jsonOut, strict)
 			}
 
 			src, err := preparePackageSource(args[0], true)
@@ -59,11 +60,12 @@ With --release, Dockyard checks the current release metadata format.`,
 			defer src.cleanup()
 
 			result := checkPackageCompatibility(src.Dir, args[0])
-			return printCompatResult(result, jsonOut)
+			return printCompatResult(result, jsonOut, strict)
 		},
 	}
 
 	cmd.Flags().BoolVar(&jsonOut, "json", false, "output JSON")
+	cmd.Flags().BoolVar(&strict, "strict", false, "treat warnings as failures")
 	cmd.Flags().StringVar(&releaseName, "release", "", "check the current release metadata format")
 	return cmd
 }
@@ -154,8 +156,12 @@ func checkReleaseCompatibility(global *globalOptions, releaseName string) (compa
 	return compatResult{Checks: []compatCheck{check}}, nil
 }
 
-func printCompatResult(result compatResult, jsonOut bool) error {
+func printCompatResult(result compatResult, jsonOut bool, strict bool) error {
 	if jsonOut {
+		if strict && compatHasProblems(result) {
+			_ = printJSON(result)
+			return fmt.Errorf("compatibility checks failed")
+		}
 		return printJSON(result)
 	}
 
@@ -174,5 +180,17 @@ func printCompatResult(result compatResult, jsonOut bool) error {
 		}
 		fmt.Printf("%s: %s\n", check.Status, check.Name)
 	}
+	if strict && compatHasProblems(result) {
+		return fmt.Errorf("compatibility checks failed")
+	}
 	return nil
+}
+
+func compatHasProblems(result compatResult) bool {
+	for _, check := range result.Checks {
+		if check.Status == "WARN" || check.Status == "FAIL" {
+			return true
+		}
+	}
+	return false
 }

@@ -193,5 +193,5 @@ It checks:
 - The default Compose render succeeds.
 - The default render passes the configured Dockyard policy.
 
-Use `--strict` when preparing packages for examples, internal catalogs, or OCI publishing. In strict mode, missing README/SECURITY files and schema quality warnings become failures. Missing LICENSE remains a warning because private/internal packages may use repository-level licensing.
+Use `--strict` when preparing packages for examples, internal catalogs, or OCI publishing. In strict mode, missing README/SECURITY files and schema quality warnings become failures. In strict mode, warnings fail by default. Use `--allow-advisory` when private/internal packages intentionally rely on repository-level licensing instead of a package-local `LICENSE`.
 

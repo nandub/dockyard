@@ -44,6 +44,19 @@ dockyard package test ./examples/nginx --strict
 dockyard package test ./examples/nginx --smoke
 ```
 
+## v1.0 release-candidate preparation
+
+For packages that should be ready to publish, use strict compatibility and package-quality gates:
+
+```bash
+dockyard compat ./examples/nginx --strict
+dockyard package lint ./examples/nginx --strict
+dockyard package test ./examples/nginx --strict
+```
+
+See [v1.0 readiness](docs/v1-readiness.md) for the full release-candidate checklist.
+
+
 ## Examples
 
 Runnable package examples live under `examples/`:
@@ -259,6 +272,19 @@ dockyard package test ./examples/nginx --strict
 dockyard package test ./examples/nginx --smoke
 ```
 
+## v1.0 release-candidate preparation
+
+For packages that should be ready to publish, use strict compatibility and package-quality gates:
+
+```bash
+dockyard compat ./examples/nginx --strict
+dockyard package lint ./examples/nginx --strict
+dockyard package test ./examples/nginx --strict
+```
+
+See [v1.0 readiness](docs/v1-readiness.md) for the full release-candidate checklist.
+
+
 ## Examples
 
 Runnable example packages live in `examples/`:
@@ -286,3 +312,16 @@ Keep local smoke-test artifacts outside this repository, for example:
 - [Command reference](docs/command-reference.md)
 - [Release engineering](docs/release-engineering.md)
 - [Real-world example](docs/real-world-example.md)
+
+
+## Strict package gates
+
+Strict mode treats warnings as failures for release-candidate checks:
+
+```bash
+dockyard compat ./examples/nginx --strict
+dockyard package lint ./examples/nginx --strict
+dockyard package test ./examples/nginx --strict
+```
+
+For private/internal packages that intentionally rely on repository-level licensing instead of a package-local `LICENSE`, package quality commands support `--allow-advisory`.
