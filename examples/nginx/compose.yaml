@@ -1,0 +1,12 @@
+services:
+  web:
+    image: "${image.repository}:${image.tag}"
+    ports:
+      - "${service.port}:80"
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true

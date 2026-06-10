@@ -41,6 +41,7 @@ func newDiffCommand(global *globalOptions) *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVarP(&opts.valuesFile, "values", "f", "", "values override file")
+	cmd.Flags().StringVar(&opts.envFile, "env-file", "", "accepted for workflow consistency; diff does not execute docker compose")
 	cmd.Flags().StringVar(&opts.overlay, "overlay", "", "compose overlay name")
 	cmd.Flags().BoolVar(&opts.allowRisk, "allow-risk", false, "allow HIGH policy findings")
 	cmd.Flags().BoolVar(&opts.skipPolicy, "skip-policy", false, "skip Dockyard policy checks")

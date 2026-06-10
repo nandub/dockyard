@@ -1,0 +1,14 @@
+caddy:
+  image: caddy
+  tag: "2.8"
+  email: "admin@example.com"
+
+site:
+  hostname: "example.com"
+
+upstream:
+  url: "http://host.docker.internal:8080"
+
+service:
+  httpPort: 80
+  httpsPort: 443

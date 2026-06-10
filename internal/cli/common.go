@@ -11,6 +11,7 @@ import (
 
 	"github.com/nandub/dockyard/internal/archive"
 	"github.com/nandub/dockyard/internal/dockpkg"
+	"github.com/nandub/dockyard/internal/envfile"
 	"github.com/nandub/dockyard/internal/lock"
 	"github.com/nandub/dockyard/internal/oci"
 	"github.com/nandub/dockyard/internal/policy"
@@ -18,6 +19,7 @@ import (
 	"github.com/nandub/dockyard/internal/runner"
 	"github.com/nandub/dockyard/internal/state"
 	"github.com/nandub/dockyard/internal/values"
+	"github.com/nandub/dockyard/internal/version"
 )
 
 type packageBuildOptions struct {
@@ -27,6 +29,7 @@ type packageBuildOptions struct {
 	allowRisk         bool
 	skipComposeConfig bool
 	requireLock       bool
+	envFile           string
 }
 
 type preparedSource struct {
@@ -144,7 +147,7 @@ func buildPackage(packageDir string, releaseName string, opts packageBuildOption
 	return manifest, vals, rendered, findings, nil
 }
 
-func writeRevision(home string, releaseName string, revision int, manifest *dockpkg.Manifest, vals map[string]any, rendered []byte, packageDir string, src state.Source, statusValue string) (*state.Release, string, error) {
+func writeRevision(home string, releaseName string, revision int, manifest *dockpkg.Manifest, vals map[string]any, rendered []byte, packageDir string, src state.Source, statusValue string, envFile string) (*state.Release, string, error) {
 	revisionDir := state.RevisionDir(home, releaseName, revision)
 	if err := os.MkdirAll(revisionDir, 0o700); err != nil {
 		return nil, "", err
@@ -170,16 +173,18 @@ func writeRevision(home string, releaseName string, revision int, manifest *dock
 	}
 	now := time.Now().UTC()
 	release := state.Release{
-		Name:           releaseName,
-		PackageName:    manifest.Name,
-		PackageVersion: manifest.Version,
-		AppVersion:     manifest.AppVersion,
-		Revision:       revision,
-		Status:         statusValue,
-		CreatedAt:      now,
-		UpdatedAt:      now,
-		ComposeProject: releaseName,
-		Source:         src,
+		DockyardVersion: version.Version,
+		Name:            releaseName,
+		PackageName:     manifest.Name,
+		PackageVersion:  manifest.Version,
+		AppVersion:      manifest.AppVersion,
+		Revision:        revision,
+		Status:          statusValue,
+		CreatedAt:       now,
+		UpdatedAt:       now,
+		ComposeProject:  releaseName,
+		Source:          src,
+		EnvFile:         envFile,
 	}
 	if err := state.WriteRelease(revisionDir, release); err != nil {
 		return nil, "", err
@@ -207,6 +212,17 @@ func printJSON(v any) error {
 	encoder := json.NewEncoder(os.Stdout)
 	encoder.SetIndent("", "  ")
 	return encoder.Encode(v)
+}
+
+func loadCommandEnv(path string) ([]string, error) {
+	if path == "" {
+		return nil, nil
+	}
+	return envfile.LoadForProcess(path)
+}
+
+func dockerRunnerWithEnv(releaseName string, workDir string, env []string) runner.DockerComposeRunner {
+	return runner.DockerComposeRunner{WorkDir: workDir, Project: releaseName, Env: env}
 }
 
 func dockerRunner(releaseName string, workDir string) runner.DockerComposeRunner {

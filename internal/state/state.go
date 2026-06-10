@@ -21,16 +21,18 @@ type Source struct {
 }
 
 type Release struct {
-	Name           string    `json:"name"`
-	PackageName    string    `json:"packageName"`
-	PackageVersion string    `json:"packageVersion"`
-	AppVersion     string    `json:"appVersion"`
-	Revision       int       `json:"revision"`
-	Status         string    `json:"status"`
-	CreatedAt      time.Time `json:"createdAt"`
-	UpdatedAt      time.Time `json:"updatedAt"`
-	ComposeProject string    `json:"composeProject"`
-	Source         Source    `json:"source"`
+	DockyardVersion string    `json:"dockyardVersion,omitempty"`
+	Name            string    `json:"name"`
+	PackageName     string    `json:"packageName"`
+	PackageVersion  string    `json:"packageVersion"`
+	AppVersion      string    `json:"appVersion"`
+	Revision        int       `json:"revision"`
+	Status          string    `json:"status"`
+	CreatedAt       time.Time `json:"createdAt"`
+	UpdatedAt       time.Time `json:"updatedAt"`
+	ComposeProject  string    `json:"composeProject"`
+	Source          Source    `json:"source"`
+	EnvFile         string    `json:"envFile,omitempty"`
 }
 
 func ValidateReleaseName(name string) error {

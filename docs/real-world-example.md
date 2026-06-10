@@ -4,16 +4,34 @@ This guide shows a realistic Dockyard workflow for packaging, validating, lockin
 
 The example application is an internal dashboard backed by PostgreSQL.
 
-The main path intentionally does **not** use a Compose overlay. It uses a production values file only. See [Compose Overlays](overlays.md) for the advanced case where the Compose structure itself needs to change.
+The main path intentionally does **not** use a Compose overlay. It uses a production values file only. See [Compose Overlays](operator-guide.md) for the advanced case where the Compose structure itself needs to change.
+
+
+## Working outside the Dockyard repository
+
+When testing Dockyard itself, keep the sample application, deployment values, env files, and package archives outside the Dockyard source repository:
+
+```bash
+mkdir -p ../dockyard-work ../deploy-values ../dockyard-artifacts
+```
+
+The commands below assume you are running from the Dockyard repository root and use:
+
+```text
+../dockyard-work/team-dashboard
+../deploy-values/dashboard-prod.yaml
+../deploy-values/dashboard-prod.env
+../dockyard-artifacts/team-dashboard-0.1.0.dockyard.tgz
+```
 
 ## Example names
 
 | Item | Name |
 |---|---|
-| Dockyard package | `team-dashboard` |
+| Dockyard package | `../dockyard-work/team-dashboard` |
 | Installed release | `dashboard-prod` |
-| Operator values file | `deploy-values/dashboard-prod.yaml` |
-| Package archive | `team-dashboard-0.1.0.dockyard.tgz` |
+| Operator values file | `../deploy-values/dashboard-prod.yaml` |
+| Package archive | `../dockyard-artifacts/team-dashboard-0.1.0.dockyard.tgz` |
 
 ## 1. Build Dockyard
 
@@ -46,13 +64,13 @@ Run the environment check:
 ## 2. Create a package
 
 ```bash
-./bin/dockyard init ./team-dashboard
+./bin/dockyard init ../dockyard-work/team-dashboard
 ```
 
 Create `Dockyard.yaml`:
 
 ```bash
-cat > ./team-dashboard/Dockyard.yaml <<'EOF'
+cat > ../dockyard-work/team-dashboard/Dockyard.yaml <<'EOF'
 apiVersion: dockyard.dev/v1alpha1
 name: team-dashboard
 description: Internal dashboard with PostgreSQL
@@ -81,7 +99,7 @@ EOF
 Create `values.yaml`:
 
 ```bash
-cat > ./team-dashboard/values.yaml <<'EOF'
+cat > ../dockyard-work/team-dashboard/values.yaml <<'EOF'
 app:
   image: ghcr.io/example/team-dashboard
   tag: "1.0.0"
@@ -100,7 +118,7 @@ EOF
 Create `values.schema.json`:
 
 ```bash
-cat > ./team-dashboard/values.schema.json <<'EOF'
+cat > ../dockyard-work/team-dashboard/values.schema.json <<'EOF'
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
@@ -181,8 +199,8 @@ Production values belong outside the reusable package.
 ```bash
 mkdir -p ./deploy-values
 
-./bin/dockyard values template ./team-dashboard \
-  -o ./deploy-values/dashboard-prod.yaml
+./bin/dockyard values template ../dockyard-work/team-dashboard \
+  -o ./../deploy-values/dashboard-prod.yaml
 ```
 
 The generated file is meant for the operator to edit. It uses comments from `values.schema.json` and masks sensitive fields.
@@ -217,14 +235,14 @@ database:
 Edit the generated file and set a real password:
 
 ```bash
-$EDITOR ./deploy-values/dashboard-prod.yaml
+$EDITOR ./../deploy-values/dashboard-prod.yaml
 ```
 
 Validate it:
 
 ```bash
-./bin/dockyard values validate ./team-dashboard \
-  -f ./deploy-values/dashboard-prod.yaml
+./bin/dockyard values validate ../dockyard-work/team-dashboard \
+  -f ./../deploy-values/dashboard-prod.yaml
 ```
 
 ## 5. Add the Compose template
@@ -232,7 +250,7 @@ Validate it:
 Create `compose.yaml`:
 
 ```bash
-cat > ./team-dashboard/compose.yaml <<'EOF'
+cat > ../dockyard-work/team-dashboard/compose.yaml <<'EOF'
 services:
   app:
     image: "${app.image}:${app.tag}"
@@ -279,28 +297,28 @@ EOF
 ## 6. Lint and render
 
 ```bash
-./bin/dockyard lint ./team-dashboard \
-  -f ./deploy-values/dashboard-prod.yaml
+./bin/dockyard lint ../dockyard-work/team-dashboard \
+  -f ./../deploy-values/dashboard-prod.yaml
 ```
 
 Scan package defaults for accidental secrets:
 
 ```bash
-dockyard secrets scan ./team-dashboard --strict
+dockyard secrets scan ../dockyard-work/team-dashboard --strict
 ```
 
 Run explicit policy checks:
 
 ```bash
-dockyard policy check ./team-dashboard \
-  -f ./deploy-values/dashboard-prod.yaml
+dockyard policy check ../dockyard-work/team-dashboard \
+  -f ./../deploy-values/dashboard-prod.yaml
 ```
 
 Render and explain placeholders:
 
 ```bash
-./bin/dockyard render ./team-dashboard \
-  -f ./deploy-values/dashboard-prod.yaml \
+./bin/dockyard render ../dockyard-work/team-dashboard \
+  -f ./../deploy-values/dashboard-prod.yaml \
   --explain
 ```
 
@@ -311,8 +329,8 @@ Sensitive values such as passwords are masked in diagnostics.
 Before installing, ask Docker Compose to validate the final rendered file:
 
 ```bash
-./bin/dockyard config ./team-dashboard \
-  -f ./deploy-values/dashboard-prod.yaml
+./bin/dockyard config ../dockyard-work/team-dashboard \
+  -f ./../deploy-values/dashboard-prod.yaml
 ```
 
 This command renders the Dockyard package to a temporary Compose file and runs:
@@ -326,22 +344,22 @@ It does not create a release and does not start containers.
 You can use the same check for a packaged archive:
 
 ```bash
-./bin/dockyard config team-dashboard-0.1.0.dockyard.tgz \
-  -f ./deploy-values/dashboard-prod.yaml \
+./bin/dockyard config ../dockyard-artifacts/team-dashboard-0.1.0.dockyard.tgz \
+  -f ./../deploy-values/dashboard-prod.yaml \
   --require-lock
 ```
 
 ## 8. Create a lockfile
 
 ```bash
-./bin/dockyard lock ./team-dashboard \
-  -f ./deploy-values/dashboard-prod.yaml
+./bin/dockyard lock ../dockyard-work/team-dashboard \
+  -f ./../deploy-values/dashboard-prod.yaml
 ```
 
 This creates:
 
 ```text
-team-dashboard/dockyard.lock
+../dockyard-work/team-dashboard/dockyard.lock
 ```
 
 The lockfile records values digest, rendered Compose digest, package file digests, service image references, and image digests when image references are already pinned with `@sha256:...`.
@@ -353,17 +371,17 @@ Dockyard v0.6.2 does not resolve image tags to registry digests. It only records
 Create a locked package archive:
 
 ```bash
-./bin/dockyard package ./team-dashboard \
+./bin/dockyard package ../dockyard-work/team-dashboard \
   --locked \
-  -f ./deploy-values/dashboard-prod.yaml \
-  -o team-dashboard-0.1.0.dockyard.tgz
+  -f ./../deploy-values/dashboard-prod.yaml \
+  -o ../dockyard-artifacts/team-dashboard-0.1.0.dockyard.tgz
 ```
 
 Verify it:
 
 ```bash
-./bin/dockyard verify team-dashboard-0.1.0.dockyard.tgz \
-  -f ./deploy-values/dashboard-prod.yaml \
+./bin/dockyard verify ../dockyard-artifacts/team-dashboard-0.1.0.dockyard.tgz \
+  -f ./../deploy-values/dashboard-prod.yaml \
   --require-lock
 ```
 
@@ -386,8 +404,8 @@ The archive should not include `.env`, private keys, `.git/`, `.dockyard/`, `nod
 Dry-run first:
 
 ```bash
-./bin/dockyard install dashboard-prod team-dashboard-0.1.0.dockyard.tgz \
-  -f ./deploy-values/dashboard-prod.yaml \
+./bin/dockyard install dashboard-prod ../dockyard-artifacts/team-dashboard-0.1.0.dockyard.tgz \
+  -f ./../deploy-values/dashboard-prod.yaml \
   --require-lock \
   --dry-run
 ```
@@ -395,8 +413,8 @@ Dry-run first:
 Install:
 
 ```bash
-./bin/dockyard install dashboard-prod team-dashboard-0.1.0.dockyard.tgz \
-  -f ./deploy-values/dashboard-prod.yaml \
+./bin/dockyard install dashboard-prod ../dockyard-artifacts/team-dashboard-0.1.0.dockyard.tgz \
+  -f ./../deploy-values/dashboard-prod.yaml \
   --require-lock
 ```
 
@@ -426,7 +444,7 @@ $DOCKYARD_HOME/releases/dashboard-prod/
 Change the app tag to `1.1.0` in a new values file:
 
 ```bash
-cp ./deploy-values/dashboard-prod.yaml ./deploy-values/dashboard-prod-v1.1.0.yaml
+cp ./../deploy-values/dashboard-prod.yaml ./../deploy-values/dashboard-prod-v1.1.0.yaml
 ```
 
 Edit:
@@ -439,16 +457,16 @@ app:
 Regenerate the lockfile for the new render:
 
 ```bash
-./bin/dockyard lock ./team-dashboard \
-  -f ./deploy-values/dashboard-prod-v1.1.0.yaml
+./bin/dockyard lock ../dockyard-work/team-dashboard \
+  -f ./../deploy-values/dashboard-prod-v1.1.0.yaml
 ```
 
 Package the new render:
 
 ```bash
-./bin/dockyard package ./team-dashboard \
+./bin/dockyard package ../dockyard-work/team-dashboard \
   --locked \
-  -f ./deploy-values/dashboard-prod-v1.1.0.yaml \
+  -f ./../deploy-values/dashboard-prod-v1.1.0.yaml \
   -o team-dashboard-0.1.0-v1.1.0-render.dockyard.tgz
 ```
 
@@ -456,7 +474,7 @@ Preview:
 
 ```bash
 ./bin/dockyard diff dashboard-prod team-dashboard-0.1.0-v1.1.0-render.dockyard.tgz \
-  -f ./deploy-values/dashboard-prod-v1.1.0.yaml \
+  -f ./../deploy-values/dashboard-prod-v1.1.0.yaml \
   --require-lock
 ```
 
@@ -464,7 +482,7 @@ Upgrade:
 
 ```bash
 ./bin/dockyard upgrade dashboard-prod team-dashboard-0.1.0-v1.1.0-render.dockyard.tgz \
-  -f ./deploy-values/dashboard-prod-v1.1.0.yaml \
+  -f ./../deploy-values/dashboard-prod-v1.1.0.yaml \
   --require-lock
 ```
 
@@ -513,7 +531,7 @@ oras login ghcr.io
 Push the package:
 
 ```bash
-./bin/dockyard push team-dashboard-0.1.0.dockyard.tgz \
+./bin/dockyard push ../dockyard-artifacts/team-dashboard-0.1.0.dockyard.tgz \
   oci://ghcr.io/nandub/dockyard/team-dashboard:0.1.0
 ```
 
@@ -521,7 +539,7 @@ Pull the package somewhere else:
 
 ```bash
 ./bin/dockyard pull oci://ghcr.io/nandub/dockyard/team-dashboard:0.1.0 \
-  -o team-dashboard-0.1.0.dockyard.tgz
+  -o ../dockyard-artifacts/team-dashboard-0.1.0.dockyard.tgz
 ```
 
 Install directly from the OCI reference:
@@ -529,7 +547,7 @@ Install directly from the OCI reference:
 ```bash
 ./bin/dockyard install dashboard-prod \
   oci://ghcr.io/nandub/dockyard/team-dashboard:0.1.0 \
-  -f ./deploy-values/dashboard-prod.yaml \
+  -f ./../deploy-values/dashboard-prod.yaml \
   --require-lock
 ```
 
@@ -538,12 +556,12 @@ Preview and upgrade to a newer OCI package:
 ```bash
 ./bin/dockyard diff dashboard-prod \
   oci://ghcr.io/nandub/dockyard/team-dashboard:0.1.1 \
-  -f ./deploy-values/dashboard-prod.yaml \
+  -f ./../deploy-values/dashboard-prod.yaml \
   --require-lock
 
 ./bin/dockyard upgrade dashboard-prod \
   oci://ghcr.io/nandub/dockyard/team-dashboard:0.1.1 \
-  -f ./deploy-values/dashboard-prod.yaml \
+  -f ./../deploy-values/dashboard-prod.yaml \
   --require-lock
 ```
 
@@ -565,7 +583,7 @@ compose:
 Create `compose.prod.yaml`:
 
 ```bash
-cat > ./team-dashboard/compose.prod.yaml <<'EOF'
+cat > ../dockyard-work/team-dashboard/compose.prod.yaml <<'EOF'
 services:
   app:
     restart: always
@@ -582,13 +600,13 @@ EOF
 Then pass `--overlay prod` explicitly:
 
 ```bash
-./bin/dockyard install dashboard-prod team-dashboard-0.1.0.dockyard.tgz \
-  -f ./deploy-values/dashboard-prod.yaml \
+./bin/dockyard install dashboard-prod ../dockyard-artifacts/team-dashboard-0.1.0.dockyard.tgz \
+  -f ./../deploy-values/dashboard-prod.yaml \
   --overlay prod \
   --require-lock
 ```
 
-`-f ./deploy-values/dashboard-prod.yaml` chooses production values. `--overlay prod` applies the structural production Compose override.
+`-f ./../deploy-values/dashboard-prod.yaml` chooses production values. `--overlay prod` applies the structural production Compose override.
 
 ## Operator workflow
 
@@ -596,17 +614,17 @@ For a normal install:
 
 ```bash
 ./bin/dockyard doctor
-./bin/dockyard verify team-dashboard-0.1.0.dockyard.tgz -f ./deploy-values/dashboard-prod.yaml --require-lock
-./bin/dockyard install dashboard-prod team-dashboard-0.1.0.dockyard.tgz -f ./deploy-values/dashboard-prod.yaml --require-lock
+./bin/dockyard verify ../dockyard-artifacts/team-dashboard-0.1.0.dockyard.tgz -f ./../deploy-values/dashboard-prod.yaml --require-lock
+./bin/dockyard install dashboard-prod ../dockyard-artifacts/team-dashboard-0.1.0.dockyard.tgz -f ./../deploy-values/dashboard-prod.yaml --require-lock
 ./bin/dockyard status dashboard-prod --compose-ps
 ```
 
 For a normal upgrade:
 
 ```bash
-./bin/dockyard verify team-dashboard-0.1.0-v1.1.0-render.dockyard.tgz -f ./deploy-values/dashboard-prod-v1.1.0.yaml --require-lock
-./bin/dockyard diff dashboard-prod team-dashboard-0.1.0-v1.1.0-render.dockyard.tgz -f ./deploy-values/dashboard-prod-v1.1.0.yaml --require-lock
-./bin/dockyard upgrade dashboard-prod team-dashboard-0.1.0-v1.1.0-render.dockyard.tgz -f ./deploy-values/dashboard-prod-v1.1.0.yaml --require-lock
+./bin/dockyard verify team-dashboard-0.1.0-v1.1.0-render.dockyard.tgz -f ./../deploy-values/dashboard-prod-v1.1.0.yaml --require-lock
+./bin/dockyard diff dashboard-prod team-dashboard-0.1.0-v1.1.0-render.dockyard.tgz -f ./../deploy-values/dashboard-prod-v1.1.0.yaml --require-lock
+./bin/dockyard upgrade dashboard-prod team-dashboard-0.1.0-v1.1.0-render.dockyard.tgz -f ./../deploy-values/dashboard-prod-v1.1.0.yaml --require-lock
 ./bin/dockyard status dashboard-prod --compose-ps
 ```
 
@@ -646,7 +664,7 @@ Windows PowerShell users can test HTTP endpoints with `curl.exe http://localhost
 
 For production secrets, prefer environment references in the deployment values file instead of literal secrets.
 
-Example `deploy-values/dashboard-prod.yaml`:
+Example `../deploy-values/dashboard-prod.yaml`:
 
 ```yaml
 database:
@@ -661,9 +679,9 @@ database:
 Generate an env template for operators:
 
 ```bash
-dockyard env template ./team-dashboard \
+dockyard env template ../dockyard-work/team-dashboard \
   --sensitive-only \
-  -o ./deploy-values/dashboard-prod.env.example
+  -o ./../deploy-values/dashboard-prod.env.example
 ```
 
 PowerShell deployment:
@@ -678,6 +696,48 @@ $env:DASHBOARD_DB_PASSWORD = "use-a-long-random-password"
 Validate the env example before committing it:
 
 ```bash
-dockyard env check ./deploy-values/dashboard-prod.env.example
+dockyard env check ./../deploy-values/dashboard-prod.env.example
 ```
 
+
+
+## v0.9 env-file workflow
+
+For values that reference environment variables:
+
+```yaml
+database:
+  password: "${DASHBOARD_DB_PASSWORD}"
+```
+
+create a private env file:
+
+```dotenv
+DASHBOARD_DB_PASSWORD=use-a-long-random-password
+```
+
+Check it:
+
+```bash
+dockyard env check ../deploy-values/dashboard-prod.env
+```
+
+Then pass it to Compose-facing Dockyard commands:
+
+```bash
+dockyard config ../dockyard-work/team-dashboard \
+  -f ../deploy-values/dashboard-prod.yaml \
+  --env-file ../deploy-values/dashboard-prod.env
+
+dockyard install dashboard-prod ../dockyard-work/team-dashboard \
+  -f ../deploy-values/dashboard-prod.yaml \
+  --env-file ../deploy-values/dashboard-prod.env
+```
+
+Dockyard loads this file only for the Docker Compose subprocess. The secret value is not written to `release.json`.
+
+After several upgrades, prune old revision directories:
+
+```bash
+dockyard prune --release dashboard-prod --keep 5
+```

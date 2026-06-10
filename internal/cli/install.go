@@ -49,6 +49,10 @@ func newInstallCommand(global *globalOptions) *cobra.Command {
 				}
 				revision = nextRevision
 			}
+			envEntries, err := loadCommandEnv(opts.envFile)
+			if err != nil {
+				return err
+			}
 			manifest, vals, rendered, _, err := buildPackage(src.Dir, releaseName, opts)
 			if err != nil {
 				return err
@@ -57,14 +61,14 @@ func newInstallCommand(global *globalOptions) *cobra.Command {
 				fmt.Printf("Would install release %q into %s from %s source\n", releaseName, home, src.Source.Type)
 				return nil
 			}
-			release, composePath, err := writeRevision(home, releaseName, revision, manifest, vals, rendered, src.Dir, src.Source, "pending")
+			release, composePath, err := writeRevision(home, releaseName, revision, manifest, vals, rendered, src.Dir, src.Source, "pending", opts.envFile)
 			if err != nil {
 				return err
 			}
 			if !opts.skipComposeConfig {
 				ctx, cancel := context10m()
 				defer cancel()
-				if err := (runner.DockerComposeRunner{WorkDir: filepath.Dir(composePath), Project: releaseName}).ValidateConfig(ctx, composePath); err != nil {
+				if err := (runner.DockerComposeRunner{WorkDir: filepath.Dir(composePath), Project: releaseName, Env: envEntries}).ValidateConfig(ctx, composePath); err != nil {
 					release.Status = "failed"
 					_ = state.WriteRelease(filepath.Dir(composePath), *release)
 					return err
@@ -72,7 +76,7 @@ func newInstallCommand(global *globalOptions) *cobra.Command {
 			}
 			ctx, cancel := context10m()
 			defer cancel()
-			if err := dockerRunner(releaseName, filepath.Dir(composePath)).Up(ctx, composePath); err != nil {
+			if err := dockerRunnerWithEnv(releaseName, filepath.Dir(composePath), envEntries).Up(ctx, composePath); err != nil {
 				release.Status = "failed"
 				_ = state.WriteRelease(filepath.Dir(composePath), *release)
 				return err
@@ -92,6 +96,7 @@ func newInstallCommand(global *globalOptions) *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVarP(&opts.valuesFile, "values", "f", "", "values override file")
+	cmd.Flags().StringVar(&opts.envFile, "env-file", "", "dotenv file to pass to docker compose without mutating the shell environment")
 	cmd.Flags().StringVar(&opts.overlay, "overlay", "", "compose overlay name")
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "show what would happen without deploying")
 	cmd.Flags().BoolVar(&opts.allowRisk, "allow-risk", false, "allow HIGH policy findings")

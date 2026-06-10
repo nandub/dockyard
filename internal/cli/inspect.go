@@ -37,6 +37,12 @@ func newInspectCommand(global *globalOptions) *cobra.Command {
 				return printJSON(release)
 			}
 			fmt.Printf("Release: %s\nRevision: %d\nStatus: %s\nRevision Dir: %s\nCompose File: %s\nValues File: %s\nManifest File: %s\n", release.Name, release.Revision, release.Status, revisionDir, filepath.Join(revisionDir, "compose.rendered.yaml"), filepath.Join(revisionDir, "values.yaml"), filepath.Join(revisionDir, "Dockyard.yaml"))
+			if release.DockyardVersion != "" {
+				fmt.Printf("Dockyard Version: %s\n", release.DockyardVersion)
+			}
+			if release.EnvFile != "" {
+				fmt.Printf("Env File: %s\n", release.EnvFile)
+			}
 			return nil
 		},
 	}

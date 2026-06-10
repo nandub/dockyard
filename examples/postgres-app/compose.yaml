@@ -1,0 +1,34 @@
+services:
+  web:
+    image: "${app.image}:${app.tag}"
+    ports:
+      - "${app.port}:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+
+  db:
+    image: "${database.image}:${database.tag}"
+    environment:
+      POSTGRES_DB: "${database.name}"
+      POSTGRES_USER: "${database.user}"
+      POSTGRES_PASSWORD: "${database.password}"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${database.user} -d ${database.name}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  postgres-data:

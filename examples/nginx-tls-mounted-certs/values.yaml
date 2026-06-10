@@ -1,0 +1,12 @@
+image:
+  repository: nginx
+  tag: "1.27"
+
+service:
+  httpPort: 8080
+  httpsPort: 8443
+
+tls:
+  certificatePath: "/absolute/path/to/fullchain.pem"
+  privateKeyPath: "/absolute/path/to/privkey.pem"
+  nginxConfigPath: "/absolute/path/to/default.conf"

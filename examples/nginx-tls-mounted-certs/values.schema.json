@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["image", "service", "tls"],
+  "properties": {
+    "image": {
+      "type": "object",
+      "required": ["repository", "tag"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Nginx image repository."
+        },
+        "tag": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Nginx image tag."
+        }
+      },
+      "additionalProperties": false
+    },
+    "service": {
+      "type": "object",
+      "required": ["httpPort", "httpsPort"],
+      "properties": {
+        "httpPort": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "description": "Host HTTP port."
+        },
+        "httpsPort": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "description": "Host HTTPS port."
+        }
+      },
+      "additionalProperties": false
+    },
+    "tls": {
+      "type": "object",
+      "required": ["certificatePath", "privateKeyPath", "nginxConfigPath"],
+      "properties": {
+        "certificatePath": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Absolute path to a PEM certificate or full chain file."
+        },
+        "privateKeyPath": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Absolute path to the private key file.",
+          "x-dockyard-sensitive": true
+        },
+        "nginxConfigPath": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Absolute path to an nginx server configuration with TLS enabled."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,5 +1,92 @@
 # Changelog
 
+## v0.10.4
+
+- Fixed `make fmt-check` on Windows by replacing shell-specific `gofmt -l` logic with a small Go-based formatter check.
+- Updated `make fmt` to run `go fmt ./...` so formatting covers all Go packages, including developer tools.
+- Kept `make build` non-mutating and `make dev-build` as the local convenience target.
+
+
+## v0.10.3
+
+Developer experience patch.
+
+- Added `make dev-build` for local development builds that run `go mod tidy`, `gofmt`, and `make build`.
+- Added `make verify` for pre-commit/CI checks.
+- Added `make fmt-check` and `make tidy-check`.
+- Kept `make build` non-mutating so builds do not silently edit `go.mod` or `go.sum`.
+- Updated README development target documentation.
+
+## v0.10.2
+
+- Fixed Windows Makefile build metadata generation.
+- Escaped Git pretty-format `%cI` correctly for Make.
+- Avoided Unix-only `/dev/null` and `date -u` usage in Makefile.
+- Added Windows-compatible `release-snapshot` and `clean` targets.
+
+## v0.10.1
+
+Examples expansion release.
+
+- Added `examples/caddy-letsencrypt` for automatic HTTPS with Caddy.
+- Added `examples/nginx-tls-mounted-certs` for operator-provided certificate and key files.
+- Added `examples/traefik-letsencrypt` for Docker-label routing and Let's Encrypt with Traefik.
+- Updated README and getting-started docs to explain example package choices.
+- Kept TLS behavior modeled through standard Docker Compose; Dockyard does not manage certificates itself.
+
+## v0.10.0
+
+- Added `dockyard version` with build metadata and JSON output.
+- Added Dockyard CLI version to release revision metadata.
+- Added GitHub Actions release workflow for Windows, Linux, and macOS binaries.
+- Added release checksums and SBOM generation to the release workflow.
+- Added `docs/command-reference.md` and `docs/release-engineering.md`.
+- Added runnable examples under `examples/nginx` and `examples/postgres-app`.
+- Updated README install instructions for release artifacts.
+- Updated Makefile build flags and cross-platform snapshot build target.
+
+
+## v0.9.3
+
+- Added `AGENTS.md` with repository guidance for code agents and automation.
+
+## v0.9.2
+
+Documentation consolidation release.
+
+- Consolidated `docs/` from many feature-specific files into six maintained guides:
+  - `getting-started.md`
+  - `operator-guide.md`
+  - `packaging-and-distribution.md`
+  - `security.md`
+  - `compose-compatibility.md`
+  - `real-world-example.md`
+- Removed duplicate docs for overlays, secrets, env files, OCI, pruning, Windows smoke tests, and hardening.
+- Updated `README.md` to reference only the consolidated docs.
+- Kept generated smoke-test artifacts outside the repository in examples.
+
+## v0.9.1
+
+- Updated docs to keep generated smoke-test packages, deployment values, env files, rendered files, and package archives outside the Dockyard repository.
+- Updated Windows smoke-test commands to use `../dockyard-work` and `../deploy-values`.
+- Added `../dockyard-artifacts` examples for generated `.dockyard.tgz` archives.
+- Expanded `.gitignore` for common local smoke-test artifacts if they are accidentally created inside the repo.
+
+## v0.9
+
+- Added `--env-file` support for Compose-facing commands.
+- Added `dockyard prune` for release revision cleanup.
+- Stored the env-file path in release metadata without storing secret values.
+- Added docs for private dotenv workflows and release pruning.
+- Kept Windows `.exe` Makefile build support from v0.8.1.
+
+
+## v0.8.1
+
+- Fixed `make build` so it uses `go env GOEXE` and produces `bin/dockyard.exe` on Windows.
+- Changed the default `make` target to build the Dockyard binary instead of only running `gofmt`.
+
+
 ## v0.8
 
 Secrets and environment ergonomics release.
@@ -10,7 +97,7 @@ Secrets and environment ergonomics release.
 - Added `--sensitive-only` for secret-oriented environment templates.
 - Added `--prefix` for generated environment variable names.
 - Added duplicate-key, malformed-line, and populated-secret checks for env files.
-- Added `docs/secrets-and-env.md`.
+- Added `docs/operator-guide.md`.
 - Updated README and real-world examples with environment-variable secret injection guidance.
 
 ## v0.7.3
@@ -19,8 +106,8 @@ Patch release based on Windows Docker Desktop lifecycle testing.
 
 - Made the default `dockyard init` nginx example runnable with stock `nginx`.
 - Kept starter hardening practical by defaulting to `no-new-privileges` without `read_only`, `user`, or `cap_drop: [ALL]`.
-- Added `docs/advanced-hardening.md` for stricter image-specific hardening.
-- Added `docs/windows-smoke-test.md`.
+- Added `docs/security.md` for stricter image-specific hardening.
+- Added `docs/getting-started.md`.
 - Added `status --compose-ps --all` to include stopped containers.
 - Improved missing/unsupported `apiVersion` manifest errors.
 - Allowed `install` to create a new revision when the existing release status is `uninstalled`.
@@ -42,8 +129,8 @@ Security and operator-safety release.
 - Added `dockyard policy check PACKAGE_SOURCE`.
 - Added `dockyard secrets scan PACKAGE_DIR`.
 - Added policy checks for `read_only`, `no-new-privileges`, `cap_drop: [ALL]`, and host path mounts.
-- Added `docs/security-policy.md`.
-- Added `docs/secrets.md`.
+- Added `docs/security.md`.
+- Added `docs/security.md`.
 - Updated the README and real-world guide with policy and secret-scanning examples.
 - Kept Docker Compose as the runtime source of truth.
 
@@ -62,8 +149,8 @@ Compose compatibility and validation release.
 Documentation-focused cleanup.
 
 - Simplified beginner examples to use production values files without `--overlay prod`.
-- Added `docs/overlays.md` explaining values versus Compose overlays.
-- Added `docs/recommended-layout.md`.
+- Added `docs/operator-guide.md` explaining values versus Compose overlays.
+- Added `docs/getting-started.md`.
 - Updated OCI and real-world examples to use overlays only in the advanced structural-override section.
 - Clarified that values files choose settings while overlays change Compose structure.
 

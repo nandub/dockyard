@@ -1,0 +1,22 @@
+apiVersion: dockyard.dev/v1alpha1
+name: traefik-letsencrypt
+description: Traefik Let's Encrypt example with Docker provider labels
+version: 0.1.0
+appVersion: "3.1"
+type: application
+
+compose:
+  base: compose.yaml
+  overlays: {}
+
+security:
+  requireNonRoot: false
+  requireHealthchecks: true
+  requireReadOnlyRootFilesystem: false
+  requireNoNewPrivileges: true
+  requireCapDropAll: false
+  disallowPrivileged: true
+  disallowHostNetwork: true
+  disallowDockerSocketMount: false
+  disallowHostPathMounts: false
+  disallowLatestTag: true

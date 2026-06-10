@@ -28,6 +28,11 @@ This command validates Docker Compose compatibility without installing a release
 			}
 			defer src.cleanup()
 
+			envEntries, err := loadCommandEnv(opts.envFile)
+			if err != nil {
+				return err
+			}
+
 			_, _, rendered, _, err := buildPackage(src.Dir, "dockyard-config", opts)
 			if err != nil {
 				return err
@@ -50,6 +55,7 @@ This command validates Docker Compose compatibility without installing a release
 			if err := (runner.DockerComposeRunner{
 				WorkDir: tempDir,
 				Project: "dockyard-config",
+				Env:     envEntries,
 			}).Config(ctx, composePath); err != nil {
 				return err
 			}
@@ -65,6 +71,7 @@ This command validates Docker Compose compatibility without installing a release
 	}
 
 	cmd.Flags().StringVarP(&opts.valuesFile, "values", "f", "", "values override file")
+	cmd.Flags().StringVar(&opts.envFile, "env-file", "", "dotenv file to pass to docker compose without mutating the shell environment")
 	cmd.Flags().StringVar(&opts.overlay, "overlay", "", "compose overlay name")
 	cmd.Flags().StringVarP(&outputFile, "output", "o", "", "optional path to write rendered Compose YAML after validation")
 	cmd.Flags().BoolVar(&opts.allowRisk, "allow-risk", false, "allow HIGH policy findings")

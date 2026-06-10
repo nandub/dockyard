@@ -1,0 +1,18 @@
+services:
+  nginx:
+    image: "${image.repository}:${image.tag}"
+    restart: unless-stopped
+    ports:
+      - "${service.httpPort}:80"
+      - "${service.httpsPort}:443"
+    volumes:
+      - "${tls.nginxConfigPath}:/etc/nginx/conf.d/default.conf:ro"
+      - "${tls.certificatePath}:/etc/nginx/certs/fullchain.pem:ro"
+      - "${tls.privateKeyPath}:/etc/nginx/certs/privkey.pem:ro"
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true

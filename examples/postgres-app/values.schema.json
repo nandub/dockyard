@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["app", "database"],
+  "properties": {
+    "app": {
+      "type": "object",
+      "required": ["image", "tag", "port"],
+      "properties": {
+        "image": { "type": "string", "minLength": 1, "description": "Application image repository." },
+        "tag": { "type": "string", "minLength": 1, "description": "Application image tag." },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535, "description": "Host port for the web service." }
+      },
+      "additionalProperties": false
+    },
+    "database": {
+      "type": "object",
+      "required": ["image", "tag", "name", "user", "password"],
+      "properties": {
+        "image": { "type": "string", "minLength": 1, "description": "PostgreSQL image repository." },
+        "tag": { "type": "string", "minLength": 1, "description": "PostgreSQL image tag." },
+        "name": { "type": "string", "minLength": 1, "description": "Database name." },
+        "user": { "type": "string", "minLength": 1, "description": "Database user." },
+        "password": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Database password. Prefer an environment reference such as ${POSTGRES_APP_PASSWORD}.",
+          "x-dockyard-sensitive": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

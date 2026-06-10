@@ -1,0 +1,31 @@
+services:
+  caddy:
+    image: "${caddy.image}:${caddy.tag}"
+    restart: unless-stopped
+    command:
+      - caddy
+      - reverse-proxy
+      - --from
+      - "${site.hostname}"
+      - --to
+      - "${upstream.url}"
+    environment:
+      ACME_AGREE: "true"
+      EMAIL: "${caddy.email}"
+    ports:
+      - "${service.httpPort}:80"
+      - "${service.httpsPort}:443"
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    healthcheck:
+      test: ["CMD", "caddy", "version"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  caddy-data:
+  caddy-config:

@@ -24,6 +24,79 @@ type CheckFinding struct {
 	Message string
 }
 
+type Entry struct {
+	Key   string
+	Value string
+	Line  int
+}
+
+// ParseFile parses a dotenv-style KEY=VALUE file into a deterministic key/value map.
+// It supports blank lines, comments, optional "export " prefixes, and single- or
+// double-quoted values. It rejects malformed lines, duplicate keys, and invalid keys.
+func ParseFile(path string) (map[string]string, error) {
+	file, err := os.Open(filepath.Clean(path))
+	if err != nil {
+		return nil, fmt.Errorf("open env file: %w", err)
+	}
+	defer file.Close()
+
+	values := map[string]string{}
+	seen := map[string]int{}
+
+	scanner := bufio.NewScanner(file)
+	lineNumber := 0
+	for scanner.Scan() {
+		lineNumber++
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		if strings.HasPrefix(line, "export ") {
+			line = strings.TrimSpace(strings.TrimPrefix(line, "export "))
+		}
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("parse env file %q line %d: line is not KEY=VALUE format", path, lineNumber)
+		}
+		key := strings.TrimSpace(parts[0])
+		if key == "" || !validEnvName(key) {
+			return nil, fmt.Errorf("parse env file %q line %d: invalid environment variable name %q", path, lineNumber, key)
+		}
+		if previous, exists := seen[key]; exists {
+			return nil, fmt.Errorf("parse env file %q line %d: duplicate key %q; first defined on line %d", path, lineNumber, key, previous)
+		}
+		seen[key] = lineNumber
+		value, err := parseEnvValue(strings.TrimSpace(parts[1]))
+		if err != nil {
+			return nil, fmt.Errorf("parse env file %q line %d: %w", path, lineNumber, err)
+		}
+		values[key] = value
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("read env file: %w", err)
+	}
+	return values, nil
+}
+
+// LoadForProcess converts a dotenv file into KEY=VALUE entries that can be
+// appended to exec.Cmd.Env. It does not mutate the current process environment.
+func LoadForProcess(path string) ([]string, error) {
+	parsed, err := ParseFile(path)
+	if err != nil {
+		return nil, err
+	}
+	keys := make([]string, 0, len(parsed))
+	for key := range parsed {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	out := make([]string, 0, len(keys))
+	for _, key := range keys {
+		out = append(out, key+"="+parsed[key])
+	}
+	return out, nil
+}
+
 func GenerateTemplate(packageDir string, opts TemplateOptions) ([]byte, error) {
 	vals, err := values.LoadValues(packageDir, opts.ValuesFile)
 	if err != nil {
@@ -215,6 +288,29 @@ func strconvQuote(value string) string {
 	escaped := strings.ReplaceAll(value, `\`, `\\`)
 	escaped = strings.ReplaceAll(escaped, `"`, `\"`)
 	return `"` + escaped + `"`
+}
+
+func parseEnvValue(value string) (string, error) {
+	if value == "" {
+		return "", nil
+	}
+	if strings.HasPrefix(value, `"`) {
+		if !strings.HasSuffix(value, `"`) || len(value) == 1 {
+			return "", fmt.Errorf("unterminated double-quoted value")
+		}
+		inner := value[1 : len(value)-1]
+		inner = strings.ReplaceAll(inner, `\\`, `\`)
+		inner = strings.ReplaceAll(inner, `\"`, `"`)
+		inner = strings.ReplaceAll(inner, `\n`, "\n")
+		return inner, nil
+	}
+	if strings.HasPrefix(value, `'`) {
+		if !strings.HasSuffix(value, `'`) || len(value) == 1 {
+			return "", fmt.Errorf("unterminated single-quoted value")
+		}
+		return value[1 : len(value)-1], nil
+	}
+	return value, nil
 }
 
 func validEnvName(key string) bool {

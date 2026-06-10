@@ -30,6 +30,12 @@ func newStatusCommand(global *globalOptions) *cobra.Command {
 				return printJSON(release)
 			}
 			fmt.Printf("Name: %s\nStatus: %s\nRevision: %d\nPackage: %s@%s\nApp: %s\nCompose Project: %s\n", release.Name, release.Status, release.Revision, release.PackageName, release.PackageVersion, release.AppVersion, release.ComposeProject)
+			if release.DockyardVersion != "" {
+				fmt.Printf("Dockyard Version: %s\n", release.DockyardVersion)
+			}
+			if release.EnvFile != "" {
+				fmt.Printf("Env File: %s\n", release.EnvFile)
+			}
 			if composePS {
 				ctx, cancel := context10m()
 				defer cancel()

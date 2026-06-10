@@ -13,6 +13,7 @@ import (
 type DockerComposeRunner struct {
 	WorkDir string
 	Project string
+	Env     []string
 }
 
 func (r DockerComposeRunner) Up(ctx context.Context, composeFile string) error {
@@ -52,6 +53,9 @@ func (r DockerComposeRunner) runWithStdout(ctx context.Context, stdout io.Writer
 	cmd.Dir = filepath.Clean(r.WorkDir)
 	cmd.Stdout = stdout
 	cmd.Stderr = os.Stderr
+	if len(r.Env) > 0 {
+		cmd.Env = append(os.Environ(), r.Env...)
+	}
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("docker command failed")
 	}

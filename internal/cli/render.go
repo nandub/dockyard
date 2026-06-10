@@ -18,6 +18,7 @@ func newRenderCommand() *cobra.Command {
 	var outputFile string
 	var explain bool
 	var validateCompose bool
+	var envFile string
 
 	cmd := &cobra.Command{
 		Use:   "render PACKAGE_DIR",
@@ -41,6 +42,10 @@ func newRenderCommand() *cobra.Command {
 				return err
 			}
 			if validateCompose {
+				envEntries, err := loadCommandEnv(envFile)
+				if err != nil {
+					return err
+				}
 				tempDir, err := os.MkdirTemp("", "dockyard-render-*")
 				if err != nil {
 					return fmt.Errorf("create temp dir: %w", err)
@@ -52,7 +57,7 @@ func newRenderCommand() *cobra.Command {
 				}
 				ctx, cancel := context10m()
 				defer cancel()
-				if err := (runner.DockerComposeRunner{WorkDir: tempDir, Project: "dockyard-render"}).ValidateConfig(ctx, composePath); err != nil {
+				if err := (runner.DockerComposeRunner{WorkDir: tempDir, Project: "dockyard-render", Env: envEntries}).ValidateConfig(ctx, composePath); err != nil {
 					return err
 				}
 			}
@@ -69,6 +74,7 @@ func newRenderCommand() *cobra.Command {
 		},
 	}
 	cmd.Flags().StringVarP(&valuesFile, "values", "f", "", "values override file")
+	cmd.Flags().StringVar(&envFile, "env-file", "", "dotenv file to pass to docker compose when using --validate-compose")
 	cmd.Flags().StringVar(&overlay, "overlay", "", "compose overlay name")
 	cmd.Flags().StringVarP(&outputFile, "output", "o", "", "output compose file")
 	cmd.Flags().BoolVar(&explain, "explain", false, "show resolved placeholders on stderr; sensitive values are masked")

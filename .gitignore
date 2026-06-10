@@ -8,3 +8,11 @@
 *.key
 id_rsa
 id_ed25519
+# Local smoke-test artifacts if accidentally created inside the repo
+/deploy-values/
+/dockyard-work/
+/dockyard-artifacts/
+/example-app/
+/team-dashboard/
+*.env
+*.env.example

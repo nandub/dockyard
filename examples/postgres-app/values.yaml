@@ -1,0 +1,11 @@
+app:
+  image: nginx
+  tag: "1.27"
+  port: 8081
+
+database:
+  image: postgres
+  tag: "16.4"
+  name: app
+  user: app
+  password: "${POSTGRES_APP_PASSWORD}"

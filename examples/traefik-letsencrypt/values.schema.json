@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["traefik", "site", "service", "whoami"],
+  "properties": {
+    "traefik": {
+      "type": "object",
+      "required": ["image", "tag", "email", "useStagingCA"],
+      "properties": {
+        "image": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Traefik image repository."
+        },
+        "tag": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Traefik image tag."
+        },
+        "email": {
+          "type": "string",
+          "minLength": 3,
+          "description": "Email address used for ACME account registration."
+        },
+        "useStagingCA": {
+          "type": "boolean",
+          "description": "Use the Let's Encrypt staging CA. Recommended for testing."
+        }
+      },
+      "additionalProperties": false
+    },
+    "site": {
+      "type": "object",
+      "required": ["hostname"],
+      "properties": {
+        "hostname": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Hostname routed to the whoami service."
+        }
+      },
+      "additionalProperties": false
+    },
+    "service": {
+      "type": "object",
+      "required": ["httpPort", "httpsPort"],
+      "properties": {
+        "httpPort": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "description": "Host HTTP port."
+        },
+        "httpsPort": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "description": "Host HTTPS port."
+        }
+      },
+      "additionalProperties": false
+    },
+    "whoami": {
+      "type": "object",
+      "required": ["image", "tag"],
+      "properties": {
+        "image": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Demo upstream image repository."
+        },
+        "tag": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Demo upstream image tag."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

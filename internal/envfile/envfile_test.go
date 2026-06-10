@@ -55,3 +55,31 @@ func TestCheckFileDetectsDuplicateAndSecret(t *testing.T) {
 		t.Fatalf("unexpected findings: %s", text)
 	}
 }
+
+func TestLoadForProcessParsesQuotedValues(t *testing.T) {
+	t.Parallel()
+	path := t.TempDir() + "/test.env"
+	content := "APP_PORT=8080\nAPP_NAME=\"hello world\"\nexport TOKEN='abc123'\n"
+	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	entries, err := LoadForProcess(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	joined := strings.Join(entries, "\n")
+	if !strings.Contains(joined, "APP_NAME=hello world") || !strings.Contains(joined, "TOKEN=abc123") {
+		t.Fatalf("unexpected entries: %s", joined)
+	}
+}
+
+func TestLoadForProcessRejectsDuplicate(t *testing.T) {
+	t.Parallel()
+	path := t.TempDir() + "/test.env"
+	if err := os.WriteFile(path, []byte("A=1\nA=2\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := LoadForProcess(path); err == nil {
+		t.Fatal("expected duplicate key to fail")
+	}
+}

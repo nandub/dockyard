@@ -1,0 +1,16 @@
+traefik:
+  image: traefik
+  tag: "3.1"
+  email: "admin@example.com"
+  useStagingCA: true
+
+site:
+  hostname: "whoami.example.com"
+
+service:
+  httpPort: 80
+  httpsPort: 443
+
+whoami:
+  image: traefik/whoami
+  tag: "v1.10"
