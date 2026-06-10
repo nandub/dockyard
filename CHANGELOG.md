@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.11.0
+
+- Added `dockyard compat` for format status and package/release compatibility checks.
+- Added `internal/format` to centralize Dockyard format API versions.
+- Added `apiVersion` to newly written `release.json` records.
+- Kept backwards compatibility for legacy release records without `apiVersion`.
+- Added `docs/v1-readiness.md`.
+- Updated command reference and README compatibility documentation.
+
 ## v0.10.4
 
 - Fixed `make fmt-check` on Windows by replacing shell-specific `gofmt -l` logic with a small Go-based formatter check.

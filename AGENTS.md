@@ -371,3 +371,8 @@ make clean      # remove bin/
 - `make build` must remain non-mutating. It should not run `go mod tidy` or rewrite source files.
 - `make dev-build` is the local convenience path and may run `go mod tidy`, formatting, and build.
 - `make fmt-check` uses `go run ./tools/fmtcheck` instead of shell-specific `gofmt -l` loops so it works consistently on Windows, Linux, and macOS.
+
+
+## v1.0 readiness notes
+
+Prefer compatibility-preserving changes. Keep format API versions centralized in `internal/format`. New release state records should include `apiVersion`; readers should remain tolerant of legacy v0.x records where practical. Update `docs/v1-readiness.md` when changing package, lockfile, provenance, or release-state formats.

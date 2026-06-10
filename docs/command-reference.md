@@ -73,3 +73,18 @@ dockyard version [--json]
 ```
 
 `doctor` checks local prerequisites such as Docker, Docker Compose, Dockyard home, and optional `oras`.
+
+
+## `dockyard compat`
+
+Show supported Dockyard format versions or check a package/release for compatibility issues.
+
+```bash
+dockyard compat
+dockyard compat ./examples/nginx
+dockyard compat nginx-0.1.0.dockyard.tgz
+dockyard compat --release example
+dockyard compat --json
+```
+
+The command is intended for v1.0 readiness work and for diagnosing package, archive, lockfile, and release-state format issues.

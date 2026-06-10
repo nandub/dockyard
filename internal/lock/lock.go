@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/nandub/dockyard/internal/dockpkg"
+	"github.com/nandub/dockyard/internal/format"
 	"github.com/nandub/dockyard/internal/values"
 	"go.yaml.in/yaml/v4"
 )
@@ -69,7 +70,7 @@ func New(packageDir string, manifest *dockpkg.Manifest, vals map[string]any, ren
 		return nil, err
 	}
 	return &Lockfile{
-		APIVersion:            "dockyard.dev/lockfile/v1alpha1",
+		APIVersion:            format.LockfileAPIVersion,
 		GeneratedAt:           time.Now().UTC(),
 		PackageName:           manifest.Name,
 		PackageVersion:        manifest.Version,
@@ -99,8 +100,8 @@ func Read(path string) (*Lockfile, error) {
 	if err := json.Unmarshal(data, &lf); err != nil {
 		return nil, fmt.Errorf("parse lockfile: %w", err)
 	}
-	if lf.APIVersion != "dockyard.dev/lockfile/v1alpha1" {
-		return nil, fmt.Errorf("unsupported lockfile apiVersion %q", lf.APIVersion)
+	if lf.APIVersion != format.LockfileAPIVersion {
+		return nil, fmt.Errorf("unsupported lockfile apiVersion %q; expected %s", lf.APIVersion, format.LockfileAPIVersion)
 	}
 	return &lf, nil
 }

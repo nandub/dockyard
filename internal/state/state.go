@@ -9,6 +9,8 @@ import (
 	"regexp"
 	"strconv"
 	"time"
+
+	"github.com/nandub/dockyard/internal/format"
 )
 
 const EnvDockyardHome = "DOCKYARD_HOME"
@@ -21,6 +23,7 @@ type Source struct {
 }
 
 type Release struct {
+	APIVersion      string    `json:"apiVersion,omitempty"`
 	DockyardVersion string    `json:"dockyardVersion,omitempty"`
 	Name            string    `json:"name"`
 	PackageName     string    `json:"packageName"`
@@ -69,6 +72,9 @@ func CurrentFile(home string, releaseName string) string {
 }
 
 func WriteRelease(dir string, release Release) error {
+	if release.APIVersion == "" {
+		release.APIVersion = format.ReleaseAPIVersion
+	}
 	data, err := json.MarshalIndent(release, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal release metadata: %w", err)
@@ -84,6 +90,9 @@ func ReadRelease(dir string) (*Release, error) {
 	var release Release
 	if err := json.Unmarshal(data, &release); err != nil {
 		return nil, fmt.Errorf("parse release metadata: %w", err)
+	}
+	if release.APIVersion != "" && release.APIVersion != format.ReleaseAPIVersion {
+		return nil, fmt.Errorf("unsupported release apiVersion %q; expected %s", release.APIVersion, format.ReleaseAPIVersion)
 	}
 	return &release, nil
 }

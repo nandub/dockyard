@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 
+	"github.com/nandub/dockyard/internal/format"
 	"go.yaml.in/yaml/v4"
 )
 
@@ -68,10 +69,10 @@ func LoadManifest(packageDir string) (*Manifest, error) {
 
 func (m Manifest) Validate() error {
 	if m.APIVersion == "" {
-		return errors.New("Dockyard.yaml is missing apiVersion; expected dockyard.dev/v1alpha1")
+		return fmt.Errorf("Dockyard.yaml is missing apiVersion; expected %s", format.ManifestAPIVersion)
 	}
-	if m.APIVersion != "dockyard.dev/v1alpha1" {
-		return fmt.Errorf("unsupported apiVersion %q; expected dockyard.dev/v1alpha1", m.APIVersion)
+	if m.APIVersion != format.ManifestAPIVersion {
+		return fmt.Errorf("unsupported apiVersion %q; expected %s", m.APIVersion, format.ManifestAPIVersion)
 	}
 	if !packageNamePattern.MatchString(m.Name) {
 		return errors.New("manifest name must match ^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$")

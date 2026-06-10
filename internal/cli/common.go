@@ -12,6 +12,7 @@ import (
 	"github.com/nandub/dockyard/internal/archive"
 	"github.com/nandub/dockyard/internal/dockpkg"
 	"github.com/nandub/dockyard/internal/envfile"
+	"github.com/nandub/dockyard/internal/format"
 	"github.com/nandub/dockyard/internal/lock"
 	"github.com/nandub/dockyard/internal/oci"
 	"github.com/nandub/dockyard/internal/policy"
@@ -173,6 +174,7 @@ func writeRevision(home string, releaseName string, revision int, manifest *dock
 	}
 	now := time.Now().UTC()
 	release := state.Release{
+		APIVersion:      format.ReleaseAPIVersion,
 		DockyardVersion: version.Version,
 		Name:            releaseName,
 		PackageName:     manifest.Name,

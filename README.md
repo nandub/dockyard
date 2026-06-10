@@ -29,7 +29,16 @@ The docs are intentionally consolidated into a small set:
 - [Security](docs/security.md) — policy checks, secrets, and advanced hardening.
 - [Docker Compose compatibility](docs/compose-compatibility.md) — what Dockyard supports directly versus what Compose handles.
 - [Real-world example](docs/real-world-example.md) — Team Dashboard with PostgreSQL.
+- [v1.0 readiness](docs/v1-readiness.md) — format stability and compatibility checks.
 
+
+## Compatibility checks
+
+```bash
+dockyard compat
+dockyard compat ./examples/nginx
+dockyard compat --release example
+```
 
 ## Examples
 
@@ -232,6 +241,14 @@ curl -L -o dockyard https://github.com/nandub/dockyard/releases/latest/download/
 chmod +x dockyard
 ./dockyard doctor
 ./dockyard version
+```
+
+## Compatibility checks
+
+```bash
+dockyard compat
+dockyard compat ./examples/nginx
+dockyard compat --release example
 ```
 
 ## Examples

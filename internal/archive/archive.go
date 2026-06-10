@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/nandub/dockyard/internal/dockpkg"
+	"github.com/nandub/dockyard/internal/format"
 	"github.com/nandub/dockyard/internal/lock"
 )
 
@@ -84,7 +85,7 @@ func PackageDir(packageDir string, outputFile string, requireLock bool) (string,
 	}
 
 	provenance := Provenance{
-		APIVersion:     "dockyard.dev/provenance/v1alpha1",
+		APIVersion:     format.ProvenanceAPIVersion,
 		PackageName:    manifest.Name,
 		PackageVersion: manifest.Version,
 		AppVersion:     manifest.AppVersion,
@@ -402,7 +403,7 @@ func verifyProvenance(root string) error {
 	if err := json.Unmarshal(data, &p); err != nil {
 		return fmt.Errorf("parse package provenance: %w", err)
 	}
-	if p.APIVersion != "dockyard.dev/provenance/v1alpha1" {
+	if p.APIVersion != format.ProvenanceAPIVersion {
 		return fmt.Errorf("unsupported provenance apiVersion %q", p.APIVersion)
 	}
 	if p.PackageName == "" || p.PackageVersion == "" {
