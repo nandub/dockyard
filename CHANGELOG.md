@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.12.0
+
+- Added `dockyard package lint PACKAGE_DIR`.
+- Added package quality checks for recommended docs, forbidden local artifacts, values/schema validation, schema descriptions, sensitive schema markers, default rendering, and configured policy findings.
+- Added `--strict` and `--json` output for package quality checks.
+- Added `internal/quality` with unit tests.
+- Updated command reference, packaging documentation, README, and AGENTS.md.
+
+
 ## v0.11.0
 
 - Added `dockyard compat` for format status and package/release compatibility checks.

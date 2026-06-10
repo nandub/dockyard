@@ -76,3 +76,15 @@ Before v1.0, review:
 - Windows, Linux, and macOS behavior.
 - Security policy defaults.
 - Documentation examples and command reference.
+
+
+## Package quality gate
+
+Before v1.0, example and catalog-ready packages should pass:
+
+```bash
+dockyard compat PACKAGE_DIR
+dockyard package lint PACKAGE_DIR --strict
+```
+
+`compat` checks format support. `package lint` checks package quality and publication readiness.

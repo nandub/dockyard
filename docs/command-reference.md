@@ -39,11 +39,14 @@ Use values files for deployment settings. Use `--env-file` for environment-backe
 
 ```bash
 dockyard lock PACKAGE_DIR [-f values.yaml]
+dockyard package lint PACKAGE_DIR [--strict] [--json]
 dockyard package PACKAGE_DIR --locked [-f values.yaml] -o app-0.1.0.dockyard.tgz
 dockyard verify PACKAGE_ARCHIVE [-f values.yaml] [--require-lock]
 dockyard push PACKAGE_ARCHIVE oci://registry/repository/name:tag
 dockyard pull oci://registry/repository/name:tag
 ```
+
+Run `dockyard package lint --strict` before publishing packages. It checks package documentation, forbidden local artifacts, schema quality, sensitive markers, default rendering, and policy findings.
 
 OCI push/pull uses the `oras` CLI and relies on external registry authentication.
 

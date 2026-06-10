@@ -376,3 +376,14 @@ make clean      # remove bin/
 ## v1.0 readiness notes
 
 Prefer compatibility-preserving changes. Keep format API versions centralized in `internal/format`. New release state records should include `apiVersion`; readers should remain tolerant of legacy v0.x records where practical. Update `docs/v1-readiness.md` when changing package, lockfile, provenance, or release-state formats.
+
+
+## Package quality checks
+
+For package/example changes, run:
+
+```bash
+dockyard package lint ./examples/nginx --strict
+```
+
+Use this before changing `examples/`, package templates, archive behavior, values/schema generation, or packaging docs. The command checks required package docs, forbidden local artifacts, schema descriptions, sensitive markers, default rendering, and policy findings.

@@ -25,19 +25,20 @@ The docs are intentionally consolidated into a small set:
 
 - [Getting started](docs/getting-started.md) — build, local layout, Windows/Docker Desktop smoke test.
 - [Operator guide](docs/operator-guide.md) — values, env files, overlays, release state, and pruning.
-- [Packaging and distribution](docs/packaging-and-distribution.md) — lockfiles, archives, verification, and OCI.
+- [Packaging and distribution](docs/packaging-and-distribution.md) — package quality checks, lockfiles, archives, verification, and OCI.
 - [Security](docs/security.md) — policy checks, secrets, and advanced hardening.
 - [Docker Compose compatibility](docs/compose-compatibility.md) — what Dockyard supports directly versus what Compose handles.
 - [Real-world example](docs/real-world-example.md) — Team Dashboard with PostgreSQL.
 - [v1.0 readiness](docs/v1-readiness.md) — format stability and compatibility checks.
 
 
-## Compatibility checks
+## Compatibility and package quality checks
 
 ```bash
 dockyard compat
 dockyard compat ./examples/nginx
 dockyard compat --release example
+dockyard package lint ./examples/nginx --strict
 ```
 
 ## Examples
@@ -243,12 +244,13 @@ chmod +x dockyard
 ./dockyard version
 ```
 
-## Compatibility checks
+## Compatibility and package quality checks
 
 ```bash
 dockyard compat
 dockyard compat ./examples/nginx
 dockyard compat --release example
+dockyard package lint ./examples/nginx --strict
 ```
 
 ## Examples

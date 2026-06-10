@@ -132,3 +132,31 @@ dockyard upgrade dashboard-prod \
 ```
 
 `dockyard doctor` reports whether `oras` is available. OCI references must include an explicit tag or digest.
+
+
+## Package quality checks
+
+Use `dockyard package lint` before creating or publishing a package.
+
+```bash
+dockyard package lint ./examples/nginx
+dockyard package lint ./examples/nginx --strict
+dockyard package lint ./examples/nginx --json
+```
+
+The quality checker is stricter than `dockyard compat`. It is intended for package authors and example maintainers.
+
+It checks:
+
+- `Dockyard.yaml` loads and uses a supported API version.
+- Recommended metadata files exist: `README.md`, `SECURITY.md`, and `LICENSE`.
+- Forbidden local artifacts are absent, including `.dockyard/`, `.git/`, `deploy-values/`, `.env`, private keys, and certificate key files.
+- `values.yaml` loads successfully.
+- `values.schema.json` validates the default values.
+- Public schema leaf values include `description`.
+- Secret-like schema fields use `x-dockyard-sensitive: true`.
+- The default Compose render succeeds.
+- The default render passes the configured Dockyard policy.
+
+Use `--strict` when preparing packages for examples, internal catalogs, or OCI publishing. In strict mode, missing README/SECURITY files and schema quality warnings become failures. Missing LICENSE remains a warning because private/internal packages may use repository-level licensing.
+
