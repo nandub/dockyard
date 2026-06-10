@@ -1,0 +1,117 @@
+# Changelog
+
+## v0.8
+
+Secrets and environment ergonomics release.
+
+- Added `dockyard env template PACKAGE_DIR`.
+- Added `dockyard env check ENV_FILE`.
+- Added support for generating `.env.example`-style files from Dockyard values.
+- Added `--sensitive-only` for secret-oriented environment templates.
+- Added `--prefix` for generated environment variable names.
+- Added duplicate-key, malformed-line, and populated-secret checks for env files.
+- Added `docs/secrets-and-env.md`.
+- Updated README and real-world examples with environment-variable secret injection guidance.
+
+## v0.7.3
+
+Patch release based on Windows Docker Desktop lifecycle testing.
+
+- Made the default `dockyard init` nginx example runnable with stock `nginx`.
+- Kept starter hardening practical by defaulting to `no-new-privileges` without `read_only`, `user`, or `cap_drop: [ALL]`.
+- Added `docs/advanced-hardening.md` for stricter image-specific hardening.
+- Added `docs/windows-smoke-test.md`.
+- Added `status --compose-ps --all` to include stopped containers.
+- Improved missing/unsupported `apiVersion` manifest errors.
+- Allowed `install` to create a new revision when the existing release status is `uninstalled`.
+
+## v0.7.2
+
+Patch release based on local Windows smoke testing.
+
+- Fixed JSON Schema v6 loading by decoding `values.schema.json` into a JSON value before calling `Compiler.AddResource`.
+- Kept the v0.7.1 Windows path containment fix.
+- Added quiet Compose validation for `render --validate-compose`, `install`, and `upgrade`.
+- Kept `dockyard config` as the command that intentionally prints normalized `docker compose config` output.
+
+## v0.7
+
+Security and operator-safety release.
+
+- Added `dockyard policy list`.
+- Added `dockyard policy check PACKAGE_SOURCE`.
+- Added `dockyard secrets scan PACKAGE_DIR`.
+- Added policy checks for `read_only`, `no-new-privileges`, `cap_drop: [ALL]`, and host path mounts.
+- Added `docs/security-policy.md`.
+- Added `docs/secrets.md`.
+- Updated the README and real-world guide with policy and secret-scanning examples.
+- Kept Docker Compose as the runtime source of truth.
+
+## v0.6.2
+
+Compose compatibility and validation release.
+
+- Added `docs/compose-compatibility.md`.
+- Added `dockyard config PACKAGE_SOURCE` to render and run `docker compose config` without installing.
+- Added `dockyard render --validate-compose`.
+- Updated README and the real-world guide with Compose validation examples.
+- Documented the boundary between Dockyard's package layer and Docker Compose runtime behavior.
+
+## v0.6.1
+
+Documentation-focused cleanup.
+
+- Simplified beginner examples to use production values files without `--overlay prod`.
+- Added `docs/overlays.md` explaining values versus Compose overlays.
+- Added `docs/recommended-layout.md`.
+- Updated OCI and real-world examples to use overlays only in the advanced structural-override section.
+- Clarified that values files choose settings while overlays change Compose structure.
+
+## v0.6
+
+- Added OCI registry support through the `oras` CLI.
+- Added `dockyard push PACKAGE_ARCHIVE OCI_REFERENCE`.
+- Added `dockyard pull OCI_REFERENCE`.
+- Added install, upgrade, and diff support for `oci://` package sources.
+- Added OCI source metadata in release revisions.
+- Updated `dockyard doctor` to report whether `oras` is available.
+- Updated real-world documentation with GHCR-style OCI examples.
+
+## v0.5.1
+
+- Added `dockyard values` command group.
+- Added `dockyard values template PACKAGE_DIR -o values.yaml`.
+- Added `dockyard values validate PACKAGE_DIR -f values.yaml`.
+- Added `dockyard values schema PACKAGE_DIR`.
+- Added schema-description comments and sensitive-value masking for generated values templates.
+- Updated real-world documentation with the operator values workflow.
+
+## v0.5.0
+
+- Added `dockyard lock`.
+- Added `dockyard package --locked`.
+- Added package provenance metadata via `package.provenance.json`.
+- Made package archives more reproducible by normalizing tar/gzip metadata.
+- Added install, upgrade, and diff support for local `.dockyard.tgz` archives.
+- Added `--require-lock` for install, upgrade, and diff.
+- Added release-state copying of `dockyard.lock` when present.
+- Added a security workflow for `govulncheck`, `staticcheck`, and Semgrep.
+- Updated the real-world documentation to use lock, package, verify, and install-from-archive flows.
+
+## v0.4.1
+
+Documentation-focused update.
+
+- Added `docs/real-world-example.md`.
+- Linked the real-world guide from `README.md`.
+- Documented a realistic `team-dashboard` + PostgreSQL package workflow.
+- Covered `doctor`, `lint`, `render`, `install`, `status`, `inspect`, `list`, `package`, `verify`, `diff`, `upgrade`, `rollback`, and `uninstall`.
+
+## v0.4
+
+- Added `doctor`.
+- Added `inspect`.
+- Added `package`.
+- Added `verify`.
+- Added safer placeholder parsing and render diagnostics.
+- Added package archive integrity checks via `SHA256SUMS`.
