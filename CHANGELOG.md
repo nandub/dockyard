@@ -1,5 +1,22 @@
 # Changelog
 
+
+## v1.0.2
+
+- Fixed the `TestManifestValidateMissingAPIVersion` unit test to expect the lower-case error string required by Staticcheck ST1005.
+- No runtime behavior changes from v1.0.1.
+
+## v1.0.1
+
+Patch release.
+
+- Fixed `dockyard push` by running `oras push` from the archive directory and passing only the archive filename, avoiding ORAS absolute-path validation failures on Windows and other platforms.
+- Fixed Staticcheck findings:
+  - lower-case error strings,
+  - simplified volume string slice construction,
+  - replaced dynamic `fmt.Errorf` usage with `errors.New`.
+- No package format or CLI behavior changes.
+
 ## v1.0.0
 
 Stable 1.0 release.

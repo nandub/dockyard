@@ -95,7 +95,7 @@ func DaemonReachable(ctx context.Context) error {
 	cmd.Stdout = &out
 	cmd.Stderr = &out
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("Docker daemon not reachable")
+		return fmt.Errorf("docker daemon not reachable")
 	}
 	return nil
 }

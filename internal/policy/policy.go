@@ -153,10 +153,7 @@ func stringSlice(value any) []string {
 }
 
 func volumeStrings(value any) []string {
-	var out []string
-	for _, item := range stringSlice(value) {
-		out = append(out, item)
-	}
+	out := append([]string(nil), stringSlice(value)...)
 	rawItems, ok := value.([]any)
 	if !ok {
 		return out

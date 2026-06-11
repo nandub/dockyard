@@ -61,8 +61,11 @@ func Push(ctx context.Context, archivePath string, ref string) error {
 	if err != nil {
 		return fmt.Errorf("resolve package archive: %w", err)
 	}
-	layer := absArchive + ":" + MediaType
+	archiveDir := filepath.Dir(absArchive)
+	archiveName := filepath.Base(absArchive)
+	layer := archiveName + ":" + MediaType
 	cmd := exec.CommandContext(ctx, "oras", "push", normalized, layer)
+	cmd.Dir = archiveDir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {

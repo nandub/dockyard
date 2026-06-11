@@ -2,6 +2,7 @@ package render
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -143,7 +144,7 @@ func renderFile(path string, vals map[string]any) ([]byte, []Diagnostic, error) 
 			b.WriteString("; unresolved values: ")
 			b.WriteString(strings.Join(sortedKeys(missing), ", "))
 		}
-		return nil, nil, fmt.Errorf(b.String())
+		return nil, nil, errors.New(b.String())
 	}
 
 	diagnostics := make([]Diagnostic, 0, len(diagnosticByKey))

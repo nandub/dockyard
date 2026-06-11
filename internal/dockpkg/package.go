@@ -69,7 +69,7 @@ func LoadManifest(packageDir string) (*Manifest, error) {
 
 func (m Manifest) Validate() error {
 	if m.APIVersion == "" {
-		return fmt.Errorf("Dockyard.yaml is missing apiVersion; expected %s", format.ManifestAPIVersion)
+		return fmt.Errorf("dockyard.yaml is missing apiVersion; expected %s", format.ManifestAPIVersion)
 	}
 	if m.APIVersion != format.ManifestAPIVersion {
 		return fmt.Errorf("unsupported apiVersion %q; expected %s", m.APIVersion, format.ManifestAPIVersion)

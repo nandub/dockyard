@@ -44,7 +44,7 @@ func TestManifestValidateMissingAPIVersion(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected validation error for missing apiVersion")
 	}
-	if err.Error() != "Dockyard.yaml is missing apiVersion; expected dockyard.dev/v1alpha1" {
+	if err.Error() != "dockyard.yaml is missing apiVersion; expected dockyard.dev/v1alpha1" {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }

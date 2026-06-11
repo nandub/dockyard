@@ -22,7 +22,7 @@ func newDoctorCommand(global *globalOptions) *cobra.Command {
 				return err
 			}
 			if err := os.MkdirAll(home, 0o700); err != nil {
-				return fmt.Errorf("Dockyard home is not writable: %w", err)
+				return fmt.Errorf("dockyard home is not writable: %w", err)
 			}
 			fmt.Printf("OK: Dockyard home writable: %s\n", home)
 			if !runner.CommandExists("docker") {
