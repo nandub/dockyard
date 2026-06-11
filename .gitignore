@@ -16,3 +16,5 @@ id_ed25519
 /team-dashboard/
 *.env
 *.env.example
+
+/SHA256SUMS
