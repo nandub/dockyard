@@ -82,6 +82,11 @@ func checkPackageCompatibility(packageDir string, originalSource string) compatR
 			Status:  "OK",
 			Details: fmt.Sprintf("%s package=%s version=%s", manifest.APIVersion, manifest.Name, manifest.Version),
 		})
+		if len(manifest.Dependencies) == 0 {
+			checks = append(checks, compatCheck{Name: "dependencies", Status: "OK", Details: "none declared"})
+		} else {
+			checks = append(checks, compatCheck{Name: "dependencies", Status: "OK", Details: fmt.Sprintf("%d declared; metadata-only in v1.2", len(manifest.Dependencies))})
+		}
 	}
 
 	valuesPath, err := dockpkg.SafeJoin(packageDir, "values.yaml")

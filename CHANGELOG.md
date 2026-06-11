@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.2.1
+
+- Fixed `examples/team-dashboard` to use Dockyard `${...}` value placeholders so `dockyard package test --strict` passes Docker Compose validation.
+
+## v1.2.0
+
+- Added package dependency metadata to `Dockyard.yaml`.
+- Added dependency validation for names, aliases, sources, duplicate declarations, and explicitly tagged/digested OCI sources.
+- Added `dockyard package deps PACKAGE_SOURCE [--json]` for non-destructive dependency inspection.
+- Added dependency metadata to package quality checks.
+- Added dependency references to `dockyard.lock`.
+- Documented v1.2 dependency support as metadata-only; Dockyard does not automatically install dependencies yet.
+
+
 ## v1.1.0
 
 Post-1.0 release engineering and adoption release.
@@ -24,14 +38,7 @@ Post-1.0 release engineering and adoption release.
 
 ## v1.0.1
 
-Patch release.
-
-- Fixed `dockyard push` by running `oras push` from the archive directory and passing only the archive filename, avoiding ORAS absolute-path validation failures on Windows and other platforms.
-- Fixed Staticcheck findings:
-  - lower-case error strings,
-  - simplified volume string slice construction,
-  - replaced dynamic `fmt.Errorf` usage with `errors.New`.
-- No package format or CLI behavior changes.
+Skipped before release. Superseded by v1.0.2.
 
 ## v1.0.0
 

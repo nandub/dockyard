@@ -117,6 +117,41 @@ dockyard install dashboard-prod ../dockyard-artifacts/team-dashboard-0.1.0.docky
 
 Archives are verified before extraction for install, upgrade, and diff.
 
+
+
+## Package dependencies
+
+Dockyard packages may declare dependency metadata in `Dockyard.yaml`.
+
+```yaml
+dependencies:
+  - name: postgres
+    alias: db
+    version: 0.1.0
+    source: oci://ghcr.io/nandub/dockyard/postgres:0.1.0
+    values:
+      database: dashboard
+      username: dashboard
+```
+
+Dependency support in v1.2 is intentionally metadata-only. Dockyard validates dependency declarations, includes dependency references in `dockyard.lock`, and exposes them through:
+
+```bash
+dockyard package deps ./examples/team-dashboard
+dockyard package deps oci://ghcr.io/nandub/dockyard/team-dashboard:0.2.0 --json
+```
+
+Dockyard does not automatically install, upgrade, or uninstall dependencies yet. Use this metadata to document package requirements and prepare for future dependency orchestration.
+
+Dependency rules:
+
+- `name` is required and must use the same safe identifier format as package names.
+- `source` is required.
+- `alias` is optional and can describe the release or service role, such as `db`.
+- OCI dependency sources must include an explicit tag or digest.
+- Duplicate dependency names or aliases are rejected.
+
+
 ## OCI registry support
 
 Dockyard can push and pull `.dockyard.tgz` package archives using OCI registries through the `oras` CLI.

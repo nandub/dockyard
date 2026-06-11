@@ -1,0 +1,12 @@
+services:
+  web:
+    image: nginx:1.27
+    ports:
+      - "${service.port}:80"
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "nginx -t || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3

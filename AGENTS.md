@@ -440,7 +440,7 @@ Prefer changes that improve:
 - examples
 - migration/support notes
 
-Treat `Dockyard.yaml` with `apiVersion: dockyard.dev/v1alpha1` as the package manifest stable. Treat `dockyard.lock`, `package.provenance.json`, and `release.json` as experimental unless instructed otherwise.
+Treat `Dockyard.yaml` with `apiVersion: dockyard.dev/v1alpha1` as the package manifest stable. Dependency metadata in `Dockyard.yaml` is metadata-only in v1.2: validate and display it, but do not automatically install dependency packages unless a later design explicitly adds orchestration. Treat `dockyard.lock`, `package.provenance.json`, and `release.json` as experimental unless instructed otherwise.
 
 
 ## v1.1 release focus

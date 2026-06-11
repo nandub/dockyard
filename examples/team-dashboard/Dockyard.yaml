@@ -1,0 +1,31 @@
+apiVersion: dockyard.dev/v1alpha1
+name: team-dashboard
+description: Example package with dependency metadata
+version: 0.2.0
+appVersion: "1.0.0"
+type: application
+
+dependencies:
+  - name: postgres
+    alias: db
+    version: 0.1.0
+    source: oci://ghcr.io/nandub/dockyard/postgres:0.1.0
+    values:
+      database: dashboard
+      username: dashboard
+
+compose:
+  base: compose.yaml
+  overlays: {}
+
+security:
+  requireNonRoot: false
+  requireHealthchecks: true
+  requireReadOnlyRootFilesystem: false
+  requireNoNewPrivileges: true
+  requireCapDropAll: false
+  disallowPrivileged: true
+  disallowHostNetwork: true
+  disallowDockerSocketMount: true
+  disallowHostPathMounts: true
+  disallowLatestTag: true

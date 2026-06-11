@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/nandub/dockyard/internal/archive"
+	"github.com/nandub/dockyard/internal/dockpkg"
 	"github.com/nandub/dockyard/internal/quality"
 	"github.com/nandub/dockyard/internal/runner"
 	"github.com/spf13/cobra"
@@ -45,7 +46,83 @@ func newPackageCommand() *cobra.Command {
 	cmd.Flags().BoolVar(&opts.skipPolicy, "skip-policy", false, "skip policy checks during --locked verification")
 	cmd.AddCommand(newPackageLintCommand())
 	cmd.AddCommand(newPackageTestCommand())
+	cmd.AddCommand(newPackageDepsCommand())
 	return cmd
+}
+
+type packageDepsReport struct {
+	PackageName    string               `json:"packageName"`
+	PackageVersion string               `json:"packageVersion"`
+	Dependencies   []dockpkg.Dependency `json:"dependencies,omitempty"`
+}
+
+func newPackageDepsCommand() *cobra.Command {
+	var jsonOut bool
+
+	cmd := &cobra.Command{
+		Use:   "deps PACKAGE_SOURCE",
+		Short: "Inspect declared Dockyard package dependencies",
+		Long: `Inspect dependency metadata declared in Dockyard.yaml.
+
+This command is intentionally non-destructive. It validates and displays
+dependencies, but it does not install, upgrade, or uninstall dependency
+packages.`,
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			report, err := loadPackageDeps(args[0])
+			if err != nil {
+				return err
+			}
+			if jsonOut {
+				return printJSON(report)
+			}
+			printPackageDepsReport(report)
+			return nil
+		},
+	}
+
+	cmd.Flags().BoolVar(&jsonOut, "json", false, "output JSON")
+	return cmd
+}
+
+func loadPackageDeps(source string) (packageDepsReport, error) {
+	prepared, err := preparePackageSource(source, true)
+	if err != nil {
+		return packageDepsReport{}, err
+	}
+	defer prepared.cleanup()
+
+	manifest, err := dockpkg.LoadManifest(prepared.Dir)
+	if err != nil {
+		return packageDepsReport{}, err
+	}
+	return packageDepsReport{
+		PackageName:    manifest.Name,
+		PackageVersion: manifest.Version,
+		Dependencies:   manifest.Dependencies,
+	}, nil
+}
+
+func printPackageDepsReport(report packageDepsReport) {
+	fmt.Printf("%s@%s\n", report.PackageName, report.PackageVersion)
+	if len(report.Dependencies) == 0 {
+		fmt.Println("└── no dependencies")
+		return
+	}
+	for i, dep := range report.Dependencies {
+		prefix := "├──"
+		if i == len(report.Dependencies)-1 {
+			prefix = "└──"
+		}
+		label := dep.Name
+		if dep.Alias != "" {
+			label += " as " + dep.Alias
+		}
+		if dep.Version != "" {
+			label += "@" + dep.Version
+		}
+		fmt.Printf("%s %s  %s\n", prefix, label, dep.Source)
+	}
 }
 
 func newPackageLintCommand() *cobra.Command {

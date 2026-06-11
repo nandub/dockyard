@@ -31,17 +31,25 @@ type ImageRef struct {
 	Digest  string `json:"digest,omitempty"`
 }
 
+type DependencyRef struct {
+	Name    string `json:"name"`
+	Alias   string `json:"alias,omitempty"`
+	Source  string `json:"source"`
+	Version string `json:"version,omitempty"`
+}
+
 type Lockfile struct {
-	APIVersion            string       `json:"apiVersion"`
-	GeneratedAt           time.Time    `json:"generatedAt"`
-	PackageName           string       `json:"packageName"`
-	PackageVersion        string       `json:"packageVersion"`
-	AppVersion            string       `json:"appVersion"`
-	Overlay               string       `json:"overlay,omitempty"`
-	ValuesSHA256          string       `json:"valuesSha256"`
-	RenderedComposeSHA256 string       `json:"renderedComposeSha256"`
-	Images                []ImageRef   `json:"images"`
-	Files                 []FileDigest `json:"files"`
+	APIVersion            string          `json:"apiVersion"`
+	GeneratedAt           time.Time       `json:"generatedAt"`
+	PackageName           string          `json:"packageName"`
+	PackageVersion        string          `json:"packageVersion"`
+	AppVersion            string          `json:"appVersion"`
+	Overlay               string          `json:"overlay,omitempty"`
+	ValuesSHA256          string          `json:"valuesSha256"`
+	RenderedComposeSHA256 string          `json:"renderedComposeSha256"`
+	Images                []ImageRef      `json:"images"`
+	Dependencies          []DependencyRef `json:"dependencies,omitempty"`
+	Files                 []FileDigest    `json:"files"`
 }
 
 func New(packageDir string, manifest *dockpkg.Manifest, vals map[string]any, rendered []byte, overlay string) (*Lockfile, error) {
@@ -79,8 +87,36 @@ func New(packageDir string, manifest *dockpkg.Manifest, vals map[string]any, ren
 		ValuesSHA256:          sha256Bytes(valuesBytes),
 		RenderedComposeSHA256: sha256Bytes(rendered),
 		Images:                images,
+		Dependencies:          lockDependencies(manifest.Dependencies),
 		Files:                 fileDigests,
 	}, nil
+}
+
+func lockDependencies(dependencies []dockpkg.Dependency) []DependencyRef {
+	if len(dependencies) == 0 {
+		return nil
+	}
+	refs := make([]DependencyRef, 0, len(dependencies))
+	for _, dep := range dependencies {
+		refs = append(refs, DependencyRef{
+			Name:    dep.Name,
+			Alias:   dep.Alias,
+			Source:  dep.Source,
+			Version: dep.Version,
+		})
+	}
+	sort.Slice(refs, func(i, j int) bool {
+		left := refs[i].Name
+		if refs[i].Alias != "" {
+			left = refs[i].Alias
+		}
+		right := refs[j].Name
+		if refs[j].Alias != "" {
+			right = refs[j].Alias
+		}
+		return left < right
+	})
+	return refs
 }
 
 func Write(path string, lf *Lockfile) error {

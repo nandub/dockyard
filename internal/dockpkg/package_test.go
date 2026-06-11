@@ -48,3 +48,73 @@ func TestManifestValidateMissingAPIVersion(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
+
+func TestManifestValidateAcceptsDependencies(t *testing.T) {
+	manifest := Manifest{
+		APIVersion: "dockyard.dev/v1alpha1",
+		Name:       "app",
+		Version:    "0.1.0",
+		Compose: ComposeConfig{
+			Base: "compose.yaml",
+		},
+		Dependencies: []Dependency{
+			{
+				Name:   "postgres",
+				Alias:  "db",
+				Source: "oci://ghcr.io/nandub/dockyard/postgres:0.1.0",
+				Values: map[string]any{
+					"database": "app",
+				},
+			},
+		},
+	}
+	if err := manifest.Validate(); err != nil {
+		t.Fatalf("expected dependencies to validate: %v", err)
+	}
+}
+
+func TestManifestValidateRejectsDependencyWithoutPinnedOCIReference(t *testing.T) {
+	manifest := Manifest{
+		APIVersion: "dockyard.dev/v1alpha1",
+		Name:       "app",
+		Version:    "0.1.0",
+		Compose: ComposeConfig{
+			Base: "compose.yaml",
+		},
+		Dependencies: []Dependency{
+			{
+				Name:   "postgres",
+				Source: "oci://ghcr.io/nandub/dockyard/postgres",
+			},
+		},
+	}
+	err := manifest.Validate()
+	if err == nil {
+		t.Fatal("expected dependency validation error")
+	}
+	if err.Error() != "dependencies[0].source OCI reference must include an explicit tag or digest" {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestManifestValidateRejectsDuplicateDependencyAliases(t *testing.T) {
+	manifest := Manifest{
+		APIVersion: "dockyard.dev/v1alpha1",
+		Name:       "app",
+		Version:    "0.1.0",
+		Compose: ComposeConfig{
+			Base: "compose.yaml",
+		},
+		Dependencies: []Dependency{
+			{Name: "postgres", Alias: "db", Source: "oci://ghcr.io/nandub/dockyard/postgres:0.1.0"},
+			{Name: "mysql", Alias: "db", Source: "oci://ghcr.io/nandub/dockyard/mysql:0.1.0"},
+		},
+	}
+	err := manifest.Validate()
+	if err == nil {
+		t.Fatal("expected duplicate alias validation error")
+	}
+	if err.Error() != `duplicate dependency alias "db"` {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}

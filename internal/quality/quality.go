@@ -52,6 +52,7 @@ func LintPackage(packageDir string, opts Options) (Report, error) {
 	report.PackageVersion = manifest.Version
 	report.Checks = append(report.Checks, Check{Name: "Dockyard.yaml", Severity: SeverityOK, Message: "manifest is valid"})
 
+	report.Checks = append(report.Checks, checkDependencies(manifest))
 	report.Checks = append(report.Checks, checkRequiredFiles(packageDir, opts.Strict)...)
 	report.Checks = append(report.Checks, checkForbiddenFiles(packageDir)...)
 	report.Checks = append(report.Checks, checkValuesAndSchema(packageDir, opts.Strict)...)
@@ -82,6 +83,29 @@ func HasBlockingFindings(report Report, opts Options) bool {
 		}
 	}
 	return false
+}
+
+func checkDependencies(manifest *dockpkg.Manifest) Check {
+	if len(manifest.Dependencies) == 0 {
+		return Check{Name: "dependencies", Severity: SeverityOK, Message: "no package dependencies declared"}
+	}
+	details := make([]string, 0, len(manifest.Dependencies))
+	for _, dep := range manifest.Dependencies {
+		name := dep.Name
+		if dep.Alias != "" {
+			name += " as " + dep.Alias
+		}
+		if dep.Version != "" {
+			name += "@" + dep.Version
+		}
+		details = append(details, name+" from "+dep.Source)
+	}
+	return Check{
+		Name:     "dependencies",
+		Severity: SeverityOK,
+		Message:  "dependency metadata is valid; automatic dependency installation is not enabled",
+		Details:  details,
+	}
 }
 
 func checkRequiredFiles(packageDir string, strict bool) []Check {

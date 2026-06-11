@@ -21,6 +21,8 @@ Docker Compose remains the runtime source of truth.
 
 Dockyard v1.0 supports `Dockyard.yaml` manifests using `apiVersion: dockyard.dev/v1alpha1` as the stable package manifest contract for the v1.x line.
 
+Dockyard v1.2 adds package dependency metadata. A package can declare dependencies in `Dockyard.yaml`, inspect them with `dockyard package deps`, and include them in `dockyard.lock`. Dependency installation is intentionally not automatic yet.
+
 ## Documentation
 
 The docs are intentionally consolidated into a small set:
@@ -94,6 +96,7 @@ Runnable package examples live under `examples/`:
 
 - `examples/nginx` — basic local smoke-test package.
 - `examples/postgres-app` — app plus PostgreSQL package.
+- `examples/team-dashboard` — dependency metadata example.
 - `examples/caddy-letsencrypt` — automatic HTTPS with Caddy.
 - `examples/nginx-tls-mounted-certs` — TLS with operator-provided certificate/key files.
 - `examples/traefik-letsencrypt` — Let's Encrypt with Traefik Docker labels.
