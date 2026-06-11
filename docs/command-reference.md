@@ -142,3 +142,13 @@ dockyard package test PACKAGE_DIR --smoke
 ```
 
 Use `--allow-advisory` only for private/internal package gates where advisory warnings, such as a missing package-local `LICENSE`, are accepted.
+
+
+## OCI artifact media types
+
+`dockyard push` publishes packages with:
+
+```text
+artifact type: application/vnd.dockyard.package.v1+gzip
+archive layer: application/vnd.dockyard.package.archive.v1+gzip
+```

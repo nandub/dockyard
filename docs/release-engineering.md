@@ -24,6 +24,7 @@ Before committing or tagging:
 
 ```bash
 make verify
+go run honnef.co/go/tools/cmd/staticcheck@latest ./...
 ```
 
 On Windows, `make build` writes `bin/dockyard.exe`. On Linux and macOS, it writes `bin/dockyard`. The `build` target does not edit `go.mod` or `go.sum`.
@@ -60,6 +61,35 @@ dockyard-darwin-arm64
 SHA256SUMS
 dockyard-source.spdx.json
 ```
+
+Verify a downloaded binary with `SHA256SUMS` before installing it.
+
+Windows:
+
+```powershell
+Get-FileHash .\dockyard-windows-amd64.exe -Algorithm SHA256
+Get-Content .\SHA256SUMS
+```
+
+Linux/macOS:
+
+```bash
+sha256sum -c SHA256SUMS
+```
+
+## Release workflow verification
+
+The release workflow runs:
+
+```text
+make verify
+staticcheck
+dockyard version
+dockyard compat ./examples/nginx --strict
+dockyard package test ./examples/nginx --strict
+```
+
+The smoke test remains a local/manual gate because it requires a reachable Docker daemon.
 
 ## Tagging
 

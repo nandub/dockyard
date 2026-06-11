@@ -30,3 +30,22 @@ func TestNormalizeReferenceAcceptsDigest(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
+
+func TestPushArgsUsesDockyardArtifactType(t *testing.T) {
+	got := PushArgs("ghcr.io/nandub/dockyard/nginx:0.1.0", "nginx-0.1.0.dockyard.tgz")
+	want := []string{
+		"push",
+		"--artifact-type",
+		ArtifactType,
+		"ghcr.io/nandub/dockyard/nginx:0.1.0",
+		"nginx-0.1.0.dockyard.tgz:" + LayerMediaType,
+	}
+	if len(got) != len(want) {
+		t.Fatalf("expected %d args, got %d: %#v", len(want), len(got), got)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("arg %d: expected %q, got %q", i, want[i], got[i])
+		}
+	}
+}

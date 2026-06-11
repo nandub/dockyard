@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.1.0
+
+Post-1.0 release engineering and adoption release.
+
+- Added an explicit Dockyard OCI artifact type for `dockyard push`:
+  - artifact type: `application/vnd.dockyard.package.v1+gzip`
+  - archive layer media type: `application/vnd.dockyard.package.archive.v1+gzip`
+- Kept ORAS path-safety behavior by continuing to pass only archive filenames from the archive directory.
+- Added release workflow verification for the built Linux AMD64 binary.
+- Added Staticcheck to the release workflow.
+- Expanded release checksum documentation.
+- Added `CONTRIBUTING.md`.
+- Added `CODE_OF_CONDUCT.md`.
+- Added GitHub issue templates and pull request template.
+- Documented official example package publishing to GHCR.
+
 
 ## v1.0.2
 

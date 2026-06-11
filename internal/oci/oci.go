@@ -11,8 +11,9 @@ import (
 )
 
 const (
-	Scheme    = "oci://"
-	MediaType = "application/vnd.dockyard.package.v1+gzip"
+	Scheme         = "oci://"
+	ArtifactType   = "application/vnd.dockyard.package.v1+gzip"
+	LayerMediaType = "application/vnd.dockyard.package.archive.v1+gzip"
 )
 
 func IsReference(input string) bool {
@@ -63,8 +64,8 @@ func Push(ctx context.Context, archivePath string, ref string) error {
 	}
 	archiveDir := filepath.Dir(absArchive)
 	archiveName := filepath.Base(absArchive)
-	layer := archiveName + ":" + MediaType
-	cmd := exec.CommandContext(ctx, "oras", "push", normalized, layer)
+	args := PushArgs(normalized, archiveName)
+	cmd := exec.CommandContext(ctx, "oras", args...)
 	cmd.Dir = archiveDir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -72,6 +73,11 @@ func Push(ctx context.Context, archivePath string, ref string) error {
 		return errors.New("oras push failed")
 	}
 	return nil
+}
+
+func PushArgs(normalizedRef string, archiveName string) []string {
+	layer := archiveName + ":" + LayerMediaType
+	return []string{"push", "--artifact-type", ArtifactType, normalizedRef, layer}
 }
 
 func Pull(ctx context.Context, ref string, outputDir string) (string, error) {

@@ -36,6 +36,32 @@ The docs are intentionally consolidated into a small set:
 - [Support policy](docs/support-policy.md) — supported platforms and support boundaries.
 - [Release checklist](docs/release-candidate-checklist.md) — pre-tag validation steps for release candidates and final releases.
 
+## Install and verify releases
+
+GitHub releases include cross-platform binaries and `SHA256SUMS`.
+
+Windows checksum example:
+
+```powershell
+Get-FileHash .\dockyard-windows-amd64.exe -Algorithm SHA256
+Get-Content .\SHA256SUMS
+```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for local development, verification, and pull request expectations.
+
+
+## OCI package distribution
+
+Dockyard packages can be pushed to OCI registries through ORAS. Dockyard uses:
+
+```text
+artifact type: application/vnd.dockyard.package.v1+gzip
+archive layer: application/vnd.dockyard.package.archive.v1+gzip
+```
+
+See [Packaging and distribution](docs/packaging-and-distribution.md) for GHCR examples.
 
 ## Compatibility and package quality checks
 
@@ -264,6 +290,17 @@ chmod +x dockyard
 ./dockyard doctor
 ./dockyard version
 ```
+
+## OCI package distribution
+
+Dockyard packages can be pushed to OCI registries through ORAS. Dockyard uses:
+
+```text
+artifact type: application/vnd.dockyard.package.v1+gzip
+archive layer: application/vnd.dockyard.package.archive.v1+gzip
+```
+
+See [Packaging and distribution](docs/packaging-and-distribution.md) for GHCR examples.
 
 ## Compatibility and package quality checks
 

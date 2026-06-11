@@ -121,6 +121,20 @@ Archives are verified before extraction for install, upgrade, and diff.
 
 Dockyard can push and pull `.dockyard.tgz` package archives using OCI registries through the `oras` CLI.
 
+Dockyard publishes packages with the OCI artifact type:
+
+```text
+application/vnd.dockyard.package.v1+gzip
+```
+
+and the package archive layer media type:
+
+```text
+application/vnd.dockyard.package.archive.v1+gzip
+```
+
+This lets registries and tooling distinguish Dockyard packages from generic ORAS blobs.
+
 Install and authenticate with `oras` before using these commands:
 
 ```bash
@@ -167,6 +181,34 @@ dockyard upgrade dashboard-prod \
 ```
 
 `dockyard doctor` reports whether `oras` is available. OCI references must include an explicit tag or digest.
+
+### Publish official examples
+
+Before publishing an example package:
+
+```bash
+dockyard lock ./examples/nginx
+dockyard compat ./examples/nginx --strict
+dockyard package lint ./examples/nginx --strict
+dockyard package test ./examples/nginx --strict
+dockyard package ./examples/nginx --locked -o ../dockyard-artifacts/nginx-0.1.0.dockyard.tgz
+dockyard verify ../dockyard-artifacts/nginx-0.1.0.dockyard.tgz --require-lock
+```
+
+Push to GHCR:
+
+```bash
+oras login ghcr.io
+dockyard push ../dockyard-artifacts/nginx-0.1.0.dockyard.tgz \
+  oci://ghcr.io/nandub/dockyard/nginx:0.1.0
+```
+
+Test the published artifact:
+
+```bash
+dockyard package test oci://ghcr.io/nandub/dockyard/nginx:0.1.0 --smoke
+```
+
 
 
 ## Package quality checks

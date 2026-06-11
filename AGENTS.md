@@ -441,3 +441,20 @@ Prefer changes that improve:
 - migration/support notes
 
 Treat `Dockyard.yaml` with `apiVersion: dockyard.dev/v1alpha1` as the package manifest stable. Treat `dockyard.lock`, `package.provenance.json`, and `release.json` as experimental unless instructed otherwise.
+
+
+## v1.1 release focus
+
+Post-1.0 changes should improve reliability, packaging, release engineering, and adoption without breaking `Dockyard.yaml` `dockyard.dev/v1alpha1`.
+
+For OCI:
+- use `application/vnd.dockyard.package.v1+gzip` as the artifact type,
+- use `application/vnd.dockyard.package.archive.v1+gzip` as the archive layer media type,
+- do not pass absolute archive paths to ORAS,
+- keep ORAS authentication outside Dockyard.
+
+Before changing release workflows, ensure:
+- `make verify` runs,
+- Staticcheck runs,
+- release binaries can run `version`,
+- the Linux AMD64 release binary can run strict package checks.

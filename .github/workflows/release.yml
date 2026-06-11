@@ -40,8 +40,11 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Test
-        run: go test ./...
+      - name: Verify
+        run: make verify
+
+      - name: Staticcheck
+        run: go run honnef.co/go/tools/cmd/staticcheck@latest ./...
 
       - name: Build
         env:
@@ -54,7 +57,18 @@ jobs:
         run: |
           mkdir -p dist
           name="dockyard-${GOOS}-${GOARCH}${{ matrix.suffix }}"
-          go build             -trimpath             -ldflags "-s -w -X github.com/nandub/dockyard/internal/version.Version=${VERSION} -X github.com/nandub/dockyard/internal/version.Commit=${COMMIT} -X github.com/nandub/dockyard/internal/version.Date=${DATE}"             -o "dist/${name}"             ./cmd/dockyard
+          go build \
+            -trimpath \
+            -ldflags "-s -w -X github.com/nandub/dockyard/internal/version.Version=${VERSION} -X github.com/nandub/dockyard/internal/version.Commit=${COMMIT} -X github.com/nandub/dockyard/internal/version.Date=${DATE}" \
+            -o "dist/${name}" \
+            ./cmd/dockyard
+
+      - name: Verify linux-amd64 binary
+        if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
+        run: |
+          ./dist/dockyard-linux-amd64 version
+          ./dist/dockyard-linux-amd64 compat ./examples/nginx --strict
+          ./dist/dockyard-linux-amd64 package test ./examples/nginx --strict
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@v4
