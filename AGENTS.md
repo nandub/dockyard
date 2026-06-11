@@ -458,3 +458,7 @@ Before changing release workflows, ensure:
 - Staticcheck runs,
 - release binaries can run `version`,
 - the Linux AMD64 release binary can run strict package checks.
+
+## Dependency planning
+
+`dockyard install-plan RELEASE PACKAGE_SOURCE` is intentionally read-only. Keep dependency planning separate from dependency installation until lifecycle behavior is explicitly implemented. The command should validate planned release names, show existing-release status, and avoid writing release state.

@@ -41,6 +41,7 @@ Use values files for deployment settings. Use `--env-file` for environment-backe
 dockyard lock PACKAGE_DIR [-f values.yaml]
 dockyard package lint PACKAGE_DIR [--strict] [--allow-advisory] [--json]
 dockyard package deps PACKAGE_SOURCE [--json]
+dockyard install-plan RELEASE PACKAGE_SOURCE [--json]
 dockyard package test PACKAGE_SOURCE [--strict] [--allow-advisory] [--smoke] [--env-file file]
 dockyard package PACKAGE_DIR --locked [-f values.yaml] -o app-0.1.0.dockyard.tgz
 dockyard verify PACKAGE_ARCHIVE [-f values.yaml] [--require-lock]

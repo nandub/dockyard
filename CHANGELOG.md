@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.3.0
+
+- Added `dockyard install-plan RELEASE PACKAGE_SOURCE` for read-only dependency-aware install previews.
+- Generated deterministic dependency release names using `RELEASE-ALIAS` or `RELEASE-NAME`.
+- Added existing-release detection to install plans with `install`, `reinstall`, and `exists` actions.
+- Added `--json` output for install plans.
+- Added tests for dependency plan generation and existing release detection.
+- Ignored generated release checksum files with `/SHA256SUMS`.
+
 ## v1.2.1
 
 - Fixed `examples/team-dashboard` to use Dockyard `${...}` value placeholders so `dockyard package test --strict` passes Docker Compose validation.

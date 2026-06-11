@@ -23,6 +23,7 @@ func NewRootCommand() *cobra.Command {
 	cmd.AddCommand(newRenderCommand())
 	cmd.AddCommand(newConfigCommand())
 	cmd.AddCommand(newInstallCommand(opts))
+	cmd.AddCommand(newInstallPlanCommand(opts))
 	cmd.AddCommand(newUninstallCommand(opts))
 	cmd.AddCommand(newListCommand(opts))
 	cmd.AddCommand(newStatusCommand(opts))

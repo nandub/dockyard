@@ -55,6 +55,36 @@ dockyard install dashboard-prod ../dockyard-artifacts/team-dashboard-0.1.0.docky
 
 
 
+## Dependency install plans
+
+Packages can declare dependency metadata in `Dockyard.yaml`. Dockyard does not automatically install dependencies yet, but package authors and operators can preview the future install order with:
+
+```bash
+dockyard install-plan team-dashboard ./examples/team-dashboard
+```
+
+Example output:
+
+```text
+Install plan for release team-dashboard
+
+1. dependency: postgres as db@0.1.0
+   source: oci://ghcr.io/nandub/dockyard/postgres:0.1.0
+   planned release: team-dashboard-db
+   action: install
+   automatic install: not enabled
+
+2. root package: team-dashboard@0.2.0
+   source: ./examples/team-dashboard
+   planned release: team-dashboard
+   action: install
+
+Read-only: no releases were installed, upgraded, uninstalled, or modified.
+```
+
+Dependency release names are deterministic: `RELEASE-ALIAS` when an alias is set, otherwise `RELEASE-NAME`. Use `--json` for automation or review tooling.
+
+
 ## Test a package
 
 Use `dockyard package test` before publishing or sharing a package:

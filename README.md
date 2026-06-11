@@ -21,7 +21,7 @@ Docker Compose remains the runtime source of truth.
 
 Dockyard v1.0 supports `Dockyard.yaml` manifests using `apiVersion: dockyard.dev/v1alpha1` as the stable package manifest contract for the v1.x line.
 
-Dockyard v1.2 adds package dependency metadata. A package can declare dependencies in `Dockyard.yaml`, inspect them with `dockyard package deps`, and include them in `dockyard.lock`. Dependency installation is intentionally not automatic yet.
+Dockyard v1.2 adds package dependency metadata. A package can declare dependencies in `Dockyard.yaml`, inspect them with `dockyard package deps`, and include them in `dockyard.lock`. Dependency installation is intentionally not automatic yet. Dockyard v1.3 adds `dockyard install-plan` to preview dependency-aware install order and existing-release status without modifying state.
 
 ## Documentation
 
