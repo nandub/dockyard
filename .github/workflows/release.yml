@@ -103,6 +103,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/dockyard-*
+            dist/dockyard-windows-amd64.exe
+            dist/dockyard-linux-amd64
+            dist/dockyard-linux-arm64
+            dist/dockyard-darwin-amd64
+            dist/dockyard-darwin-arm64
             dist/SHA256SUMS
             dist/dockyard-source.spdx.json
