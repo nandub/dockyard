@@ -425,3 +425,19 @@ Use `dockyard package test --smoke` only when Docker is available.
 ## Strict mode and advisory warnings
 
 `--strict` must mean warnings fail across compatibility and package-quality commands. For package quality checks, use `--allow-advisory` only for explicitly advisory warnings such as private packages that rely on repository-level licensing instead of a package-local `LICENSE`.
+
+
+## v1.0.0-rc.1 agent guidance
+
+Do not add large new runtime features during release-candidate preparation.
+
+Prefer changes that improve:
+
+- compatibility checks
+- documentation accuracy
+- release metadata
+- test coverage
+- examples
+- migration/support notes
+
+Treat `Dockyard.yaml` with `apiVersion: dockyard.dev/v1alpha1` as the package manifest stable candidate. Treat `dockyard.lock`, `package.provenance.json`, and `release.json` as experimental unless instructed otherwise.

@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.0.0-rc.1
+
+Release-candidate preparation release.
+
+- Documented `Dockyard.yaml` `dockyard.dev/v1alpha1` as the stable package manifest candidate for v1.0.
+- Kept `dockyard.lock`, `package.provenance.json`, and `release.json` marked experimental during release-candidate testing.
+- Added upgrade policy, support policy, and release-candidate checklist documentation.
+- Updated v1 readiness and release-engineering docs.
+- Updated format compatibility notes.
+- Avoided new runtime features to keep the release candidate conservative.
+
 ## v0.14.1
 
 - Normalized `--strict` behavior for package quality commands: warnings now fail by default.

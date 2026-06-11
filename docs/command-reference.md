@@ -128,3 +128,17 @@ dockyard package test ./internal-package --strict --allow-advisory
 ```
 
 Public examples in this repository include package-local `LICENSE` files so the strict gate can pass without `--allow-advisory`.
+
+
+## Release-candidate commands
+
+Use these commands before publishing a package or cutting a release candidate:
+
+```bash
+dockyard compat PACKAGE_DIR --strict
+dockyard package lint PACKAGE_DIR --strict
+dockyard package test PACKAGE_DIR --strict
+dockyard package test PACKAGE_DIR --smoke
+```
+
+Use `--allow-advisory` only for private/internal package gates where advisory warnings, such as a missing package-local `LICENSE`, are accepted.

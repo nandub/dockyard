@@ -123,3 +123,47 @@ On Windows, use the generated executable:
 `dockyard compat --strict`, `dockyard package lint --strict`, and `dockyard package test --strict` treat warnings as failures. Use `--allow-advisory` with package lint/test only when private packages intentionally allow advisory warnings such as a missing package-local `LICENSE`.
 
 Warnings are still useful during normal development; strict mode is intended for packages or release state that should be ready for publishing.
+
+
+## v1.0.0-rc.1 scope
+
+`v1.0.0-rc.1` is a release-candidate preparation release, not a feature-expansion release.
+
+The release candidate freezes the intended package manifest contract:
+
+```text
+Dockyard.yaml
+apiVersion: dockyard.dev/v1alpha1
+```
+
+The following formats remain experimental during the release-candidate period:
+
+```text
+dockyard.lock
+package.provenance.json
+release.json
+```
+
+## Release-candidate gate
+
+For public packages:
+
+```bash
+dockyard lock ./examples/nginx
+dockyard compat ./examples/nginx --strict
+dockyard package lint ./examples/nginx --strict
+dockyard package test ./examples/nginx --strict
+```
+
+For runnable examples:
+
+```bash
+dockyard package test ./examples/nginx --smoke
+```
+
+For private packages that intentionally rely on repository-level licensing:
+
+```bash
+dockyard package lint ./private-package --strict --allow-advisory
+dockyard package test ./private-package --strict --allow-advisory
+```

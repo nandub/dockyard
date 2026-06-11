@@ -67,3 +67,21 @@ dockyard-source.spdx.json
 git tag v0.10.0
 git push origin v0.10.0
 ```
+
+
+## Release candidate builds
+
+To build a local release-candidate snapshot:
+
+```bash
+make release-snapshot VERSION=v1.0.0-rc.1
+```
+
+To publish via GitHub Actions, create and push a tag:
+
+```bash
+git tag v1.0.0-rc.1
+git push origin v1.0.0-rc.1
+```
+
+The GitHub workflow uses the tag as the Dockyard version metadata.

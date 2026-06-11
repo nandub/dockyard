@@ -27,13 +27,13 @@ func SupportedFormats() []Format {
 			Name:       "Dockyard package manifest",
 			APIVersion: ManifestAPIVersion,
 			Stability:  Stable,
-			Notes:      "Dockyard.yaml package metadata and Compose entrypoint.",
+			Notes:      "Dockyard.yaml package metadata and Compose entrypoint. Stable candidate for v1.0.",
 		},
 		{
 			Name:       "Dockyard lockfile",
 			APIVersion: LockfileAPIVersion,
 			Stability:  Experimental,
-			Notes:      "dockyard.lock digest format; expected to stabilize before v1.0.",
+			Notes:      "dockyard.lock digest format; still experimental during v1.0 release-candidate testing.",
 		},
 		{
 			Name:       "Dockyard package provenance",
@@ -45,7 +45,7 @@ func SupportedFormats() []Format {
 			Name:       "Dockyard release state",
 			APIVersion: ReleaseAPIVersion,
 			Stability:  Experimental,
-			Notes:      "$DOCKYARD_HOME release.json state. v0.11 can read legacy records without apiVersion.",
+			Notes:      "$DOCKYARD_HOME release.json state. Experimental; v0.11+ can read legacy records without apiVersion.",
 		},
 	}
 }
