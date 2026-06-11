@@ -1,6 +1,6 @@
-# Release Candidate Checklist
+# Release Checklist
 
-Use this checklist before tagging a release candidate such as `v1.0.0-rc.1`.
+Use this checklist before tagging a release candidate such as `v1.0.0-rc.1` or a final release such as `v1.0.0`.
 
 ## Local verification
 
@@ -34,14 +34,14 @@ Repeat the non-smoke gate for each public example package.
 For local release snapshots:
 
 ```bash
-make release-snapshot VERSION=v1.0.0-rc.1
+make release-snapshot VERSION=v1.0.0
 ```
 
 For GitHub releases, push a tag:
 
 ```bash
-git tag v1.0.0-rc.1
-git push origin v1.0.0-rc.1
+git tag v1.0.0
+git push origin v1.0.0
 ```
 
 The GitHub release workflow builds cross-platform binaries, checksums, and an SBOM.
@@ -67,10 +67,10 @@ CHANGELOG.md
 
 ## Compatibility decision
 
-For `v1.0.0-rc.1`:
+For `v1.0.0`:
 
 ```text
-Stable candidate:
+Stable:
   Dockyard.yaml apiVersion dockyard.dev/v1alpha1
 
 Experimental:

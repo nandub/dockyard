@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.0.0
+
+Stable 1.0 release.
+
+- Promoted `Dockyard.yaml` `dockyard.dev/v1alpha1` as the supported package manifest format for v1.x.
+- Kept `dockyard.lock`, `package.provenance.json`, and `release.json` explicitly experimental so they can continue to evolve without breaking the package manifest contract.
+- Carried forward the validated release-candidate gates from `v1.0.0-rc.1`.
+- No new runtime features were added after the release candidate.
+- Updated release, support, upgrade, and v1 readiness documentation for the final v1.0 release.
+
+
 ## v1.0.0-rc.1
 
 Release-candidate preparation release.

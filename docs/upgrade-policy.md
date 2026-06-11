@@ -1,6 +1,6 @@
 # Upgrade Policy
 
-Dockyard is approaching `v1.0.0`. This document describes how compatibility is handled for release-candidate and stable releases.
+Dockyard is approaching `v1.0.0`. This document describes how compatibility is handled for release and stable releases.
 
 ## Stable format for v1.0
 
@@ -11,11 +11,11 @@ Dockyard.yaml
 apiVersion: dockyard.dev/v1alpha1
 ```
 
-Dockyard `v1.0.0-rc.1` is expected to read packages using `dockyard.dev/v1alpha1`.
+Dockyard `v1.0.0` is expected to read packages using `dockyard.dev/v1alpha1`.
 
 ## Experimental formats
 
-The following formats remain experimental during the release-candidate period:
+The following formats remain experimental during the release period:
 
 ```text
 dockyard.lock

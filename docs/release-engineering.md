@@ -64,24 +64,24 @@ dockyard-source.spdx.json
 ## Tagging
 
 ```bash
-git tag v0.10.0
-git push origin v0.10.0
+git tag v1.0.0
+git push origin v1.0.0
 ```
 
 
-## Release candidate builds
+## Release candidate and final builds
 
-To build a local release-candidate snapshot:
+To build a local release snapshot:
 
 ```bash
-make release-snapshot VERSION=v1.0.0-rc.1
+make release-snapshot VERSION=v1.0.0
 ```
 
 To publish via GitHub Actions, create and push a tag:
 
 ```bash
-git tag v1.0.0-rc.1
-git push origin v1.0.0-rc.1
+git tag v1.0.0
+git push origin v1.0.0
 ```
 
 The GitHub workflow uses the tag as the Dockyard version metadata.

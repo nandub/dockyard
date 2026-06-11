@@ -97,9 +97,9 @@ dockyard compat --json
 The command is intended for v1.0 readiness work and for diagnosing package, archive, lockfile, and release-state format issues.
 
 
-## Release-candidate checks
+## Release checks
 
-For v1.0 release-candidate preparation, run:
+For v1.0 release preparation, run:
 
 ```bash
 dockyard compat ./examples/nginx --strict
@@ -107,7 +107,7 @@ dockyard package lint ./examples/nginx --strict
 dockyard package test ./examples/nginx --strict
 ```
 
-Use `--strict` to treat warnings as failures for release-candidate gates. `package lint` and `package test` also support `--allow-advisory` for advisory warnings such as a missing package-local `LICENSE` in private/internal packages.
+Use `--strict` to treat warnings as failures for release gates. `package lint` and `package test` also support `--allow-advisory` for advisory warnings such as a missing package-local `LICENSE` in private/internal packages.
 
 
 ### Strict package gates
@@ -130,7 +130,7 @@ dockyard package test ./internal-package --strict --allow-advisory
 Public examples in this repository include package-local `LICENSE` files so the strict gate can pass without `--allow-advisory`.
 
 
-## Release-candidate commands
+## Release commands
 
 Use these commands before publishing a package or cutting a release candidate:
 

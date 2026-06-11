@@ -399,7 +399,7 @@ Use `dockyard package test PACKAGE_SOURCE` when adding or changing example packa
 
 
 
-## v1.0 / release-candidate work
+## v1.0 / release work
 
 Avoid expanding the CLI surface unless the change directly improves stability, compatibility, release quality, or documentation accuracy.
 
@@ -410,7 +410,7 @@ Before changing file formats, update:
 - `docs/compose-compatibility.md` when behavior affects Compose support
 - `CHANGELOG.md`
 
-For release-candidate checks, prefer:
+For release checks, prefer:
 
 ```sh
 make verify
@@ -427,9 +427,9 @@ Use `dockyard package test --smoke` only when Docker is available.
 `--strict` must mean warnings fail across compatibility and package-quality commands. For package quality checks, use `--allow-advisory` only for explicitly advisory warnings such as private packages that rely on repository-level licensing instead of a package-local `LICENSE`.
 
 
-## v1.0.0-rc.1 agent guidance
+## v1.0.0 agent guidance
 
-Do not add large new runtime features during release-candidate preparation.
+Do not add large new runtime features during release preparation.
 
 Prefer changes that improve:
 
@@ -440,4 +440,4 @@ Prefer changes that improve:
 - examples
 - migration/support notes
 
-Treat `Dockyard.yaml` with `apiVersion: dockyard.dev/v1alpha1` as the package manifest stable candidate. Treat `dockyard.lock`, `package.provenance.json`, and `release.json` as experimental unless instructed otherwise.
+Treat `Dockyard.yaml` with `apiVersion: dockyard.dev/v1alpha1` as the package manifest stable. Treat `dockyard.lock`, `package.provenance.json`, and `release.json` as experimental unless instructed otherwise.

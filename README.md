@@ -19,6 +19,8 @@ Dockyard package
 
 Docker Compose remains the runtime source of truth.
 
+Dockyard v1.0 supports `Dockyard.yaml` manifests using `apiVersion: dockyard.dev/v1alpha1` as the stable package manifest contract for the v1.x line.
+
 ## Documentation
 
 The docs are intentionally consolidated into a small set:
@@ -32,7 +34,7 @@ The docs are intentionally consolidated into a small set:
 - [v1.0 readiness](docs/v1-readiness.md) — format stability and compatibility checks.
 - [Upgrade policy](docs/upgrade-policy.md) — stable and experimental format expectations.
 - [Support policy](docs/support-policy.md) — supported platforms and support boundaries.
-- [Release candidate checklist](docs/release-candidate-checklist.md) — pre-tag validation steps.
+- [Release checklist](docs/release-candidate-checklist.md) — pre-tag validation steps for release candidates and final releases.
 
 
 ## Compatibility and package quality checks
@@ -47,7 +49,7 @@ dockyard package test ./examples/nginx --strict
 dockyard package test ./examples/nginx --smoke
 ```
 
-## v1.0.0-rc.1 release-candidate preparation
+## v1.0 release gate
 
 For packages that should be ready to publish, use strict compatibility and package-quality gates:
 
@@ -57,7 +59,7 @@ dockyard package lint ./examples/nginx --strict
 dockyard package test ./examples/nginx --strict
 ```
 
-See [v1.0 readiness](docs/v1-readiness.md) for the full release-candidate checklist.
+See [v1.0 readiness](docs/v1-readiness.md) for the full release checklist.
 
 
 ## Examples
@@ -275,7 +277,7 @@ dockyard package test ./examples/nginx --strict
 dockyard package test ./examples/nginx --smoke
 ```
 
-## v1.0.0-rc.1 release-candidate preparation
+## v1.0 release gate
 
 For packages that should be ready to publish, use strict compatibility and package-quality gates:
 
@@ -285,7 +287,7 @@ dockyard package lint ./examples/nginx --strict
 dockyard package test ./examples/nginx --strict
 ```
 
-See [v1.0 readiness](docs/v1-readiness.md) for the full release-candidate checklist.
+See [v1.0 readiness](docs/v1-readiness.md) for the full release checklist.
 
 
 ## Examples

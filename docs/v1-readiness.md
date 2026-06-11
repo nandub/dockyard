@@ -1,6 +1,8 @@
 # v1.0 readiness
 
-Dockyard v0.14 is the release-candidate preparation pass. The goal is to make file formats, command behavior, and release state predictable before declaring a stable v1.0.
+Dockyard v1.0 establishes the package manifest compatibility contract for the v1.x line.
+
+`Dockyard.yaml` with `apiVersion: dockyard.dev/v1alpha1` is the supported package manifest format. Other Dockyard-generated formats remain explicitly experimental so they can continue to evolve.
 
 ## Format stability
 
@@ -8,12 +10,12 @@ Dockyard currently uses these format versions:
 
 | Format | API version | Stability |
 | --- | --- | --- |
-| Package manifest | `dockyard.dev/v1alpha1` | Stable candidate |
+| Package manifest | `dockyard.dev/v1alpha1` | Stable |
 | Lockfile | `dockyard.dev/lockfile/v1alpha1` | Experimental |
 | Package provenance | `dockyard.dev/provenance/v1alpha1` | Experimental |
 | Release state | `dockyard.dev/release/v1alpha1` | Experimental |
 
-`Dockyard.yaml` is the most important compatibility contract. Other formats may still receive small changes before v1.0.
+`Dockyard.yaml` is the primary v1.x compatibility contract. Other formats may still receive compatible or documented changes while they remain experimental.
 
 ## Compatibility command
 
@@ -62,9 +64,9 @@ New v0.11 release revisions include an `apiVersion` field in `release.json`:
 
 Dockyard can still read older release records that do not have `apiVersion`; they are treated as legacy v0.x records.
 
-## v1.0 review checklist
+## v1.x compatibility checklist
 
-Before v1.0, review:
+Before making changes in the v1.x line, review:
 
 - CLI argument order and flag names.
 - `Dockyard.yaml` fields and defaults.
@@ -80,7 +82,7 @@ Before v1.0, review:
 
 ## Package quality gate
 
-Before v1.0, example and catalog-ready packages should pass:
+Example and catalog-ready packages should pass:
 
 ```bash
 dockyard compat PACKAGE_DIR
@@ -90,9 +92,9 @@ dockyard package lint PACKAGE_DIR --strict
 `compat` checks format support. `package lint` checks package quality and publication readiness.
 
 
-## v0.14 release-candidate gate
+## v1.0 release gate
 
-Before cutting a `v1.0.0-rc.1` tag, run this checklist from a clean checkout:
+Before cutting a `v1.0.0` tag or later v1.x release tag, run this checklist from a clean checkout:
 
 ```bash
 go mod tidy
@@ -127,7 +129,7 @@ Warnings are still useful during normal development; strict mode is intended for
 
 ## v1.0.0-rc.1 scope
 
-`v1.0.0-rc.1` is a release-candidate preparation release, not a feature-expansion release.
+`v1.0.0-rc.1` is a release preparation release, not a feature-expansion release.
 
 The release candidate freezes the intended package manifest contract:
 
@@ -136,7 +138,7 @@ Dockyard.yaml
 apiVersion: dockyard.dev/v1alpha1
 ```
 
-The following formats remain experimental during the release-candidate period:
+The following formats remain experimental during the release period:
 
 ```text
 dockyard.lock
