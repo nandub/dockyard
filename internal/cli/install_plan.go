@@ -149,6 +149,10 @@ func buildInstallPlan(global *globalOptions, releaseName string, source string) 
 	}, nil
 }
 
+func buildInstallDryRunPlan(global *globalOptions, releaseName string, source string) (installPlanReport, error) {
+	return buildInstallPlan(global, releaseName, source)
+}
+
 func dependencyReleaseName(rootRelease string, dep dockpkg.Dependency) string {
 	suffix := dep.Alias
 	if suffix == "" {

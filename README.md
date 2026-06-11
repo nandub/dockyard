@@ -370,3 +370,12 @@ dockyard package test ./examples/nginx --strict
 ```
 
 For private/internal packages that intentionally rely on repository-level licensing instead of a package-local `LICENSE`, package quality commands support `--allow-advisory`.
+
+### Dependency dry runs
+
+`dockyard install-plan RELEASE PACKAGE_SOURCE` and `dockyard install --dry-run RELEASE PACKAGE_SOURCE` use the same read-only planner. Use either command to preview dependency release names, existing release actions, and root package installation order before Dockyard supports automatic dependency installation.
+
+```bash
+dockyard install --dry-run team-dashboard ./examples/team-dashboard
+dockyard install --dry-run team-dashboard ./examples/team-dashboard --json
+```

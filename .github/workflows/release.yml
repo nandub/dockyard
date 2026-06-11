@@ -88,16 +88,32 @@ jobs:
           path: dist
           merge-multiple: true
 
-      - name: Generate checksums
-        run: |
-          cd dist
-          sha256sum dockyard-* > SHA256SUMS
-
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@v0
 
       - name: Generate SBOM
         run: syft dir:. -o spdx-json=dist/dockyard-source.spdx.json
+
+      - name: Generate checksums
+        run: |
+          cd dist
+          sha256sum \
+            dockyard-windows-amd64.exe \
+            dockyard-linux-amd64 \
+            dockyard-linux-arm64 \
+            dockyard-darwin-amd64 \
+            dockyard-darwin-arm64 \
+            dockyard-source.spdx.json > SHA256SUMS
+
+      - name: Verify release asset set
+        run: |
+          test -s dist/dockyard-windows-amd64.exe
+          test -s dist/dockyard-linux-amd64
+          test -s dist/dockyard-linux-arm64
+          test -s dist/dockyard-darwin-amd64
+          test -s dist/dockyard-darwin-arm64
+          test -s dist/dockyard-source.spdx.json
+          test -s dist/SHA256SUMS
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v2

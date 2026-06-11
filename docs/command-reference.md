@@ -51,7 +51,9 @@ dockyard pull oci://registry/repository/name:tag
 
 Run `dockyard package lint --strict` before publishing packages. It checks package documentation, forbidden local artifacts, dependency metadata, schema quality, sensitive markers, default rendering, and policy findings.
 
-Run `dockyard package deps` to inspect declared dependencies in `Dockyard.yaml`. In v1.2, dependency support is metadata-only: Dockyard validates and displays dependencies but does not automatically install them.
+Run `dockyard package deps` to inspect declared dependencies in `Dockyard.yaml`. Dependency support is still metadata/planning-only: Dockyard validates, displays, and plans dependencies but does not automatically install them.
+
+Run `dockyard install-plan RELEASE PACKAGE_SOURCE` or `dockyard install --dry-run RELEASE PACKAGE_SOURCE` to preview the same read-only dependency-aware install plan. Add `--json` to either command for automation-friendly output.
 
 Run `dockyard package test` for a fuller package-author pipeline. It prepares local directories, archives, or OCI sources, runs quality checks, renders with selected values, runs Dockyard policy checks, and validates the result with `docker compose config`. Add `--smoke` for safe examples that can be started and stopped with a temporary Compose project name. Smoke tests require a reachable Docker daemon; run `dockyard doctor` first when troubleshooting Docker Desktop or daemon connectivity.
 
@@ -60,7 +62,7 @@ OCI push/pull uses the `oras` CLI and relies on external registry authentication
 ## Release lifecycle
 
 ```bash
-dockyard install RELEASE PACKAGE_SOURCE [-f values.yaml] [--env-file file]
+dockyard install RELEASE PACKAGE_SOURCE [-f values.yaml] [--env-file file] [--dry-run] [--json]
 dockyard diff RELEASE PACKAGE_SOURCE [-f values.yaml]
 dockyard upgrade RELEASE PACKAGE_SOURCE [-f values.yaml] [--env-file file]
 dockyard rollback RELEASE REVISION
@@ -72,6 +74,8 @@ dockyard prune [--release RELEASE] [--keep N] [--dry-run]
 ```
 
 `PACKAGE_SOURCE` may be a local package directory, a `.dockyard.tgz` archive, or an `oci://` reference.
+
+`dockyard install --dry-run` is read-only and shares its planner with `dockyard install-plan`, so dependency preview behavior stays aligned before automatic dependency installation is introduced. `--json` is accepted only with `--dry-run`.
 
 ## Policy and diagnostics
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.3.1
+
+- Made `dockyard install --dry-run` delegate to the same dependency-aware planner used by `dockyard install-plan`.
+- Added `dockyard install --dry-run --json` for machine-readable dry-run output.
+- Added parity tests to keep `install --dry-run` and `install-plan` behavior aligned before automatic dependency installation.
+- Hardened the release workflow with an explicit upload asset list, release asset existence checks, and SBOM checksums.
+
 ## v1.3.0
 
 - Added `dockyard install-plan RELEASE PACKAGE_SOURCE` for read-only dependency-aware install previews.

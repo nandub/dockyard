@@ -462,3 +462,7 @@ Before changing release workflows, ensure:
 ## Dependency planning
 
 `dockyard install-plan RELEASE PACKAGE_SOURCE` is intentionally read-only. Keep dependency planning separate from dependency installation until lifecycle behavior is explicitly implemented. The command should validate planned release names, show existing-release status, and avoid writing release state.
+
+## Dependency planner safety
+
+Keep `dockyard install-plan` and `dockyard install --dry-run` aligned. Both commands should use the same planner and remain read-only until dependency lifecycle behavior is explicitly introduced.

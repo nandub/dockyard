@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,6 +14,7 @@ import (
 func newInstallCommand(global *globalOptions) *cobra.Command {
 	var opts packageBuildOptions
 	var dryRun bool
+	var jsonOut bool
 
 	cmd := &cobra.Command{
 		Use:   "install RELEASE PACKAGE_SOURCE",
@@ -22,6 +24,20 @@ func newInstallCommand(global *globalOptions) *cobra.Command {
 			releaseName := args[0]
 			if err := state.ValidateReleaseName(releaseName); err != nil {
 				return err
+			}
+			if jsonOut && !dryRun {
+				return errors.New("--json can only be used with --dry-run")
+			}
+			if dryRun {
+				report, err := buildInstallDryRunPlan(global, releaseName, args[1])
+				if err != nil {
+					return err
+				}
+				if jsonOut {
+					return printJSON(report)
+				}
+				printInstallPlan(report)
+				return nil
 			}
 			src, err := preparePackageSource(args[1], true)
 			if err != nil {
@@ -56,10 +72,6 @@ func newInstallCommand(global *globalOptions) *cobra.Command {
 			manifest, vals, rendered, _, err := buildPackage(src.Dir, releaseName, opts)
 			if err != nil {
 				return err
-			}
-			if dryRun {
-				fmt.Printf("Would install release %q into %s from %s source\n", releaseName, home, src.Source.Type)
-				return nil
 			}
 			release, composePath, err := writeRevision(home, releaseName, revision, manifest, vals, rendered, src.Dir, src.Source, "pending", opts.envFile)
 			if err != nil {
@@ -98,7 +110,8 @@ func newInstallCommand(global *globalOptions) *cobra.Command {
 	cmd.Flags().StringVarP(&opts.valuesFile, "values", "f", "", "values override file")
 	cmd.Flags().StringVar(&opts.envFile, "env-file", "", "dotenv file to pass to docker compose without mutating the shell environment")
 	cmd.Flags().StringVar(&opts.overlay, "overlay", "", "compose overlay name")
-	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "show what would happen without deploying")
+	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "show the dependency-aware install plan without deploying")
+	cmd.Flags().BoolVar(&jsonOut, "json", false, "output JSON when used with --dry-run")
 	cmd.Flags().BoolVar(&opts.allowRisk, "allow-risk", false, "allow HIGH policy findings")
 	cmd.Flags().BoolVar(&opts.skipPolicy, "skip-policy", false, "skip Dockyard policy checks")
 	cmd.Flags().BoolVar(&opts.skipComposeConfig, "skip-compose-config", false, "skip docker compose config validation")

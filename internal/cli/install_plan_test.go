@@ -3,6 +3,7 @@ package cli
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 	"time"
 
@@ -73,6 +74,25 @@ func TestBuildInstallPlanDetectsExistingReleases(t *testing.T) {
 	}
 	if report.Steps[1].Action != "reinstall" || report.Steps[1].ExistingReleaseStatus != "uninstalled" {
 		t.Fatalf("unexpected root existing state: action=%s status=%s", report.Steps[1].Action, report.Steps[1].ExistingReleaseStatus)
+	}
+}
+
+func TestBuildInstallDryRunPlanMatchesInstallPlan(t *testing.T) {
+	packageDir := writeInstallPlanPackage(t)
+	home := t.TempDir()
+
+	installPlan, err := buildInstallPlan(&globalOptions{home: home}, "team-dashboard", packageDir)
+	if err != nil {
+		t.Fatalf("build install plan: %v", err)
+	}
+
+	dryRunPlan, err := buildInstallDryRunPlan(&globalOptions{home: home}, "team-dashboard", packageDir)
+	if err != nil {
+		t.Fatalf("build dry-run install plan: %v", err)
+	}
+
+	if !reflect.DeepEqual(dryRunPlan, installPlan) {
+		t.Fatalf("dry-run plan does not match install-plan\ninstall-plan: %#v\ndry-run: %#v", installPlan, dryRunPlan)
 	}
 }
 

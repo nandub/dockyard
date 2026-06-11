@@ -302,3 +302,14 @@ It checks:
 
 Use `--strict` when preparing packages for examples, internal catalogs, or OCI publishing. In strict mode, missing README/SECURITY files and schema quality warnings become failures. In strict mode, warnings fail by default. Use `--allow-advisory` when private/internal packages intentionally rely on repository-level licensing instead of a package-local `LICENSE`.
 
+
+## Dependency install planning and dry runs
+
+Dependency support remains non-mutating. `dockyard install-plan RELEASE PACKAGE_SOURCE` and `dockyard install --dry-run RELEASE PACKAGE_SOURCE` share the same planner and must produce equivalent plans. This keeps package dependency behavior observable before Dockyard adds automatic dependency installation.
+
+Use JSON output for automation:
+
+```bash
+dockyard install-plan team-dashboard ./examples/team-dashboard --json
+dockyard install --dry-run team-dashboard ./examples/team-dashboard --json
+```
