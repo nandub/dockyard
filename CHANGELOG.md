@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.6.0
+
+- Added uninstall safety for dependency releases with active parent releases.
+- `dockyard uninstall` now blocks removing a dependency release while active releases still depend on it.
+- Added `dockyard uninstall --force` for explicit operator override.
+- Documented that root releases should be uninstalled before dependency releases.
+
+
 ## v1.5.0
 
 - Record dependency parent/child relationships in release metadata.

@@ -210,3 +210,15 @@ dockyard prune --release myapp --keep 3
 ## Dependency relationship visibility
 
 Dependency installs record relationships in release metadata. Operators can use `dockyard list` to identify roots and dependency releases, and `dockyard status RELEASE` to inspect exact parent/dependency links. Dockyard still requires explicit uninstall commands for every release.
+
+
+## Dependency uninstall safety
+
+Dependency releases are protected from accidental direct removal. If an active release still references a dependency release, `dockyard uninstall DEPENDENCY_RELEASE` fails with a message listing the active dependent release. Uninstall the parent first, then uninstall the dependency.
+
+```powershell
+dockyard uninstall team-dashboard
+dockyard uninstall team-dashboard-db
+```
+
+Use `--force` only for manual recovery when you intentionally want to remove a dependency release while a parent still references it.

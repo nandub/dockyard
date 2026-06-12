@@ -69,7 +69,7 @@ dockyard rollback RELEASE REVISION
 dockyard status RELEASE [--compose-ps] [--all] [--json]
 dockyard inspect RELEASE [--revision N] [--json]
 dockyard list [--all] [--status STATUS]
-dockyard uninstall RELEASE [--volumes] [--purge] [--dry-run]
+dockyard uninstall RELEASE [--volumes] [--purge] [--dry-run] [--force]
 dockyard prune [--release RELEASE] [--keep N] [--dry-run]
 ```
 
@@ -90,6 +90,19 @@ dockyard list --status uninstalled
 ```
 
 `--all` includes historical uninstalled releases. `--status STATUS` shows only releases with the selected status, such as `deployed`, `uninstalled`, `failed`, or `pending`.
+
+### Dependency uninstall safety
+
+When a release is recorded as a dependency of an active parent release, Dockyard blocks direct uninstall by default. Uninstall the parent release first, then uninstall the dependency release. Use `--force` only when intentionally breaking that relationship, such as during manual recovery.
+
+```powershell
+dockyard uninstall team-dashboard
+dockyard uninstall team-dashboard-db
+
+# Recovery override only:
+dockyard uninstall team-dashboard-db --force
+```
+
 
 ## Policy and diagnostics
 

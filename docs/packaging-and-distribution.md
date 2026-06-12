@@ -190,7 +190,7 @@ dockyard package deps ./examples/team-dashboard
 dockyard package deps oci://ghcr.io/nandub/dockyard/team-dashboard:0.2.0 --json
 ```
 
-Dockyard does not automatically install, upgrade, or uninstall dependencies yet. Use this metadata to document package requirements and prepare for future dependency orchestration.
+Dockyard installs dependencies only when the operator explicitly passes `--with-dependencies`. Dockyard does not automatically upgrade dependency releases and does not automatically uninstall dependencies.
 
 Dependency rules:
 
@@ -354,3 +354,8 @@ Failed or pending dependency releases block automatic dependency installation; r
 ### Dependency release metadata
 
 When a package is installed with `--with-dependencies`, Dockyard records each installed dependency release in the root release metadata and records the parent release on dependency releases. This metadata is operational only; package manifests remain the source of declared dependencies.
+
+
+### Dependency uninstall protection
+
+Packages installed as dependencies are recorded in release metadata. Dockyard blocks direct uninstall of a dependency release while an active parent release still depends on it. This prevents accidental removal of shared or required backing services. Use `dockyard uninstall --force DEPENDENCY_RELEASE` only for deliberate recovery operations.

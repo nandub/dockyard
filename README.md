@@ -410,3 +410,5 @@ Failed or pending dependency releases block automatic dependency installation; r
 When `dockyard install --with-dependencies` installs dependency releases, Dockyard records parent/child relationship metadata in `release.json`. `dockyard status` shows the parent for dependency releases and dependency references for root releases. `dockyard list` includes a `RELATION` column such as `deps=1` or `child-of=team-dashboard`.
 
 Uninstall remains explicit: removing a root release does not automatically remove dependency releases.
+
+Dockyard also protects dependency releases from accidental direct removal: if an active root release still depends on a release, `dockyard uninstall DEPENDENCY_RELEASE` is blocked until the parent is uninstalled first. Operators can use `--force` for manual recovery.
