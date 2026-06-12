@@ -349,3 +349,8 @@ Dependency inline values are passed only to the dependency package. Root package
 Existing deployed dependency releases are reused. Dockyard does not upgrade or uninstall dependencies automatically.
 
 Failed or pending dependency releases block automatic dependency installation; resolve them before re-running `dockyard install --with-dependencies`.
+
+
+### Dependency release metadata
+
+When a package is installed with `--with-dependencies`, Dockyard records each installed dependency release in the root release metadata and records the parent release on dependency releases. This metadata is operational only; package manifests remain the source of declared dependencies.

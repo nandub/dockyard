@@ -51,7 +51,7 @@ func newUpgradeCommand(global *globalOptions) *cobra.Command {
 				fmt.Printf("Would upgrade release %q to revision %d from %s source\n", releaseName, revision, src.Source.Type)
 				return nil
 			}
-			release, composePath, err := writeRevision(home, releaseName, revision, manifest, vals, rendered, src.Dir, src.Source, "pending", opts.envFile)
+			release, composePath, err := writeRevision(home, releaseName, revision, manifest, vals, rendered, src.Dir, src.Source, "pending", opts.envFile, releaseRelationshipMetadata{})
 			if err != nil {
 				return err
 			}

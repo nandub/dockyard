@@ -55,7 +55,7 @@ automatically removed if a later step fails or the root release is uninstalled.`
 				return installWithDependencies(global, releaseName, source, opts)
 			}
 
-			release, err := installSingleRelease(global, releaseName, source, opts, nil)
+			release, err := installSingleRelease(global, releaseName, source, opts, nil, releaseRelationshipMetadata{})
 			if err != nil {
 				return err
 			}
@@ -88,29 +88,51 @@ func installWithDependencies(global *globalOptions, releaseName string, source s
 		}
 	}
 
+	dependencyRefs := make([]state.ReleaseDependency, 0, len(report.Steps))
 	for _, step := range report.Steps {
 		if step.Type != planStepDependency {
 			continue
 		}
+		var depRelease *state.Release
 		switch step.Action {
 		case "exists":
+			existing, _, err := readCurrentRelease(report.Home, step.PlannedRelease)
+			if err != nil {
+				return fmt.Errorf("read dependency release %q: %w", step.PlannedRelease, err)
+			}
+			depRelease = existing
 			fmt.Printf("dependency %s already exists as release %s; leaving unchanged\n", step.Name, step.PlannedRelease)
-			continue
 		case "install", "reinstall":
 			depOpts := dependencyInstallOptions(opts)
-			release, err := installSingleRelease(global, step.PlannedRelease, step.Source, depOpts, step.Values)
+			release, err := installSingleRelease(global, step.PlannedRelease, step.Source, depOpts, step.Values, releaseRelationshipMetadata{
+				parent: &state.ReleaseParent{
+					Name:           releaseName,
+					DependencyName: step.Name,
+					Alias:          step.Alias,
+				},
+			})
 			if err != nil {
 				return fmt.Errorf("install dependency %q as release %q: %w", step.Name, step.PlannedRelease, err)
 			}
+			depRelease = release
 			fmt.Printf("installed dependency %s as %s revision %d\n", step.Name, release.Name, release.Revision)
 		case "blocked":
 			return fmt.Errorf("dependency release %q already exists and is %s; resolve it before using --with-dependencies", step.PlannedRelease, step.ExistingReleaseStatus)
 		default:
 			return fmt.Errorf("unsupported dependency action %q for release %q", step.Action, step.PlannedRelease)
 		}
+		dependencyRefs = append(dependencyRefs, state.ReleaseDependency{
+			Name:           step.Name,
+			Alias:          step.Alias,
+			Release:        step.PlannedRelease,
+			PackageName:    depRelease.PackageName,
+			PackageVersion: depRelease.PackageVersion,
+			Source:         step.Source,
+			Status:         depRelease.Status,
+		})
 	}
 
-	release, err := installSingleRelease(global, releaseName, source, opts, nil)
+	release, err := installSingleRelease(global, releaseName, source, opts, nil, releaseRelationshipMetadata{dependencies: dependencyRefs})
 	if err != nil {
 		return err
 	}
@@ -125,7 +147,7 @@ func dependencyInstallOptions(opts packageBuildOptions) packageBuildOptions {
 	return depOpts
 }
 
-func installSingleRelease(global *globalOptions, releaseName string, source string, opts packageBuildOptions, overrideValues map[string]any) (*state.Release, error) {
+func installSingleRelease(global *globalOptions, releaseName string, source string, opts packageBuildOptions, overrideValues map[string]any, relationships releaseRelationshipMetadata) (*state.Release, error) {
 	if err := state.ValidateReleaseName(releaseName); err != nil {
 		return nil, err
 	}
@@ -170,7 +192,7 @@ func installSingleRelease(global *globalOptions, releaseName string, source stri
 	if err != nil {
 		return nil, err
 	}
-	release, composePath, err := writeRevision(home, releaseName, revision, manifest, vals, rendered, src.Dir, src.Source, "pending", opts.envFile)
+	release, composePath, err := writeRevision(home, releaseName, revision, manifest, vals, rendered, src.Dir, src.Source, "pending", opts.envFile, relationships)
 	if err != nil {
 		return nil, err
 	}

@@ -474,3 +474,8 @@ Keep `dockyard install-plan` and `dockyard install --dry-run` aligned. Both comm
 ## Dependency installation rules
 
 `dockyard install --with-dependencies` must remain explicit opt-in. Plain `install` installs only the root package. Dependency install behavior should stay conservative: reuse existing deployed dependencies, reinstall only dependencies marked `uninstalled`, do not auto-upgrade dependencies, and do not auto-remove dependencies on root uninstall or partial failure. Keep `install-plan`, `install --dry-run`, and actual dependency installation behavior aligned through tests.
+
+
+## Dependency relationship metadata
+
+When changing install behavior, preserve relationship metadata in `state.Release.Parent` and `state.Release.Dependencies`. Do not automatically uninstall dependencies unless an explicit future design adds reference counting and strong safety checks.

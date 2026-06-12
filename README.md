@@ -403,3 +403,10 @@ Dependency installs are conservative: existing deployed dependency releases are 
 
 
 Failed or pending dependency releases block automatic dependency installation; resolve them before re-running `dockyard install --with-dependencies`.
+
+
+### Dependency relationship tracking
+
+When `dockyard install --with-dependencies` installs dependency releases, Dockyard records parent/child relationship metadata in `release.json`. `dockyard status` shows the parent for dependency releases and dependency references for root releases. `dockyard list` includes a `RELATION` column such as `deps=1` or `child-of=team-dashboard`.
+
+Uninstall remains explicit: removing a root release does not automatically remove dependency releases.

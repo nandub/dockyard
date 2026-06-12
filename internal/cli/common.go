@@ -148,7 +148,12 @@ func buildPackage(packageDir string, releaseName string, opts packageBuildOption
 	return manifest, vals, rendered, findings, nil
 }
 
-func writeRevision(home string, releaseName string, revision int, manifest *dockpkg.Manifest, vals map[string]any, rendered []byte, packageDir string, src state.Source, statusValue string, envFile string) (*state.Release, string, error) {
+type releaseRelationshipMetadata struct {
+	parent       *state.ReleaseParent
+	dependencies []state.ReleaseDependency
+}
+
+func writeRevision(home string, releaseName string, revision int, manifest *dockpkg.Manifest, vals map[string]any, rendered []byte, packageDir string, src state.Source, statusValue string, envFile string, relationships releaseRelationshipMetadata) (*state.Release, string, error) {
 	revisionDir := state.RevisionDir(home, releaseName, revision)
 	if err := os.MkdirAll(revisionDir, 0o700); err != nil {
 		return nil, "", err
@@ -187,6 +192,8 @@ func writeRevision(home string, releaseName string, revision int, manifest *dock
 		ComposeProject:  releaseName,
 		Source:          src,
 		EnvFile:         envFile,
+		Parent:          relationships.parent,
+		Dependencies:    relationships.dependencies,
 	}
 	if err := state.WriteRelease(revisionDir, release); err != nil {
 		return nil, "", err

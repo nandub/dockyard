@@ -62,6 +62,7 @@ type releaseListRow struct {
 	Revision       int
 	PackageName    string
 	PackageVersion string
+	Relation       string
 }
 
 func collectReleaseListRows(home string, opts listOptions) ([]releaseListRow, error) {
@@ -95,6 +96,7 @@ func collectReleaseListRows(home string, opts listOptions) ([]releaseListRow, er
 			Revision:       release.Revision,
 			PackageName:    release.PackageName,
 			PackageVersion: release.PackageVersion,
+			Relation:       releaseRelationSummary(release),
 		})
 	}
 	sort.Slice(rows, func(i, j int) bool {
@@ -113,11 +115,21 @@ func shouldIncludeReleaseInList(status string, opts listOptions) bool {
 	return status != "uninstalled"
 }
 
+func releaseRelationSummary(release *state.Release) string {
+	if release.Parent != nil {
+		return "child-of=" + release.Parent.Name
+	}
+	if len(release.Dependencies) > 0 {
+		return fmt.Sprintf("deps=%d", len(release.Dependencies))
+	}
+	return "-"
+}
+
 func printReleaseListRows(rows []releaseListRow) {
 	writer := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	_, _ = fmt.Fprintln(writer, "NAME\tSTATUS\tREVISION\tPACKAGE")
+	_, _ = fmt.Fprintln(writer, "NAME\tSTATUS\tREVISION\tPACKAGE\tRELATION")
 	for _, row := range rows {
-		_, _ = fmt.Fprintf(writer, "%s\t%s\t%d\t%s@%s\n", row.Name, row.Status, row.Revision, row.PackageName, row.PackageVersion)
+		_, _ = fmt.Fprintf(writer, "%s\t%s\t%d\t%s@%s\t%s\n", row.Name, row.Status, row.Revision, row.PackageName, row.PackageVersion, row.Relation)
 	}
 	_ = writer.Flush()
 }

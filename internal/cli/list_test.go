@@ -60,6 +60,31 @@ func TestCollectReleaseListRowsStatusFilter(t *testing.T) {
 	}
 }
 
+func TestReleaseRelationSummary(t *testing.T) {
+	root := &state.Release{
+		Name: "team-dashboard",
+		Dependencies: []state.ReleaseDependency{
+			{Name: "postgres", Release: "team-dashboard-db"},
+		},
+	}
+	if got := releaseRelationSummary(root); got != "deps=1" {
+		t.Fatalf("expected root dependency summary, got %q", got)
+	}
+
+	child := &state.Release{
+		Name:   "team-dashboard-db",
+		Parent: &state.ReleaseParent{Name: "team-dashboard", DependencyName: "postgres", Alias: "db"},
+	}
+	if got := releaseRelationSummary(child); got != "child-of=team-dashboard" {
+		t.Fatalf("expected child relation summary, got %q", got)
+	}
+
+	standalone := &state.Release{Name: "nginx"}
+	if got := releaseRelationSummary(standalone); got != "-" {
+		t.Fatalf("expected standalone relation summary, got %q", got)
+	}
+}
+
 func writeCurrentReleaseForList(t *testing.T, home string, releaseName string, status string) {
 	t.Helper()
 	revisionDir := state.RevisionDir(home, releaseName, 1)

@@ -196,3 +196,10 @@ dockyard install --with-dependencies team-dashboard ./examples/team-dashboard
 ```
 
 Failed or pending dependency releases block automatic dependency installation; resolve them before re-running `dockyard install --with-dependencies`.
+
+
+### Relationship-aware list and status
+
+`dockyard list` includes a `RELATION` column. Standalone releases show `-`, root releases with dependencies show `deps=N`, and dependency releases show `child-of=RELEASE`.
+
+`dockyard status RELEASE` prints dependency references for root releases and parent information for dependency releases.

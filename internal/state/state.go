@@ -22,20 +22,38 @@ type Source struct {
 	Path string `json:"path,omitempty"`
 }
 
+type ReleaseParent struct {
+	Name           string `json:"name"`
+	DependencyName string `json:"dependencyName"`
+	Alias          string `json:"alias,omitempty"`
+}
+
+type ReleaseDependency struct {
+	Name           string `json:"name"`
+	Alias          string `json:"alias,omitempty"`
+	Release        string `json:"release"`
+	PackageName    string `json:"packageName,omitempty"`
+	PackageVersion string `json:"packageVersion,omitempty"`
+	Source         string `json:"source"`
+	Status         string `json:"status,omitempty"`
+}
+
 type Release struct {
-	APIVersion      string    `json:"apiVersion,omitempty"`
-	DockyardVersion string    `json:"dockyardVersion,omitempty"`
-	Name            string    `json:"name"`
-	PackageName     string    `json:"packageName"`
-	PackageVersion  string    `json:"packageVersion"`
-	AppVersion      string    `json:"appVersion"`
-	Revision        int       `json:"revision"`
-	Status          string    `json:"status"`
-	CreatedAt       time.Time `json:"createdAt"`
-	UpdatedAt       time.Time `json:"updatedAt"`
-	ComposeProject  string    `json:"composeProject"`
-	Source          Source    `json:"source"`
-	EnvFile         string    `json:"envFile,omitempty"`
+	APIVersion      string              `json:"apiVersion,omitempty"`
+	DockyardVersion string              `json:"dockyardVersion,omitempty"`
+	Name            string              `json:"name"`
+	PackageName     string              `json:"packageName"`
+	PackageVersion  string              `json:"packageVersion"`
+	AppVersion      string              `json:"appVersion"`
+	Revision        int                 `json:"revision"`
+	Status          string              `json:"status"`
+	CreatedAt       time.Time           `json:"createdAt"`
+	UpdatedAt       time.Time           `json:"updatedAt"`
+	ComposeProject  string              `json:"composeProject"`
+	Source          Source              `json:"source"`
+	EnvFile         string              `json:"envFile,omitempty"`
+	Parent          *ReleaseParent      `json:"parent,omitempty"`
+	Dependencies    []ReleaseDependency `json:"dependencies,omitempty"`
 }
 
 func ValidateReleaseName(name string) error {

@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.5.0
+
+- Record dependency parent/child relationships in release metadata.
+- Show dependency relationships in `dockyard status`.
+- Add a `RELATION` column to `dockyard list` so roots and dependency releases are easier to distinguish.
+- Keep uninstall behavior explicit: dependencies are still not removed automatically.
+
 ## v1.4.2
 
 - Made `dockyard list` hide uninstalled releases by default so day-to-day output focuses on active/operator-attention releases.

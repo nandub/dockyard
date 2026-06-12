@@ -205,3 +205,8 @@ Prune only one release:
 ```bash
 dockyard prune --release myapp --keep 3
 ```
+
+
+## Dependency relationship visibility
+
+Dependency installs record relationships in release metadata. Operators can use `dockyard list` to identify roots and dependency releases, and `dockyard status RELEASE` to inspect exact parent/dependency links. Dockyard still requires explicit uninstall commands for every release.
