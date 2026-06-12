@@ -1,6 +1,6 @@
 # Operator Guide
 
-This guide covers values files, environment files, overlays, release state, and pruning.
+This guide covers values files, environment files, overlays, release state, pruning, and dependency operations.
 
 ## Values files
 
@@ -179,10 +179,13 @@ dockyard status myapp
 dockyard status myapp --compose-ps
 dockyard status myapp --compose-ps --all
 dockyard inspect myapp
-dockyard list          # active releases by default
-dockyard list --all    # include uninstalled history
+dockyard list                         # active releases by default
+dockyard list --all                   # include uninstalled history
+dockyard list --status uninstalled    # filter by release state
 dockyard uninstall myapp --dry-run
 ```
+
+`dockyard list` includes a `RELATION` column. Standalone releases show `-`, root releases with dependencies show `deps=N`, and dependency releases show `child-of=RELEASE`.
 
 ## Release pruning
 
@@ -207,14 +210,34 @@ dockyard prune --release myapp --keep 3
 ```
 
 
-## Dependency relationship visibility
+## Dependency operations
 
-Dependency installs record relationships in release metadata. Operators can use `dockyard list` to identify roots and dependency releases, and `dockyard status RELEASE` to inspect exact parent/dependency links. Dockyard still requires explicit uninstall commands for every release.
+Dependency installs are explicit. Preview the plan first:
 
+```bash
+dockyard install-plan team-dashboard ./examples/team-dashboard
+dockyard install --dry-run team-dashboard ./examples/team-dashboard
+```
 
-## Dependency uninstall safety
+Install dependencies before the root package only when you opt in:
 
-Dependency releases are protected from accidental direct removal. If an active release still references a dependency release, `dockyard uninstall DEPENDENCY_RELEASE` fails with a message listing the active dependent release. Uninstall the parent first, then uninstall the dependency.
+```bash
+dockyard install --with-dependencies team-dashboard ./examples/team-dashboard
+```
+
+Dockyard records relationship metadata for releases installed with `--with-dependencies`. Operators can use `dockyard list` to identify roots and dependency releases, and `dockyard status RELEASE` to inspect exact parent/dependency links.
+
+Example list output:
+
+```text
+NAME               STATUS    REVISION  PACKAGE               RELATION
+team-dashboard     deployed  1         team-dashboard@0.2.0  deps=1
+team-dashboard-db  deployed  1         postgres@0.1.0        child-of=team-dashboard
+```
+
+Dependency releases are protected from accidental direct removal. If an active release still references a dependency release, `dockyard uninstall DEPENDENCY_RELEASE` fails with a message listing the active dependent release.
+
+Correct uninstall order:
 
 ```powershell
 dockyard uninstall team-dashboard
@@ -222,3 +245,9 @@ dockyard uninstall team-dashboard-db
 ```
 
 Use `--force` only for manual recovery when you intentionally want to remove a dependency release while a parent still references it.
+
+```powershell
+dockyard uninstall team-dashboard-db --force
+```
+
+Dockyard does not automatically remove dependency releases when a root release is uninstalled.

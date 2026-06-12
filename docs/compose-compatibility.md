@@ -36,7 +36,7 @@ Most Compose features can be used in `compose.yaml` as long as the final rendere
 docker compose config
 ```
 
-Dockyard v0.6.2 does not claim full internal awareness of every Compose feature. Advanced Compose fields may work at runtime while Dockyard's policy engine, lockfile generation, package verification, and diff output only reason about a focused subset.
+Dockyard does not claim full internal awareness of every Compose feature. Advanced Compose fields may work at runtime while Dockyard's policy engine, lockfile generation, package verification, dependency metadata, and diff output only reason about a focused subset.
 
 ## Validate rendered Compose
 
@@ -93,7 +93,7 @@ These Compose features may work after rendering, but package authors should use 
 | host-path `volumes` | Prefer named volumes. Host paths are environment-specific and harder to verify. |
 | `extends` / `include` | Use cautiously. Make sure referenced files are included in the package and do not escape the package root. |
 | `profiles` | Supported by Compose, but Dockyard does not yet provide first-class profile management. |
-| `secrets` / `configs` | Supported by Compose, but Dockyard's secret-management story is intentionally conservative in this MVP. |
+| `secrets` / `configs` | Supported by Compose, but Dockyard's secret-management story is intentionally conservative. Prefer external secret managers or environment-backed secret references. |
 | `deploy` | Compose accepts some deploy fields depending on runtime mode. Validate with `dockyard config`. |
 
 ## Policy engine scope

@@ -1,12 +1,19 @@
 # Changelog
 
+## v1.6.1
+
+- Synchronized README and docs with the v1.2-v1.6 dependency lifecycle features.
+- Removed duplicated README sections and made README a concise entry point.
+- Consolidated duplicate dependency planning/install documentation in command and packaging docs.
+- Updated stale pre-v1.0 wording in compatibility, real-world, readiness, and upgrade policy docs.
+- Clarified release artifact checksum/SBOM expectations.
+
 ## v1.6.0
 
 - Added uninstall safety for dependency releases with active parent releases.
 - `dockyard uninstall` now blocks removing a dependency release while active releases still depend on it.
 - Added `dockyard uninstall --force` for explicit operator override.
 - Documented that root releases should be uninstalled before dependency releases.
-
 
 ## v1.5.0
 
@@ -24,7 +31,6 @@
 
 ## v1.4.1
 
-
 - Added `examples/postgres`, a reusable PostgreSQL dependency package for end-to-end `install --with-dependencies` testing.
 - Updated `examples/team-dashboard` to pass inline dependency password values to the postgres package.
 - Clarified package archive creation docs to use `-o` / `--output` with an explicit archive path.
@@ -39,7 +45,6 @@
 - Dependency inline values from `Dockyard.yaml` are applied to dependency package installs.
 - Root `--values` and `--overlay` options are not applied to dependency packages.
 - Dependencies are not automatically uninstalled if a later step fails or when the root package is uninstalled.
-
 
 ## v1.3.1
 
@@ -70,7 +75,6 @@
 - Added dependency references to `dockyard.lock`.
 - Documented v1.2 dependency support as metadata-only; Dockyard does not automatically install dependencies yet.
 
-
 ## v1.1.0
 
 Post-1.0 release engineering and adoption release.
@@ -86,7 +90,6 @@ Post-1.0 release engineering and adoption release.
 - Added `CODE_OF_CONDUCT.md`.
 - Added GitHub issue templates and pull request template.
 - Documented official example package publishing to GHCR.
-
 
 ## v1.0.2
 
@@ -106,7 +109,6 @@ Stable 1.0 release.
 - Carried forward the validated release-candidate gates from `v1.0.0-rc.1`.
 - No new runtime features were added after the release candidate.
 - Updated release, support, upgrade, and v1 readiness documentation for the final v1.0 release.
-
 
 ## v1.0.0-rc.1
 
@@ -151,7 +153,6 @@ Release-candidate preparation pass.
 - Added `--env-file`, `--require-lock`, `--overlay`, `--strict`, and JSON support to package tests.
 - Updated command reference and packaging docs with package test workflows.
 
-
 ## v0.12.0
 
 - Added `dockyard package lint PACKAGE_DIR`.
@@ -159,7 +160,6 @@ Release-candidate preparation pass.
 - Added `--strict` and `--json` output for package quality checks.
 - Added `internal/quality` with unit tests.
 - Updated command reference, packaging documentation, README, and AGENTS.md.
-
 
 ## v0.11.0
 
@@ -175,7 +175,6 @@ Release-candidate preparation pass.
 - Fixed `make fmt-check` on Windows by replacing shell-specific `gofmt -l` logic with a small Go-based formatter check.
 - Updated `make fmt` to run `go fmt ./...` so formatting covers all Go packages, including developer tools.
 - Kept `make build` non-mutating and `make dev-build` as the local convenience target.
-
 
 ## v0.10.3
 
@@ -215,7 +214,6 @@ Examples expansion release.
 - Updated README install instructions for release artifacts.
 - Updated Makefile build flags and cross-platform snapshot build target.
 
-
 ## v0.9.3
 
 - Added `AGENTS.md` with repository guidance for code agents and automation.
@@ -250,12 +248,10 @@ Documentation consolidation release.
 - Added docs for private dotenv workflows and release pruning.
 - Kept Windows `.exe` Makefile build support from v0.8.1.
 
-
 ## v0.8.1
 
 - Fixed `make build` so it uses `go env GOEXE` and produces `bin/dockyard.exe` on Windows.
 - Changed the default `make` target to build the Dockyard binary instead of only running `gofmt`.
-
 
 ## v0.8
 

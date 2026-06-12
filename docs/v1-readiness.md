@@ -138,7 +138,7 @@ Dockyard.yaml
 apiVersion: dockyard.dev/v1alpha1
 ```
 
-The following formats remain experimental during the release period:
+The following generated formats remain experimental during the v1.x line:
 
 ```text
 dockyard.lock

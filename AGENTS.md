@@ -431,9 +431,7 @@ Use `dockyard package test --smoke` only when Docker is available.
 `--strict` must mean warnings fail across compatibility and package-quality commands. For package quality checks, use `--allow-advisory` only for explicitly advisory warnings such as private packages that rely on repository-level licensing instead of a package-local `LICENSE`.
 
 
-## v1.0.0 agent guidance
-
-Do not add large new runtime features during release preparation.
+## v1.x agent guidance
 
 Prefer changes that improve:
 
@@ -444,7 +442,7 @@ Prefer changes that improve:
 - examples
 - migration/support notes
 
-Treat `Dockyard.yaml` with `apiVersion: dockyard.dev/v1alpha1` as the package manifest stable. Dependency metadata in `Dockyard.yaml` is metadata-only in v1.2: validate and display it, but do not automatically install dependency packages unless a later design explicitly adds orchestration. Treat `dockyard.lock`, `package.provenance.json`, and `release.json` as experimental unless instructed otherwise.
+Treat `Dockyard.yaml` with `apiVersion: dockyard.dev/v1alpha1` as the stable package manifest contract. Dependency metadata in `Dockyard.yaml` is now operational: it is validated, shown in dependency commands, included in install plans, and installed only when operators explicitly pass `dockyard install --with-dependencies`. Treat `dockyard.lock`, `package.provenance.json`, and `release.json` as experimental generated formats unless instructed otherwise.
 
 
 ## v1.1 release focus
@@ -469,7 +467,7 @@ Before changing release workflows, ensure:
 
 ## Dependency planner safety
 
-Keep `dockyard install-plan` and `dockyard install --dry-run` aligned. Both commands should use the same planner and remain read-only until dependency lifecycle behavior is explicitly introduced.
+Keep `dockyard install-plan` and `dockyard install --dry-run` aligned. Both commands should use the same planner and remain read-only.
 
 ## Dependency installation rules
 

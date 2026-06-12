@@ -1,8 +1,8 @@
 # Upgrade Policy
 
-Dockyard is approaching `v1.0.0`. This document describes how compatibility is handled for release and stable releases.
+Dockyard has a stable v1.x package manifest contract. This document describes how compatibility is handled for stable releases.
 
-## Stable format for v1.0
+## Stable package manifest for v1.x
 
 The following format is treated as the stable v1.0 package authoring contract:
 
@@ -11,11 +11,11 @@ Dockyard.yaml
 apiVersion: dockyard.dev/v1alpha1
 ```
 
-Dockyard `v1.0.0` is expected to read packages using `dockyard.dev/v1alpha1`.
+Dockyard v1.x reads packages using `dockyard.dev/v1alpha1`.
 
 ## Experimental formats
 
-The following formats remain experimental during the release period:
+The following generated formats remain experimental during the v1.x line:
 
 ```text
 dockyard.lock
@@ -28,7 +28,7 @@ release.json
 apiVersion: dockyard.dev/release/v1alpha1
 ```
 
-These files are useful and supported by the current CLI, but their exact schema may still change before `v1.0.0`.
+These files are useful and supported by the current CLI, but their exact schema may still evolve while preserving the stable package manifest contract.
 
 ## Compatibility expectations
 

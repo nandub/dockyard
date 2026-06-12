@@ -364,7 +364,7 @@ This creates:
 
 The lockfile records values digest, rendered Compose digest, package file digests, service image references, and image digests when image references are already pinned with `@sha256:...`.
 
-Dockyard v0.6.2 does not resolve image tags to registry digests. It only records what appears in rendered Compose.
+Dockyard does not resolve image tags to registry digests. It records what appears in rendered Compose; use digest-pinned image references when you need immutable image inputs.
 
 ## 9. Package and verify
 
@@ -520,9 +520,9 @@ Remove Dockyard metadata after uninstall:
 
 ## 15. Push and install from an OCI registry
 
-Dockyard v0.6.2 can distribute the same verified `.dockyard.tgz` archive through OCI registries.
+Dockyard can distribute the same verified `.dockyard.tgz` archive through OCI registries.
 
-This MVP delegates registry authentication and transport to the `oras` CLI. For example, with GitHub Container Registry:
+Dockyard delegates registry authentication and transport to the `oras` CLI. For example, with GitHub Container Registry:
 
 ```bash
 oras login ghcr.io
