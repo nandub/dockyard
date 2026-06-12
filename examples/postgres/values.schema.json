@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["image", "database", "username", "password"],
+  "properties": {
+    "image": {
+      "type": "object",
+      "required": ["repository", "tag"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1,
+          "description": "PostgreSQL image repository."
+        },
+        "tag": {
+          "type": "string",
+          "minLength": 1,
+          "description": "PostgreSQL image tag. Do not use latest for published packages."
+        }
+      },
+      "additionalProperties": false
+    },
+    "database": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Database name created by the PostgreSQL container."
+    },
+    "username": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Database username created by the PostgreSQL container."
+    },
+    "password": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Database password. Prefer an environment reference such as ${POSTGRES_PASSWORD}.",
+      "x-dockyard-sensitive": true
+    }
+  },
+  "additionalProperties": false
+}

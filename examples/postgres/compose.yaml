@@ -1,0 +1,19 @@
+services:
+  db:
+    image: "${image.repository}:${image.tag}"
+    environment:
+      POSTGRES_DB: "${database}"
+      POSTGRES_USER: "${username}"
+      POSTGRES_PASSWORD: "${password}"
+    volumes:
+      - data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${username} -d ${database}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  data:

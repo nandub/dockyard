@@ -51,7 +51,7 @@ dockyard pull oci://registry/repository/name:tag
 
 Run `dockyard package lint --strict` before publishing packages. It checks package documentation, forbidden local artifacts, dependency metadata, schema quality, sensitive markers, default rendering, and policy findings.
 
-Run `dockyard package deps` to inspect declared dependencies in `Dockyard.yaml`. Dependency support is still metadata/planning-only: Dockyard validates, displays, and plans dependencies but does not automatically install them.
+Run `dockyard package deps` to inspect declared dependencies in `Dockyard.yaml`. Dependency support is explicit opt-in: Dockyard validates, displays, plans, and can install dependencies only when `dockyard install --with-dependencies` is used.
 
 Run `dockyard install-plan RELEASE PACKAGE_SOURCE` or `dockyard install --dry-run RELEASE PACKAGE_SOURCE` to preview the same read-only dependency-aware install plan. Add `--json` to either command for automation-friendly output.
 
@@ -62,20 +62,34 @@ OCI push/pull uses the `oras` CLI and relies on external registry authentication
 ## Release lifecycle
 
 ```bash
-dockyard install RELEASE PACKAGE_SOURCE [-f values.yaml] [--env-file file] [--dry-run] [--json]
+dockyard install RELEASE PACKAGE_SOURCE [-f values.yaml] [--env-file file] [--dry-run] [--json] [--with-dependencies]
 dockyard diff RELEASE PACKAGE_SOURCE [-f values.yaml]
 dockyard upgrade RELEASE PACKAGE_SOURCE [-f values.yaml] [--env-file file]
 dockyard rollback RELEASE REVISION
 dockyard status RELEASE [--compose-ps] [--all] [--json]
 dockyard inspect RELEASE [--revision N] [--json]
-dockyard list
+dockyard list [--all] [--status STATUS]
 dockyard uninstall RELEASE [--volumes] [--purge] [--dry-run]
 dockyard prune [--release RELEASE] [--keep N] [--dry-run]
 ```
 
 `PACKAGE_SOURCE` may be a local package directory, a `.dockyard.tgz` archive, or an `oci://` reference.
 
-`dockyard install --dry-run` is read-only and shares its planner with `dockyard install-plan`, so dependency preview behavior stays aligned before automatic dependency installation is introduced. `--json` is accepted only with `--dry-run`.
+`dockyard install --dry-run` is read-only and shares its planner with `dockyard install-plan`, so dependency preview behavior stays aligned with `dockyard install --with-dependencies`. `--json` is accepted only with `--dry-run`.
+
+`dockyard install --with-dependencies` installs declared dependency packages before the root package using deterministic release names such as `RELEASE-ALIAS`. Existing deployed dependency releases are reused. Dependencies are not automatically removed when the root package is uninstalled.
+
+### `dockyard list`
+
+Lists releases in the Dockyard home directory. By default, uninstalled releases are hidden so old test installs do not clutter day-to-day operator output.
+
+```bash
+dockyard list
+dockyard list --all
+dockyard list --status uninstalled
+```
+
+`--all` includes historical uninstalled releases. `--status STATUS` shows only releases with the selected status, such as `deployed`, `uninstalled`, `failed`, or `pending`.
 
 ## Policy and diagnostics
 
@@ -160,3 +174,25 @@ Use `--allow-advisory` only for private/internal package gates where advisory wa
 artifact type: application/vnd.dockyard.package.v1+gzip
 archive layer: application/vnd.dockyard.package.archive.v1+gzip
 ```
+
+### `dockyard install --with-dependencies RELEASE PACKAGE_SOURCE`
+
+Installs declared package dependencies before installing the root package. This is explicit opt-in; plain `dockyard install` continues to install only the root package.
+
+Behavior:
+
+- Uses the same plan produced by `dockyard install-plan` and `dockyard install --dry-run`.
+- Installs dependencies in plan order before the root package.
+- Reuses existing deployed dependency releases.
+- Reinstalls dependency releases whose current status is `uninstalled`.
+- Applies dependency inline `values:` from `Dockyard.yaml` to dependency package installs.
+- Does not apply root `--values` or `--overlay` to dependency packages.
+- Does not automatically uninstall dependencies if a later step fails or when the root release is uninstalled.
+
+Example:
+
+```sh
+dockyard install --with-dependencies team-dashboard ./examples/team-dashboard
+```
+
+Failed or pending dependency releases block automatic dependency installation; resolve them before re-running `dockyard install --with-dependencies`.

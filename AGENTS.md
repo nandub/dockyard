@@ -48,6 +48,10 @@ On Linux and macOS, it should produce:
 bin/dockyard
 ```
 
+## Example dependency packages
+
+`examples/postgres` is the reusable PostgreSQL dependency package used by `examples/team-dashboard`. Keep it valid with `dockyard package lint ./examples/postgres --strict` and `dockyard package test ./examples/postgres --strict` before changing dependency-install behavior.
+
 ## Local smoke-test layout
 
 Keep generated test packages, deployment values, rendered files, and archives outside the Dockyard repository to avoid accidental commits.
@@ -466,3 +470,7 @@ Before changing release workflows, ensure:
 ## Dependency planner safety
 
 Keep `dockyard install-plan` and `dockyard install --dry-run` aligned. Both commands should use the same planner and remain read-only until dependency lifecycle behavior is explicitly introduced.
+
+## Dependency installation rules
+
+`dockyard install --with-dependencies` must remain explicit opt-in. Plain `install` installs only the root package. Dependency install behavior should stay conservative: reuse existing deployed dependencies, reinstall only dependencies marked `uninstalled`, do not auto-upgrade dependencies, and do not auto-remove dependencies on root uninstall or partial failure. Keep `install-plan`, `install --dry-run`, and actual dependency installation behavior aligned through tests.

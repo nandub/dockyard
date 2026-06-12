@@ -1,5 +1,31 @@
 # Changelog
 
+## v1.4.2
+
+- Made `dockyard list` hide uninstalled releases by default so day-to-day output focuses on active/operator-attention releases.
+- Added `dockyard list --all` to include uninstalled release history.
+- Added `dockyard list --status STATUS` for targeted release-state filtering.
+- Formatted `dockyard list` output as aligned columns with a header.
+
+## v1.4.1
+
+
+- Added `examples/postgres`, a reusable PostgreSQL dependency package for end-to-end `install --with-dependencies` testing.
+- Updated `examples/team-dashboard` to pass inline dependency password values to the postgres package.
+- Clarified package archive creation docs to use `-o` / `--output` with an explicit archive path.
+- Documented publishing the postgres dependency to GHCR before running the team-dashboard dependency install demo.
+
+## v1.4.0
+
+- Added `dockyard install --with-dependencies` for explicit opt-in dependency installation.
+- Dependency installs now use the same deterministic release names shown by `install-plan` and `install --dry-run`.
+- Existing deployed dependency releases are reused and left unchanged.
+- Uninstalled dependency releases are reinstalled as a new revision.
+- Dependency inline values from `Dockyard.yaml` are applied to dependency package installs.
+- Root `--values` and `--overlay` options are not applied to dependency packages.
+- Dependencies are not automatically uninstalled if a later step fails or when the root package is uninstalled.
+
+
 ## v1.3.1
 
 - Made `dockyard install --dry-run` delegate to the same dependency-aware planner used by `dockyard install-plan`.
@@ -331,3 +357,5 @@ Documentation-focused update.
 - Added `verify`.
 - Added safer placeholder parsing and render diagnostics.
 - Added package archive integrity checks via `SHA256SUMS`.
+
+Failed or pending dependency releases block automatic dependency installation; resolve them before re-running `dockyard install --with-dependencies`.

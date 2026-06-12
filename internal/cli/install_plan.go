@@ -196,8 +196,10 @@ func plannedInstallAction(existingStatus string) string {
 		return "install"
 	case "uninstalled":
 		return "reinstall"
-	default:
+	case "deployed":
 		return "exists"
+	default:
+		return "blocked"
 	}
 }
 
@@ -220,7 +222,7 @@ func printInstallPlan(report installPlanReport) {
 			if step.ExistingReleaseStatus != "" {
 				fmt.Printf("   existing status: %s\n", step.ExistingReleaseStatus)
 			}
-			fmt.Println("   automatic install: not enabled")
+			fmt.Println("   automatic install: use `dockyard install --with-dependencies`")
 		default:
 			fmt.Printf("%d. root package: %s@%s\n", step.Order, step.Name, step.Version)
 			fmt.Printf("   source: %s\n", step.Source)

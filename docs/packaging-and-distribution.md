@@ -57,7 +57,7 @@ dockyard install dashboard-prod ../dockyard-artifacts/team-dashboard-0.1.0.docky
 
 ## Dependency install plans
 
-Packages can declare dependency metadata in `Dockyard.yaml`. Dockyard does not automatically install dependencies yet, but package authors and operators can preview the future install order with:
+Packages can declare dependency metadata in `Dockyard.yaml`. Operators can preview the dependency-aware install order with:
 
 ```bash
 dockyard install-plan team-dashboard ./examples/team-dashboard
@@ -72,7 +72,7 @@ Install plan for release team-dashboard
    source: oci://ghcr.io/nandub/dockyard/postgres:0.1.0
    planned release: team-dashboard-db
    action: install
-   automatic install: not enabled
+   automatic install: use `dockyard install --with-dependencies`
 
 2. root package: team-dashboard@0.2.0
    source: ./examples/team-dashboard
@@ -83,6 +83,25 @@ Read-only: no releases were installed, upgraded, uninstalled, or modified.
 ```
 
 Dependency release names are deterministic: `RELEASE-ALIAS` when an alias is set, otherwise `RELEASE-NAME`. Use `--json` for automation or review tooling.
+
+To install dependencies, use the explicit opt-in flag:
+
+```bash
+dockyard install --with-dependencies team-dashboard ./examples/team-dashboard
+```
+
+Dependency packages are installed before the root package. Existing deployed dependency releases are reused and left unchanged. Dependencies are not automatically uninstalled if root installation fails or when the root release is uninstalled.
+
+The team-dashboard example depends on the reusable postgres package. Publish it first:
+
+```bash
+dockyard package ./examples/postgres \
+  -o ../dockyard-artifacts/postgres-0.1.0.dockyard.tgz
+
+dockyard push ../dockyard-artifacts/postgres-0.1.0.dockyard.tgz \
+  oci://ghcr.io/nandub/dockyard/postgres:0.1.0
+```
+
 
 
 ## Test a package
@@ -313,3 +332,20 @@ Use JSON output for automation:
 dockyard install-plan team-dashboard ./examples/team-dashboard --json
 dockyard install --dry-run team-dashboard ./examples/team-dashboard --json
 ```
+
+## Installing packages with dependencies
+
+Packages may declare dependencies in `Dockyard.yaml`. Dockyard does not install them by default; operators must opt in after reviewing the plan.
+
+```sh
+dockyard install-plan team-dashboard ./examples/team-dashboard
+dockyard install --with-dependencies team-dashboard ./examples/team-dashboard
+```
+
+Dependency release names are deterministic. A dependency with `alias: db` under root release `team-dashboard` is planned as `team-dashboard-db`; without an alias, Dockyard uses the dependency name.
+
+Dependency inline values are passed only to the dependency package. Root package `--values` and `--overlay` flags are intentionally not reused for dependencies because those files are package-specific.
+
+Existing deployed dependency releases are reused. Dockyard does not upgrade or uninstall dependencies automatically.
+
+Failed or pending dependency releases block automatic dependency installation; resolve them before re-running `dockyard install --with-dependencies`.

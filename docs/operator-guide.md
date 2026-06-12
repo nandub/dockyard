@@ -179,7 +179,8 @@ dockyard status myapp
 dockyard status myapp --compose-ps
 dockyard status myapp --compose-ps --all
 dockyard inspect myapp
-dockyard list
+dockyard list          # active releases by default
+dockyard list --all    # include uninstalled history
 dockyard uninstall myapp --dry-run
 ```
 

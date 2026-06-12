@@ -21,7 +21,7 @@ Docker Compose remains the runtime source of truth.
 
 Dockyard v1.0 supports `Dockyard.yaml` manifests using `apiVersion: dockyard.dev/v1alpha1` as the stable package manifest contract for the v1.x line.
 
-Dockyard v1.2 adds package dependency metadata. A package can declare dependencies in `Dockyard.yaml`, inspect them with `dockyard package deps`, and include them in `dockyard.lock`. Dependency installation is intentionally not automatic yet. Dockyard v1.3 adds `dockyard install-plan` to preview dependency-aware install order and existing-release status without modifying state.
+Dockyard v1.2 adds package dependency metadata. A package can declare dependencies in `Dockyard.yaml`, inspect them with `dockyard package deps`, and include them in `dockyard.lock`. Dockyard v1.3 adds `dockyard install-plan` and dependency-aware `install --dry-run`. Dockyard v1.4 adds explicit opt-in dependency installation with `dockyard install --with-dependencies`.
 
 ## Documentation
 
@@ -95,8 +95,9 @@ See [v1.0 readiness](docs/v1-readiness.md) for the full release checklist.
 Runnable package examples live under `examples/`:
 
 - `examples/nginx` — basic local smoke-test package.
+- `examples/postgres` — reusable PostgreSQL dependency package.
 - `examples/postgres-app` — app plus PostgreSQL package.
-- `examples/team-dashboard` — dependency metadata example.
+- `examples/team-dashboard` — dependency installation example.
 - `examples/caddy-letsencrypt` — automatic HTTPS with Caddy.
 - `examples/nginx-tls-mounted-certs` — TLS with operator-provided certificate/key files.
 - `examples/traefik-letsencrypt` — Let's Encrypt with Traefik Docker labels.
@@ -241,7 +242,8 @@ dockyard verify ../dockyard-artifacts/example-app-0.1.0.dockyard.tgz -f ../deplo
 dockyard install myapp ../dockyard-artifacts/example-app-0.1.0.dockyard.tgz -f ../deploy-values/prod.yaml --require-lock
 dockyard status myapp --compose-ps
 dockyard inspect myapp
-dockyard list
+dockyard list               # active releases by default
+dockyard list --all         # include uninstalled release history
 dockyard uninstall myapp --dry-run
 dockyard prune --dry-run
 ```
@@ -379,3 +381,25 @@ For private/internal packages that intentionally rely on repository-level licens
 dockyard install --dry-run team-dashboard ./examples/team-dashboard
 dockyard install --dry-run team-dashboard ./examples/team-dashboard --json
 ```
+
+### Dependency installation
+
+Dockyard supports explicit dependency installation for packages that declare `dependencies:` in `Dockyard.yaml`.
+Preview first:
+
+```sh
+dockyard install-plan team-dashboard ./examples/team-dashboard
+# or
+dockyard install --dry-run team-dashboard ./examples/team-dashboard
+```
+
+Install dependencies before the root package with explicit opt-in:
+
+```sh
+dockyard install --with-dependencies team-dashboard ./examples/team-dashboard
+```
+
+Dependency installs are conservative: existing deployed dependency releases are reused, uninstalled dependency releases are reinstalled, dependency inline values are applied to dependency packages, and dependencies are not automatically removed on root uninstall.
+
+
+Failed or pending dependency releases block automatic dependency installation; resolve them before re-running `dockyard install --with-dependencies`.

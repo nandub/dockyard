@@ -1,0 +1,7 @@
+image:
+  repository: postgres
+  tag: "16.4"
+
+database: app
+username: app
+password: "${POSTGRES_PASSWORD:-dockyard-dev-password}"

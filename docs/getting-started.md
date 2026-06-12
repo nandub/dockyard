@@ -110,12 +110,14 @@ The repository includes a few package examples:
 
 ```text
 examples/nginx
+examples/postgres
 examples/postgres-app
+examples/team-dashboard
 examples/caddy-letsencrypt
 examples/nginx-tls-mounted-certs
 examples/traefik-letsencrypt
 ```
 
-Use `examples/nginx` for quick local smoke tests. Use the Caddy, nginx TLS, and Traefik examples to learn different TLS packaging patterns.
+Use `examples/nginx` for quick local smoke tests. Use `examples/postgres` and `examples/team-dashboard` to try dependency planning and explicit dependency installation. Use the Caddy, nginx TLS, and Traefik examples to learn different TLS packaging patterns.
 
 Dockyard can render and validate these packages, but certificate issuance and reverse proxy behavior are handled by the underlying containers and Docker Compose.

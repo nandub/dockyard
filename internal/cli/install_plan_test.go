@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -96,6 +97,20 @@ func TestBuildInstallDryRunPlanMatchesInstallPlan(t *testing.T) {
 	}
 }
 
+func TestBuildInstallPlanBlocksFailedDependency(t *testing.T) {
+	packageDir := writeInstallPlanPackage(t)
+	home := t.TempDir()
+	writeCurrentReleaseForPlan(t, home, "team-dashboard-db", "failed")
+
+	report, err := buildInstallPlan(&globalOptions{home: home}, "team-dashboard", packageDir)
+	if err != nil {
+		t.Fatalf("build install plan: %v", err)
+	}
+	if report.Steps[0].Action != "blocked" || report.Steps[0].ExistingReleaseStatus != "failed" {
+		t.Fatalf("unexpected failed dependency state: action=%s status=%s", report.Steps[0].Action, report.Steps[0].ExistingReleaseStatus)
+	}
+}
+
 func TestDependencyReleaseNameUsesNameWhenAliasMissing(t *testing.T) {
 	got := dependencyReleaseName("app", dockpkg.Dependency{Name: "postgres"})
 	if got != "app-postgres" {
@@ -159,5 +174,64 @@ func writeFile(t *testing.T, path string, content string) {
 	t.Helper()
 	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
 		t.Fatalf("write %s: %v", path, err)
+	}
+}
+
+func TestDependencyInstallOptionsDoNotReuseRootPackageSpecificFiles(t *testing.T) {
+	opts := packageBuildOptions{
+		valuesFile:        "root-values.yaml",
+		overlay:           "prod",
+		envFile:           ".env",
+		skipPolicy:        true,
+		allowRisk:         true,
+		skipComposeConfig: true,
+		requireLock:       true,
+	}
+
+	depOpts := dependencyInstallOptions(opts)
+
+	if depOpts.valuesFile != "" {
+		t.Fatalf("dependency values file should not reuse root values file: %q", depOpts.valuesFile)
+	}
+	if depOpts.overlay != "" {
+		t.Fatalf("dependency overlay should not reuse root overlay: %q", depOpts.overlay)
+	}
+	if depOpts.envFile != opts.envFile {
+		t.Fatalf("dependency env file should be preserved")
+	}
+	if !depOpts.skipPolicy || !depOpts.allowRisk || !depOpts.skipComposeConfig || !depOpts.requireLock {
+		t.Fatalf("dependency safety flags were not preserved: %#v", depOpts)
+	}
+}
+
+func TestApplyInlineValuesWritesTemporaryValuesFile(t *testing.T) {
+	opts := packageBuildOptions{}
+	cleanup, err := applyInlineValues(&opts, map[string]any{
+		"database": "dashboard",
+		"username": "dashboard",
+	})
+	if err != nil {
+		t.Fatalf("apply inline values: %v", err)
+	}
+	defer cleanup()
+
+	if opts.valuesFile == "" {
+		t.Fatal("expected temporary values file to be configured")
+	}
+	data, err := os.ReadFile(opts.valuesFile)
+	if err != nil {
+		t.Fatalf("read temporary values file: %v", err)
+	}
+	content := string(data)
+	if !strings.Contains(content, "database: dashboard") || !strings.Contains(content, "username: dashboard") {
+		t.Fatalf("temporary values file did not contain dependency values: %s", content)
+	}
+}
+
+func TestApplyInlineValuesRejectsExistingValuesFile(t *testing.T) {
+	opts := packageBuildOptions{valuesFile: "root-values.yaml"}
+	_, err := applyInlineValues(&opts, map[string]any{"database": "dashboard"})
+	if err == nil {
+		t.Fatal("expected inline values to reject an existing values file")
 	}
 }

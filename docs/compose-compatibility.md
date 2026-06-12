@@ -122,5 +122,5 @@ The linter is intentionally not a complete Compose security scanner yet.
 
 Dockyard packages can contain any valid Docker Compose project. One package may include many services, such as a frontend, API, worker, database, cache, and reverse proxy. Dockyard renders and manages that Compose project as one Dockyard release.
 
-Package dependency metadata is different from Compose services. A package can declare dependencies in `Dockyard.yaml` to document related packages, but v1.2 does not automatically install those dependency packages. Use one package with multiple Compose services for tightly coupled deployments. Use separate packages plus dependency metadata for independently managed components.
+Package dependency metadata is different from Compose services. A package can declare dependencies in `Dockyard.yaml` to document related packages, preview install order, and explicitly install dependencies with `dockyard install --with-dependencies`. Use one package with multiple Compose services for tightly coupled deployments. Use separate packages plus dependency metadata for independently managed components.
 
