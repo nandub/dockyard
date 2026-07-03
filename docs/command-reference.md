@@ -16,10 +16,10 @@ dockyard catalog list [--json]
 dockyard catalog info PACKAGE [--json]
 ```
 
-The default catalog registry is `ghcr.io/nandub/dockyard-packages`. Override it with:
+The default catalog metadata reference is `oci://ghcr.io/nandub/dockyard-packages/catalog:latest`. Override it with:
 
 ```bash
-export DOCKYARD_CATALOG=ghcr.io/my-org/my-dockyard-packages
+export DOCKYARD_CATALOG=oci://ghcr.io/my-org/my-dockyard-packages/catalog:latest
 ```
 
 Catalog source forms:
@@ -30,7 +30,7 @@ dockyard install my-cache redis
 dockyard install redis catalog://redis:0.1.0
 ```
 
-These resolve to OCI references under the configured catalog registry.
+These resolve through the live `catalog.yaml` OCI index. The catalog entry controls the package source, latest version, and available versions.
 
 JSON dry-run mode suppresses OCI pull progress so stdout can be consumed by scripts:
 

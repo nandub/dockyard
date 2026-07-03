@@ -283,3 +283,20 @@ dockyard uninstall team-dashboard-db --force
 ```
 
 Dockyard does not automatically remove dependency releases when a root release is uninstalled.
+
+
+## Configuring catalogs
+
+By default Dockyard reads package metadata from:
+
+```text
+oci://ghcr.io/nandub/dockyard-packages/catalog:latest
+```
+
+Set `DOCKYARD_CATALOG` to a different OCI catalog reference for private or internal catalogs:
+
+```bash
+export DOCKYARD_CATALOG=oci://ghcr.io/my-org/dockyard-packages/catalog:latest
+```
+
+`dockyard install PACKAGE` and `catalog://PACKAGE[:VERSION]` resolve only after the package appears in that catalog index. Local paths, archives, and explicit `oci://` package references still take precedence.

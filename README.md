@@ -23,10 +23,10 @@ Dockyard package
 
 Dockyard has a companion catalog at `github.com/nandub/dockyard-packages`.
 
-The default catalog registry is:
+The default catalog metadata reference is:
 
 ```text
-ghcr.io/nandub/dockyard-packages
+oci://ghcr.io/nandub/dockyard-packages/catalog:latest
 ```
 
 You can install known catalog packages with short names:
@@ -37,12 +37,13 @@ dockyard catalog info redis
 dockyard install redis
 ```
 
-The shorthand resolves to the configured catalog package:
+Dockyard pulls catalog metadata from the configured OCI catalog index, then resolves shorthand package names from that live index:
 
 ```text
 dockyard install redis
 # equivalent source: catalog://redis
-# resolved OCI source: oci://ghcr.io/nandub/dockyard-packages/redis:0.1.0
+# resolved OCI source comes from catalog.yaml, for example:
+# oci://ghcr.io/nandub/dockyard-packages/redis:0.1.0
 ```
 
 For automation, use JSON dry-run output. Dockyard suppresses OCI progress output in this mode so stdout remains parseable JSON:
@@ -246,3 +247,8 @@ The TLS examples show package design patterns. Dockyard does not manage certific
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for local development, verification, and pull request expectations.
+
+
+### OCI-backed catalog index
+
+Catalog package metadata is not compiled into Dockyard. `dockyard catalog list`, `dockyard catalog info`, `catalog://NAME[:VERSION]`, and bare install shorthand pull `catalog.yaml` from the configured OCI catalog reference. Override the catalog with `DOCKYARD_CATALOG=oci://ghcr.io/my-org/my-packages/catalog:latest`. For compatibility, registry prefixes such as `ghcr.io/my-org/my-packages` resolve to `/catalog:latest`.

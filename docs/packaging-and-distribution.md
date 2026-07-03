@@ -348,3 +348,20 @@ Test the published artifact:
 ```bash
 dockyard package test oci://ghcr.io/nandub/dockyard/nginx:0.1.0 --smoke
 ```
+
+
+## Publishing a catalog index
+
+Dockyard catalog metadata is distributed as an OCI artifact. Publish a `catalog.yaml` file to a catalog reference such as:
+
+```bash
+oras push --artifact-type application/vnd.dockyard.catalog.v1+yaml ghcr.io/nandub/dockyard-packages/catalog:latest catalog.yaml:application/vnd.dockyard.catalog.index.v1+yaml
+```
+
+Operators can then run:
+
+```bash
+DOCKYARD_CATALOG=oci://ghcr.io/nandub/dockyard-packages/catalog:latest dockyard catalog list
+```
+
+Use the same pattern for private catalogs. Package artifacts remain separate OCI objects, for example `oci://ghcr.io/nandub/dockyard-packages/redis:0.1.0`.

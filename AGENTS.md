@@ -6,12 +6,13 @@ Dockyard is a Go CLI that adds a package, render, validation, release-state, pol
 
 ## Catalog source behavior
 
-Dockyard v1.7 supports the official package catalog.
+Dockyard v1.8 uses an OCI-backed catalog index.
 
-- `catalog://NAME[:VERSION]` resolves to `oci://$DOCKYARD_CATALOG/NAME:VERSION`.
-- If `DOCKYARD_CATALOG` is unset, use `ghcr.io/nandub/dockyard-packages`.
-- Bare install shorthand such as `dockyard install redis` is allowed only for known catalog packages.
-- Existing local paths, archives, and explicit `oci://` references must keep precedence over catalog shorthand.
+- `DOCKYARD_CATALOG` points to a catalog metadata artifact, defaulting to `oci://ghcr.io/nandub/dockyard-packages/catalog:latest`.
+- Registry-prefix compatibility is supported: `ghcr.io/org/packages` resolves to `oci://ghcr.io/org/packages/catalog:latest`.
+- `catalog://NAME[:VERSION]` and bare install shorthand resolve from the live `catalog.yaml` index.
+- Do not hardcode package names in Dockyard when catalog packages are added.
+- Existing local paths, archives, and explicit `oci://` package references must keep precedence over catalog shorthand.
 - JSON output must remain machine-readable. When planning requires OCI pulls, use quiet pull paths for `--json` modes.
 
 ## Repository basics

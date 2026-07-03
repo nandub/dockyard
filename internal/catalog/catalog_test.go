@@ -1,41 +1,69 @@
 package catalog
 
 import (
+	"os"
 	"testing"
 )
 
+const testIndex = `apiVersion: dockyard.dev/catalog/v1alpha1
+registry: ghcr.io/example/packages
+packages:
+  - name: redis
+    latest: 0.1.0
+    description: Redis-compatible in-memory data store.
+    source: oci://ghcr.io/example/packages/redis
+    versions:
+      - 0.1.0
+  - name: postgres
+    latest: 0.2.0
+    description: PostgreSQL relational database.
+    versions:
+      - 0.1.0
+      - 0.2.0
+`
+
 func TestResolveCatalogURLDefaultVersion(t *testing.T) {
-	t.Setenv(EnvRegistry, "")
-	got, ok, err := Resolve("catalog://redis")
+	idx, err := LoadBytes([]byte(testIndex))
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, ok, err := ResolveWithIndex(idx, "catalog://redis")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !ok {
 		t.Fatal("expected catalog source")
 	}
-	want := "oci://ghcr.io/nandub/dockyard-packages/redis:0.1.0"
+	want := "oci://ghcr.io/example/packages/redis:0.1.0"
 	if got != want {
 		t.Fatalf("got %q want %q", got, want)
 	}
 }
 
 func TestResolveBareCatalogName(t *testing.T) {
-	t.Setenv(EnvRegistry, "ghcr.io/example/catalog")
-	got, ok, err := Resolve("postgres")
+	idx, err := LoadBytes([]byte(testIndex))
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, ok, err := ResolveWithIndex(idx, "postgres")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !ok {
 		t.Fatal("expected catalog source")
 	}
-	want := "oci://ghcr.io/example/catalog/postgres:0.1.0"
+	want := "oci://ghcr.io/example/packages/postgres:0.2.0"
 	if got != want {
 		t.Fatalf("got %q want %q", got, want)
 	}
 }
 
 func TestResolveUnknownBareNameIsUnchanged(t *testing.T) {
-	got, ok, err := Resolve("not-a-package")
+	idx, err := LoadBytes([]byte(testIndex))
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, ok, err := ResolveWithIndex(idx, "not-a-package")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +76,11 @@ func TestResolveUnknownBareNameIsUnchanged(t *testing.T) {
 }
 
 func TestResolveUnknownCatalogURLFails(t *testing.T) {
-	_, ok, err := Resolve("catalog://not-a-package")
+	idx, err := LoadBytes([]byte(testIndex))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, ok, err := ResolveWithIndex(idx, "catalog://not-a-package")
 	if !ok {
 		t.Fatal("expected catalog source")
 	}
@@ -57,10 +89,29 @@ func TestResolveUnknownCatalogURLFails(t *testing.T) {
 	}
 }
 
-func TestListSorted(t *testing.T) {
-	pkgs := List()
-	if len(pkgs) == 0 {
-		t.Fatal("expected packages")
+func TestRejectsUnknownVersion(t *testing.T) {
+	idx, err := LoadBytes([]byte(testIndex))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = idx.ResolveName("postgres", "9.9.9")
+	if err == nil {
+		t.Fatal("expected version error")
+	}
+}
+
+func TestListSortedFromFile(t *testing.T) {
+	path := t.TempDir() + "/catalog.yaml"
+	if err := os.WriteFile(path, []byte(testIndex), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv(EnvCatalog, path)
+	pkgs, err := List()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(pkgs) != 2 {
+		t.Fatalf("got %d packages", len(pkgs))
 	}
 	for i := 1; i < len(pkgs); i++ {
 		if pkgs[i-1].Name > pkgs[i].Name {
