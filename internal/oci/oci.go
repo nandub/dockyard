@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -80,7 +81,15 @@ func PushArgs(normalizedRef string, archiveName string) []string {
 	return []string{"push", "--artifact-type", ArtifactType, normalizedRef, layer}
 }
 
+type PullOptions struct {
+	Quiet bool
+}
+
 func Pull(ctx context.Context, ref string, outputDir string) (string, error) {
+	return PullWithOptions(ctx, ref, outputDir, PullOptions{})
+}
+
+func PullWithOptions(ctx context.Context, ref string, outputDir string, opts PullOptions) (string, error) {
 	normalized, err := NormalizeReference(ref)
 	if err != nil {
 		return "", err
@@ -93,8 +102,13 @@ func Pull(ctx context.Context, ref string, outputDir string) (string, error) {
 		return "", fmt.Errorf("create OCI pull directory: %w", err)
 	}
 	cmd := exec.CommandContext(ctx, "oras", "pull", normalized, "-o", cleanOutput)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	if opts.Quiet {
+		cmd.Stdout = io.Discard
+		cmd.Stderr = io.Discard
+	} else {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
 	if err := cmd.Run(); err != nil {
 		return "", errors.New("oras pull failed")
 	}

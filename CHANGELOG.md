@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.7.1
+
+- Made JSON dry-run planning output quieter for OCI/catalog sources.
+- `dockyard install --dry-run --json` now suppresses ORAS pull progress so stdout is machine-readable JSON.
+- `dockyard install-plan --json` uses the same quiet OCI preparation path.
+- Human-readable dry-run and install-plan output still shows OCI pull progress.
+
 ## v1.7.0
 
 - Added first-class official catalog UX.

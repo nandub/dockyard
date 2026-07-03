@@ -87,7 +87,7 @@ func TestBuildInstallDryRunPlanMatchesInstallPlan(t *testing.T) {
 		t.Fatalf("build install plan: %v", err)
 	}
 
-	dryRunPlan, err := buildInstallDryRunPlan(&globalOptions{home: home}, "team-dashboard", packageDir)
+	dryRunPlan, err := buildInstallDryRunPlan(&globalOptions{home: home}, "team-dashboard", packageDir, false)
 	if err != nil {
 		t.Fatalf("build dry-run install plan: %v", err)
 	}

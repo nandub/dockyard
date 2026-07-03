@@ -29,6 +29,14 @@ dockyard install redis
 
 Explicit local paths, archives, and `oci://` references keep their existing behavior and do not use catalog resolution.
 
+Automation can inspect catalog installs with clean JSON output:
+
+```bash
+dockyard install --dry-run redis --json
+```
+
+When `--json` is used for dry-run/install-plan output, Dockyard keeps OCI pull progress out of stdout.
+
 ## Package format
 
 A package directory contains:

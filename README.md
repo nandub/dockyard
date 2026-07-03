@@ -45,6 +45,12 @@ dockyard install redis
 # resolved OCI source: oci://ghcr.io/nandub/dockyard-packages/redis:0.1.0
 ```
 
+For automation, use JSON dry-run output. Dockyard suppresses OCI progress output in this mode so stdout remains parseable JSON:
+
+```bash
+dockyard install --dry-run redis --json
+```
+
 Use a custom release name with a catalog package name:
 
 ```bash

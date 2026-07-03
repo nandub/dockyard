@@ -32,6 +32,12 @@ dockyard install redis catalog://redis:0.1.0
 
 These resolve to OCI references under the configured catalog registry.
 
+JSON dry-run mode suppresses OCI pull progress so stdout can be consumed by scripts:
+
+```bash
+dockyard install --dry-run redis --json
+```
+
 ## Core package commands
 
 ```bash

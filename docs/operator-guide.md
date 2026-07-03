@@ -26,6 +26,14 @@ export DOCKYARD_CATALOG=ghcr.io/my-org/internal-dockyard-packages
 dockyard install redis
 ```
 
+For automation and CI, preview catalog installs as JSON:
+
+```bash
+dockyard install --dry-run redis --json
+```
+
+In JSON mode, Dockyard suppresses OCI progress output so stdout is parseable.
+
 ## Values files
 
 Dockyard separates reusable package defaults from operator-owned deployment values.

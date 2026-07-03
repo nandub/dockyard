@@ -52,7 +52,7 @@ checks for existing releases, and prints the planned install order. It does not
 install, upgrade, uninstall, or modify release state.`,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			report, err := buildInstallPlan(global, args[0], args[1])
+			report, err := buildInstallPlanWithOptions(global, args[0], args[1], installPlanBuildOptions{QuietOCI: jsonOut})
 			if err != nil {
 				return err
 			}
@@ -68,12 +68,20 @@ install, upgrade, uninstall, or modify release state.`,
 	return cmd
 }
 
+type installPlanBuildOptions struct {
+	QuietOCI bool
+}
+
 func buildInstallPlan(global *globalOptions, releaseName string, source string) (installPlanReport, error) {
+	return buildInstallPlanWithOptions(global, releaseName, source, installPlanBuildOptions{})
+}
+
+func buildInstallPlanWithOptions(global *globalOptions, releaseName string, source string, opts installPlanBuildOptions) (installPlanReport, error) {
 	if err := state.ValidateReleaseName(releaseName); err != nil {
 		return installPlanReport{}, err
 	}
 
-	prepared, err := preparePackageSource(source, true)
+	prepared, err := preparePackageSourceWithOptions(source, true, preparePackageSourceOptions(opts))
 	if err != nil {
 		return installPlanReport{}, err
 	}
@@ -149,8 +157,8 @@ func buildInstallPlan(global *globalOptions, releaseName string, source string) 
 	}, nil
 }
 
-func buildInstallDryRunPlan(global *globalOptions, releaseName string, source string) (installPlanReport, error) {
-	return buildInstallPlan(global, releaseName, source)
+func buildInstallDryRunPlan(global *globalOptions, releaseName string, source string, quietOCI bool) (installPlanReport, error) {
+	return buildInstallPlanWithOptions(global, releaseName, source, installPlanBuildOptions{QuietOCI: quietOCI})
 }
 
 func dependencyReleaseName(rootRelease string, dep dockpkg.Dependency) string {

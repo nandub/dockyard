@@ -40,7 +40,15 @@ type preparedSource struct {
 	cleanup func()
 }
 
+type preparePackageSourceOptions struct {
+	QuietOCI bool
+}
+
 func preparePackageSource(input string, verifyArchive bool) (*preparedSource, error) {
+	return preparePackageSourceWithOptions(input, verifyArchive, preparePackageSourceOptions{})
+}
+
+func preparePackageSourceWithOptions(input string, verifyArchive bool, opts preparePackageSourceOptions) (*preparedSource, error) {
 	resolvedInput, _, err := resolveCatalogPackageSource(input)
 	if err != nil {
 		return nil, err
@@ -55,7 +63,7 @@ func preparePackageSource(input string, verifyArchive bool) (*preparedSource, er
 		pullDir := filepath.Join(tempRoot, "pulled")
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 		defer cancel()
-		archivePath, err := oci.Pull(ctx, input, pullDir)
+		archivePath, err := oci.PullWithOptions(ctx, input, pullDir, oci.PullOptions{Quiet: opts.QuietOCI})
 		if err != nil {
 			_ = os.RemoveAll(tempRoot)
 			return nil, err

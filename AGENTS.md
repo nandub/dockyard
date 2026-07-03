@@ -12,6 +12,7 @@ Dockyard v1.7 supports the official package catalog.
 - If `DOCKYARD_CATALOG` is unset, use `ghcr.io/nandub/dockyard-packages`.
 - Bare install shorthand such as `dockyard install redis` is allowed only for known catalog packages.
 - Existing local paths, archives, and explicit `oci://` references must keep precedence over catalog shorthand.
+- JSON output must remain machine-readable. When planning requires OCI pulls, use quiet pull paths for `--json` modes.
 
 ## Repository basics
 

@@ -54,7 +54,7 @@ automatically removed if a later step fails or the root release is uninstalled.`
 				return errors.New("--json can only be used with --dry-run")
 			}
 			if dryRun {
-				report, err := buildInstallDryRunPlan(global, releaseName, source)
+				report, err := buildInstallDryRunPlan(global, releaseName, source, jsonOut)
 				if err != nil {
 					return err
 				}
