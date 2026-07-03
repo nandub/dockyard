@@ -4,6 +4,15 @@ This file gives coding agents enough project context to make safe, idiomatic cha
 
 Dockyard is a Go CLI that adds a package, render, validation, release-state, policy, and distribution layer on top of Docker Compose. Docker Compose remains the runtime source of truth.
 
+## Catalog source behavior
+
+Dockyard v1.7 supports the official package catalog.
+
+- `catalog://NAME[:VERSION]` resolves to `oci://$DOCKYARD_CATALOG/NAME:VERSION`.
+- If `DOCKYARD_CATALOG` is unset, use `ghcr.io/nandub/dockyard-packages`.
+- Bare install shorthand such as `dockyard install redis` is allowed only for known catalog packages.
+- Existing local paths, archives, and explicit `oci://` references must keep precedence over catalog shorthand.
+
 ## Repository basics
 
 - Module: `github.com/nandub/dockyard`

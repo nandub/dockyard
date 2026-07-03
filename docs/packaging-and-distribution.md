@@ -2,6 +2,33 @@
 
 This guide covers package format, lockfiles, quality gates, dependency metadata, package archives, verification, and OCI distribution.
 
+## Official catalog sources
+
+Dockyard v1.7 adds catalog-aware package resolution for the official package catalog.
+
+```bash
+dockyard catalog list
+dockyard catalog info postgres
+dockyard install postgres
+dockyard install my-db postgres
+dockyard install my-db catalog://postgres:0.1.0
+```
+
+The default catalog registry is:
+
+```text
+ghcr.io/nandub/dockyard-packages
+```
+
+Set `DOCKYARD_CATALOG` to point the same commands at a private catalog:
+
+```bash
+export DOCKYARD_CATALOG=ghcr.io/my-org/my-packages
+dockyard install redis
+```
+
+Explicit local paths, archives, and `oci://` references keep their existing behavior and do not use catalog resolution.
+
 ## Package format
 
 A package directory contains:

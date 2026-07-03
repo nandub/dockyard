@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.7.0
+
+- Added first-class official catalog UX.
+- Added `dockyard catalog list` and `dockyard catalog info PACKAGE`.
+- Added `catalog://PACKAGE[:VERSION]` package source resolution.
+- Added `dockyard install PACKAGE` shorthand for configured catalog packages.
+- Added `dockyard install RELEASE PACKAGE` shorthand when `PACKAGE` is a known catalog package.
+- Added `DOCKYARD_CATALOG` to override the default catalog registry prefix.
+- Kept explicit local paths, archives, and `oci://` references as the highest-precedence source forms.
+
 ## v1.6.1
 
 - Synchronized README and docs with the v1.2-v1.6 dependency lifecycle features.

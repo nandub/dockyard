@@ -19,6 +19,51 @@ Dockyard package
   -> docker compose up/down
 ```
 
+## Official package catalog
+
+Dockyard has a companion catalog at `github.com/nandub/dockyard-packages`.
+
+The default catalog registry is:
+
+```text
+ghcr.io/nandub/dockyard-packages
+```
+
+You can install known catalog packages with short names:
+
+```bash
+dockyard catalog list
+dockyard catalog info redis
+dockyard install redis
+```
+
+The shorthand resolves to the configured catalog package:
+
+```text
+dockyard install redis
+# equivalent source: catalog://redis
+# resolved OCI source: oci://ghcr.io/nandub/dockyard-packages/redis:0.1.0
+```
+
+Use a custom release name with a catalog package name:
+
+```bash
+dockyard install my-cache redis
+```
+
+Use an explicit catalog or OCI source when you want pinning or a non-default registry:
+
+```bash
+dockyard install redis catalog://redis:0.1.0
+dockyard install redis oci://ghcr.io/nandub/dockyard-packages/redis:0.1.0
+```
+
+Override the default catalog registry for private catalogs:
+
+```bash
+export DOCKYARD_CATALOG=ghcr.io/my-org/my-dockyard-packages
+```
+
 The stable v1.x package manifest is `Dockyard.yaml` with:
 
 ```yaml

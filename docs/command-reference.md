@@ -9,6 +9,29 @@ Dockyard commands are grouped around packaging, validation, release management, 
 -h, --help      command help
 ```
 
+## Catalog commands
+
+```bash
+dockyard catalog list [--json]
+dockyard catalog info PACKAGE [--json]
+```
+
+The default catalog registry is `ghcr.io/nandub/dockyard-packages`. Override it with:
+
+```bash
+export DOCKYARD_CATALOG=ghcr.io/my-org/my-dockyard-packages
+```
+
+Catalog source forms:
+
+```bash
+dockyard install redis
+dockyard install my-cache redis
+dockyard install redis catalog://redis:0.1.0
+```
+
+These resolve to OCI references under the configured catalog registry.
+
 ## Core package commands
 
 ```bash
@@ -66,7 +89,10 @@ archive layer: application/vnd.dockyard.package.archive.v1+gzip
 ```bash
 dockyard install-plan RELEASE PACKAGE_SOURCE [--json]
 dockyard install RELEASE PACKAGE_SOURCE [--dry-run] [--json]
-dockyard install RELEASE PACKAGE_SOURCE [--with-dependencies]
+dockyard install PACKAGE
+# or
+ dockyard install RELEASE PACKAGE_SOURCE [--with-dependencies]
+# PACKAGE_SOURCE may be a path, archive, oci:// reference, catalog:// reference, or catalog package name
 ```
 
 `dockyard install-plan` and `dockyard install --dry-run` use the same read-only dependency-aware planner. Use either command to preview dependency release names, existing-release actions, and root package installation order. Add `--json` for automation.
@@ -93,6 +119,7 @@ dockyard install --with-dependencies team-dashboard ./examples/team-dashboard
 ## Release lifecycle
 
 ```bash
+dockyard install PACKAGE [-f values.yaml] [--env-file file]
 dockyard install RELEASE PACKAGE_SOURCE [-f values.yaml] [--env-file file] [--require-lock]
 dockyard diff RELEASE PACKAGE_SOURCE [-f values.yaml]
 dockyard upgrade RELEASE PACKAGE_SOURCE [-f values.yaml] [--env-file file]
@@ -104,7 +131,7 @@ dockyard uninstall RELEASE [--volumes] [--purge] [--dry-run] [--force]
 dockyard prune [--release RELEASE] [--keep N] [--dry-run]
 ```
 
-`PACKAGE_SOURCE` may be a local package directory, a `.dockyard.tgz` archive, or an `oci://` reference.
+`PACKAGE_SOURCE` may be a local package directory, a `.dockyard.tgz` archive, an `oci://` reference, a `catalog://PACKAGE[:VERSION]` reference, or a known catalog package name. With one argument, `dockyard install redis` installs the configured catalog package `redis` as release `redis`.
 
 ### `dockyard list`
 

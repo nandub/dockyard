@@ -19,19 +19,33 @@ func newInstallCommand(global *globalOptions) *cobra.Command {
 	var withDependencies bool
 
 	cmd := &cobra.Command{
-		Use:   "install RELEASE PACKAGE_SOURCE",
-		Short: "Render, validate, record, and deploy a Dockyard package directory or archive",
-		Long: `Render, validate, record, and deploy a Dockyard package directory or archive.
+		Use:   "install RELEASE [PACKAGE_SOURCE]",
+		Short: "Install a Dockyard package from a path, archive, OCI reference, or catalog",
+		Long: `Render, validate, record, and deploy a Dockyard package from a local directory,
+archive, OCI reference, catalog reference, or configured catalog shorthand.
 
 By default, install deploys only the root package. Use --with-dependencies to
-install declared package dependencies before the root package. Dependency
+install declared package dependencies before the root package. Catalog shorthand is supported:
+dockyard install redis resolves to the configured catalog package named redis.
+Dependency
 installation is conservative: existing deployed dependency releases are reused,
 uninstalled dependency releases are reinstalled, and dependencies are not
 automatically removed if a later step fails or the root release is uninstalled.`,
-		Args: cobra.ExactArgs(2),
+		Args: cobra.RangeArgs(1, 2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			releaseName := args[0]
-			source := args[1]
+			source := args[0]
+			if len(args) == 2 {
+				source = args[1]
+			}
+
+			if len(args) == 1 && !sourcePathExists(source) {
+				if _, ok, err := resolveCatalogPackageSource(source); err != nil {
+					return err
+				} else if !ok {
+					return fmt.Errorf("package %q was not found in the configured catalog", source)
+				}
+			}
 
 			if err := state.ValidateReleaseName(releaseName); err != nil {
 				return err

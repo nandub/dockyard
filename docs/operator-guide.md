@@ -2,6 +2,30 @@
 
 This guide covers values files, environment files, overlays, release state, pruning, and dependency operations.
 
+## Installing from the official catalog
+
+For common services, operators can use the configured Dockyard catalog instead of copying long OCI references.
+
+```bash
+dockyard catalog list
+dockyard catalog info redis
+dockyard install redis
+dockyard install my-cache redis
+```
+
+By default, catalog packages resolve under:
+
+```text
+ghcr.io/nandub/dockyard-packages
+```
+
+Use `DOCKYARD_CATALOG` to switch to an internal catalog while preserving the same commands:
+
+```bash
+export DOCKYARD_CATALOG=ghcr.io/my-org/internal-dockyard-packages
+dockyard install redis
+```
+
 ## Values files
 
 Dockyard separates reusable package defaults from operator-owned deployment values.

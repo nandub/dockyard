@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/nandub/dockyard/internal/archive"
+	"github.com/nandub/dockyard/internal/catalog"
 	"github.com/nandub/dockyard/internal/dockpkg"
 	"github.com/nandub/dockyard/internal/envfile"
 	"github.com/nandub/dockyard/internal/format"
@@ -40,6 +41,12 @@ type preparedSource struct {
 }
 
 func preparePackageSource(input string, verifyArchive bool) (*preparedSource, error) {
+	resolvedInput, _, err := resolveCatalogPackageSource(input)
+	if err != nil {
+		return nil, err
+	}
+	input = resolvedInput
+
 	if oci.IsReference(input) {
 		tempRoot, err := os.MkdirTemp("", "dockyard-oci-*")
 		if err != nil {
@@ -107,6 +114,26 @@ func preparePackageSource(input string, verifyArchive bool) (*preparedSource, er
 		Source:  state.Source{Type: "local", Path: absSource},
 		cleanup: func() {},
 	}, nil
+}
+
+func resolveCatalogPackageSource(input string) (string, bool, error) {
+	if strings.HasPrefix(input, "catalog://") {
+		resolved, _, err := catalog.Resolve(input)
+		return resolved, true, err
+	}
+	if sourcePathExists(input) || isArchivePath(input) || oci.IsReference(input) {
+		return input, false, nil
+	}
+	resolved, ok, err := catalog.Resolve(input)
+	return resolved, ok, err
+}
+
+func sourcePathExists(input string) bool {
+	if input == "" {
+		return false
+	}
+	_, err := os.Stat(input)
+	return err == nil
 }
 
 func isArchivePath(path string) bool {
