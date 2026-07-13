@@ -46,6 +46,45 @@ func TestLocalDocumentationPathReferencesExist(t *testing.T) {
 	}
 }
 
+func TestCommandReferenceDocumentsTopLevelCommands(t *testing.T) {
+	root := repoRoot(t)
+	reference := readFile(t, filepath.Join(root, "docs", "command-reference.md"))
+	commands := []string{
+		"dockyard catalog",
+		"dockyard compat",
+		"dockyard config",
+		"dockyard diff",
+		"dockyard doctor",
+		"dockyard env",
+		"dockyard init",
+		"dockyard inspect",
+		"dockyard install",
+		"dockyard install-plan",
+		"dockyard lint",
+		"dockyard list",
+		"dockyard lock",
+		"dockyard package",
+		"dockyard policy",
+		"dockyard prune",
+		"dockyard pull",
+		"dockyard push",
+		"dockyard rollback",
+		"dockyard render",
+		"dockyard secrets",
+		"dockyard status",
+		"dockyard uninstall",
+		"dockyard upgrade",
+		"dockyard values",
+		"dockyard verify",
+		"dockyard version",
+	}
+	for _, command := range commands {
+		if !strings.Contains(reference, command) {
+			t.Fatalf("docs/command-reference.md does not document %q", command)
+		}
+	}
+}
+
 func TestAIPlaybooksHaveRequiredSections(t *testing.T) {
 	root := repoRoot(t)
 	playbooksDir := filepath.Join(root, ".ai", "playbooks")
