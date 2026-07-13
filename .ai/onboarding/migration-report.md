@@ -2,8 +2,8 @@
 
 ## Files Moved
 
-- `.agents/workflows/*` -> `.ai/playbooks/*`
-- `docs/onboarding/*` -> `.ai/onboarding/reports/*`
+- The previous agent workflow documents were moved into `.ai/playbooks/`.
+- The previous onboarding report documents were moved into `.ai/onboarding/reports/`.
 
 ## Files Merged or Rewritten
 
@@ -15,13 +15,13 @@
 
 ## Files Removed
 
-- `.agents/` was removed after useful workflow content was migrated.
-- `docs/onboarding/` was removed after historical reports were moved to `.ai/onboarding/reports/`.
+- The obsolete agent workflow directory was removed after useful content was migrated.
+- The obsolete onboarding report directory was removed after historical reports were moved.
 
 ## Corrected Claims
 
-- `.agents/workflows/` is not treated as a standard Codex feature.
-- `.agents/skills/` is not treated as a standard Codex feature.
+- The old agent workflow location is not treated as a standard Codex feature.
+- No repository-specific agent skills directory is treated as a standard Codex feature.
 - The repository now uses `.ai/playbooks/` for reusable procedures.
 - Dockyard is documented as Docker Compose-oriented.
 
