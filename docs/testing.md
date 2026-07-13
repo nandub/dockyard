@@ -33,6 +33,8 @@ Docker smoke tests require Docker Desktop or Docker Engine and should keep gener
 
 ## Gaps
 
-Observed gaps in historical onboarding notes include no coverage gate, limited Docker smoke testing in CI, no live OCI registry round-trip in normal CI, and limited dedicated tests for archive/runner paths.
+Observed gaps in historical onboarding notes include no coverage gate, limited Docker smoke testing in CI, and no live OCI registry round-trip in normal CI.
+
+Focused archive and runner tests have since been added under `internal/archive` and `internal/runner`.
 
 Historical detail: `.ai/onboarding/reports/testing.md`.
