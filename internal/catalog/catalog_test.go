@@ -229,3 +229,73 @@ func TestListSortedFromFile(t *testing.T) {
 		}
 	}
 }
+
+func TestGetAndResolveNameFromFile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "catalog.yaml")
+	if err := os.WriteFile(path, []byte(testIndex), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv(EnvCatalog, "file://"+path)
+
+	pkg, ok, err := Get("redis")
+	if err != nil {
+		t.Fatalf("get catalog package: %v", err)
+	}
+	if !ok || pkg.Name != "redis" {
+		t.Fatalf("unexpected package lookup: ok=%v pkg=%#v", ok, pkg)
+	}
+	source, err := ResolveName("postgres", "0.1.0")
+	if err != nil {
+		t.Fatalf("resolve catalog package: %v", err)
+	}
+	if source != "oci://ghcr.io/example/packages/postgres:0.1.0" {
+		t.Fatalf("unexpected source: %s", source)
+	}
+}
+
+func TestLoadReferenceRejectsInvalidReferenceAndFindsIndexFile(t *testing.T) {
+	if _, err := LoadReference(nil, "not-oci"); err == nil {
+		t.Fatal("expected invalid catalog reference error")
+	}
+
+	dir := t.TempDir()
+	if _, err := findIndexFile(dir); err == nil {
+		t.Fatal("expected missing catalog index error")
+	}
+	path := filepath.Join(dir, "catalog.yml")
+	if err := os.WriteFile(path, []byte(testIndex), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	got, err := findIndexFile(dir)
+	if err != nil {
+		t.Fatalf("find catalog index: %v", err)
+	}
+	if got != path {
+		t.Fatalf("expected %q, got %q", path, got)
+	}
+}
+
+func TestCatalogCacheRoundTrip(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("USERPROFILE", home)
+	t.Setenv("HOME", home)
+
+	idx, err := LoadBytes([]byte(testIndex))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ref := "oci://ghcr.io/example/packages/catalog:latest"
+	if _, ok := readCached(ref); ok {
+		t.Fatal("did not expect cache before write")
+	}
+	if err := writeCached(ref, idx); err != nil {
+		t.Fatalf("write cached catalog: %v", err)
+	}
+	cached, ok := readCached(ref)
+	if !ok {
+		t.Fatal("expected cached catalog")
+	}
+	if len(cached.Packages) != len(idx.Packages) {
+		t.Fatalf("unexpected cached catalog: %#v", cached)
+	}
+}
