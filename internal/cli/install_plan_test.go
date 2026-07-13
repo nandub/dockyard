@@ -118,6 +118,62 @@ func TestDependencyReleaseNameUsesNameWhenAliasMissing(t *testing.T) {
 	}
 }
 
+func TestPlannedInstallActionMapsReleaseStatus(t *testing.T) {
+	tests := []struct {
+		status string
+		want   string
+	}{
+		{status: "", want: "install"},
+		{status: "uninstalled", want: "reinstall"},
+		{status: "deployed", want: "exists"},
+		{status: "failed", want: "blocked"},
+		{status: "pending", want: "blocked"},
+	}
+	for _, tt := range tests {
+		if got := plannedInstallAction(tt.status); got != tt.want {
+			t.Fatalf("plannedInstallAction(%q) = %q, want %q", tt.status, got, tt.want)
+		}
+	}
+}
+
+func TestCurrentReleaseStatusMissingReleaseIsEmpty(t *testing.T) {
+	got, err := currentReleaseStatus(t.TempDir(), "missing")
+	if err != nil {
+		t.Fatalf("current release status: %v", err)
+	}
+	if got != "" {
+		t.Fatalf("expected missing release status to be empty, got %q", got)
+	}
+}
+
+func TestBuildInstallPlanRejectsDuplicateDependencyPlannedRelease(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "Dockyard.yaml"), `apiVersion: dockyard.dev/v1alpha1
+name: team-dashboard
+description: Team dashboard example
+version: 0.2.0
+type: application
+compose:
+  base: compose.yaml
+dependencies:
+  - name: postgres
+    source: oci://ghcr.io/nandub/dockyard/postgres:0.1.0
+  - name: redis
+    alias: postgres
+    source: oci://ghcr.io/nandub/dockyard/redis:0.1.0
+`)
+	writeFile(t, filepath.Join(dir, "compose.yaml"), "services:\n  web:\n    image: nginx:1.27\n")
+	writeFile(t, filepath.Join(dir, "values.yaml"), "{}\n")
+
+	_, err := buildInstallPlan(&globalOptions{home: t.TempDir()}, "team-dashboard", dir)
+	if err == nil {
+		t.Fatal("expected duplicate planned release name error")
+	}
+	if !strings.Contains(err.Error(), "duplicate planned release name") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
 func writeInstallPlanPackage(t *testing.T) string {
 	t.Helper()
 	dir := t.TempDir()
