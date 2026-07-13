@@ -67,6 +67,58 @@ func TestValidateAgainstSchemaAllowsMissingSchema(t *testing.T) {
 	}
 }
 
+func TestLoadYAMLMapNullDocumentReturnsEmptyMap(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "values.yaml")
+	writeValuesTestFile(t, path, "null\n")
+
+	vals, err := LoadYAMLMap(path)
+	if err != nil {
+		t.Fatalf("load null values: %v", err)
+	}
+	if len(vals) != 0 {
+		t.Fatalf("expected empty map, got %#v", vals)
+	}
+}
+
+func TestWriteValuesAndCopyFile(t *testing.T) {
+	dir := t.TempDir()
+	valuesPath := filepath.Join(dir, "values.yaml")
+	if err := WriteValues(valuesPath, map[string]any{
+		"app": map[string]any{
+			"replicas": 2,
+		},
+	}); err != nil {
+		t.Fatalf("write values: %v", err)
+	}
+
+	vals, err := LoadYAMLMap(valuesPath)
+	if err != nil {
+		t.Fatalf("reload values: %v", err)
+	}
+	app := vals["app"].(map[string]any)
+	if app["replicas"] != 2 {
+		t.Fatalf("unexpected values after round trip: %#v", vals)
+	}
+
+	copyPath := filepath.Join(dir, "copy.yaml")
+	if err := CopyFile(copyPath, valuesPath, 0o600); err != nil {
+		t.Fatalf("copy values: %v", err)
+	}
+	if err := CopyFile(copyPath, valuesPath, 0o600); err == nil {
+		t.Fatal("expected copy to reject existing destination")
+	}
+}
+
+func TestMergeMapsReplacesNestedMapWithScalar(t *testing.T) {
+	got := MergeMaps(
+		map[string]any{"app": map[string]any{"image": "nginx", "replicas": 1}},
+		map[string]any{"app": "disabled"},
+	)
+	if got["app"] != "disabled" {
+		t.Fatalf("expected scalar override to replace nested map, got %#v", got["app"])
+	}
+}
+
 func writeValuesTestFile(t *testing.T, path string, content string) {
 	t.Helper()
 	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
