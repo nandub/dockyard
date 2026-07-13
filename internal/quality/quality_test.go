@@ -1,9 +1,12 @@
 package quality
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/nandub/dockyard/internal/dockpkg"
+	"github.com/nandub/dockyard/internal/format"
 )
 
 func TestInspectSchemaQualityFindsMissingSensitiveMarker(t *testing.T) {
@@ -105,5 +108,76 @@ func TestCheckDependenciesReportsDeclaredDependencies(t *testing.T) {
 	}
 	if len(check.Details) != 1 || check.Details[0] != "postgres as db@0.1.0 from oci://ghcr.io/nandub/dockyard/postgres:0.1.0" {
 		t.Fatalf("unexpected dependency details: %v", check.Details)
+	}
+}
+
+func TestLintPackageReportsMissingStrictFilesAndForbiddenFiles(t *testing.T) {
+	dir := t.TempDir()
+	writeQualityFile(t, dir, dockpkg.ManifestFileName, `apiVersion: `+format.ManifestAPIVersion+`
+name: nginx
+version: 0.1.0
+appVersion: "1.27"
+description: test package
+compose:
+  base: compose.yaml
+`)
+	writeQualityFile(t, dir, "compose.yaml", `services:
+  web:
+    image: nginx:1.27
+`)
+	writeQualityFile(t, dir, "values.yaml", "{}\n")
+	writeQualityFile(t, dir, ".env", "PASSWORD=secret\n")
+
+	report, err := LintPackage(dir, Options{Strict: true})
+	if err != nil {
+		t.Fatalf("lint package: %v", err)
+	}
+
+	assertCheck(t, report, "Dockyard.yaml", SeverityOK)
+	assertCheck(t, report, "README.md", SeverityFail)
+	assertCheck(t, report, "SECURITY.md", SeverityFail)
+	assertCheck(t, report, "LICENSE", SeverityWarn)
+	assertCheck(t, report, "values.schema.json", SeverityFail)
+	assertCheck(t, report, "forbidden files", SeverityFail)
+	if !HasFailures(report) {
+		t.Fatal("expected strict package lint to have failures")
+	}
+}
+
+func TestLintPackageAllowsAdvisoryLicenseWarning(t *testing.T) {
+	report := Report{
+		Checks: []Check{
+			{Name: "LICENSE", Severity: SeverityWarn, Message: "missing", Advisory: true},
+		},
+	}
+	if !HasBlockingFindings(report, Options{Strict: true}) {
+		t.Fatal("expected advisory warning to block when not allowed")
+	}
+	if HasBlockingFindings(report, Options{Strict: true, AllowAdvisory: true}) {
+		t.Fatal("expected advisory warning to be allowed")
+	}
+}
+
+func assertCheck(t *testing.T, report Report, name string, severity Severity) {
+	t.Helper()
+	for _, check := range report.Checks {
+		if check.Name == name {
+			if check.Severity != severity {
+				t.Fatalf("expected check %q severity %s, got %s: %#v", name, severity, check.Severity, check)
+			}
+			return
+		}
+	}
+	t.Fatalf("missing check %q in %#v", name, report.Checks)
+}
+
+func writeQualityFile(t *testing.T, root string, rel string, content string) {
+	t.Helper()
+	path := filepath.Join(root, rel)
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		t.Fatalf("create parent for %s: %v", rel, err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+		t.Fatalf("write %s: %v", rel, err)
 	}
 }
