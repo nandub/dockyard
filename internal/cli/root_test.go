@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/spf13/cobra"
 )
 
 func TestRootCommandRegistersExpectedTopLevelCommands(t *testing.T) {
@@ -89,5 +91,36 @@ func TestPolicyListCommandPrintsTextAndJSON(t *testing.T) {
 	}
 	if len(parsed) == 0 {
 		t.Fatal("expected JSON policy list entries")
+	}
+}
+
+func TestRepresentativeCommandArgumentContracts(t *testing.T) {
+	tests := []struct {
+		name string
+		cmd  func() *cobra.Command
+		args []string
+	}{
+		{name: "init requires directory", cmd: func() *cobra.Command { return newInitCommand() }, args: nil},
+		{name: "lint requires package dir", cmd: func() *cobra.Command { return newLintCommand() }, args: nil},
+		{name: "render requires package dir", cmd: func() *cobra.Command { return newRenderCommand() }, args: nil},
+		{name: "pull requires OCI reference", cmd: func() *cobra.Command { return newPullCommand() }, args: nil},
+		{name: "push requires archive and ref", cmd: func() *cobra.Command { return newPushCommand() }, args: []string{"archive.tgz"}},
+		{name: "install-plan requires release and source", cmd: func() *cobra.Command { return newInstallPlanCommand(&globalOptions{}) }, args: []string{"release"}},
+		{name: "rollback requires release and revision", cmd: func() *cobra.Command { return newRollbackCommand(&globalOptions{}) }, args: []string{"release"}},
+		{name: "status requires release", cmd: func() *cobra.Command { return newStatusCommand(&globalOptions{}) }, args: nil},
+		{name: "uninstall requires release", cmd: func() *cobra.Command { return newUninstallCommand(&globalOptions{}) }, args: nil},
+		{name: "verify requires archive", cmd: func() *cobra.Command { return newVerifyCommand() }, args: nil},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cmd := tt.cmd()
+			if cmd.Args == nil {
+				t.Fatalf("%s has no argument validator", tt.name)
+			}
+			if err := cmd.Args(cmd, tt.args); err == nil {
+				t.Fatalf("expected argument validation error for args %#v", tt.args)
+			}
+		})
 	}
 }

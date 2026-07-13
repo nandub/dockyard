@@ -34,6 +34,18 @@ func TestAIDocumentationReferences(t *testing.T) {
 	}
 }
 
+func TestLocalDocumentationPathReferencesExist(t *testing.T) {
+	root := repoRoot(t)
+	for _, dir := range []string{".ai", "docs"} {
+		walkMarkdownFiles(t, filepath.Join(root, dir), func(path string) {
+			content := readFile(t, path)
+			for _, ref := range localPathRefs(content) {
+				assertPathExists(t, root, ref)
+			}
+		})
+	}
+}
+
 func TestAIPlaybooksHaveRequiredSections(t *testing.T) {
 	root := repoRoot(t)
 	playbooksDir := filepath.Join(root, ".ai", "playbooks")
@@ -136,6 +148,25 @@ func TestNoStaleAIOnboardingReferences(t *testing.T) {
 	}
 }
 
+func walkMarkdownFiles(t *testing.T, root string, fn func(path string)) {
+	t.Helper()
+	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		if filepath.Ext(path) == ".md" {
+			fn(path)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("walk markdown files in %s: %v", root, err)
+	}
+}
+
 func localPathRefs(markdown string) []string {
 	matches := regexp.MustCompile("`([^`]+)`").FindAllStringSubmatch(markdown, -1)
 	var refs []string
@@ -149,6 +180,9 @@ func localPathRefs(markdown string) []string {
 }
 
 func isLocalDocRef(ref string) bool {
+	if strings.ContainsAny(ref, "*?") {
+		return false
+	}
 	prefixes := []string{
 		".ai/",
 		".github/",
