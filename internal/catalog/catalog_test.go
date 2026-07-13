@@ -2,6 +2,8 @@ package catalog
 
 import (
 	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -21,6 +23,33 @@ packages:
       - 0.1.0
       - 0.2.0
 `
+
+func TestReferenceDefaultsWhenEnvUnset(t *testing.T) {
+	t.Setenv(EnvCatalog, "")
+
+	if got := Reference(); got != DefaultCatalogRef {
+		t.Fatalf("got %q want %q", got, DefaultCatalogRef)
+	}
+}
+
+func TestReferenceNormalizesRegistryPrefix(t *testing.T) {
+	t.Setenv(EnvCatalog, "ghcr.io/example/packages/")
+
+	want := "oci://ghcr.io/example/packages/catalog:latest"
+	if got := Reference(); got != want {
+		t.Fatalf("got %q want %q", got, want)
+	}
+}
+
+func TestReferenceCleansLocalYAMLPath(t *testing.T) {
+	dirty := filepath.Join(t.TempDir(), "nested", "..", "catalog.yaml")
+	t.Setenv(EnvCatalog, dirty)
+
+	want := filepath.Clean(dirty)
+	if got := Reference(); got != want {
+		t.Fatalf("got %q want %q", got, want)
+	}
+}
 
 func TestResolveCatalogURLDefaultVersion(t *testing.T) {
 	idx, err := LoadBytes([]byte(testIndex))
@@ -97,6 +126,87 @@ func TestRejectsUnknownVersion(t *testing.T) {
 	_, err = idx.ResolveName("postgres", "9.9.9")
 	if err == nil {
 		t.Fatal("expected version error")
+	}
+}
+
+func TestLoadBytesRejectsInvalidCatalogs(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   string
+		wantErr string
+	}{
+		{
+			name: "unsupported api version",
+			input: `apiVersion: dockyard.dev/catalog/v9
+registry: ghcr.io/example/packages
+packages: []
+`,
+			wantErr: "unsupported catalog apiVersion",
+		},
+		{
+			name: "missing registry",
+			input: `apiVersion: dockyard.dev/catalog/v1alpha1
+packages: []
+`,
+			wantErr: "catalog registry is required",
+		},
+		{
+			name: "duplicate package",
+			input: `apiVersion: dockyard.dev/catalog/v1alpha1
+registry: ghcr.io/example/packages
+packages:
+  - name: redis
+    latest: 0.1.0
+    description: Redis one.
+  - name: redis
+    latest: 0.2.0
+    description: Redis two.
+`,
+			wantErr: `duplicate catalog package "redis"`,
+		},
+		{
+			name: "invalid package name",
+			input: `apiVersion: dockyard.dev/catalog/v1alpha1
+registry: ghcr.io/example/packages
+packages:
+  - name: Redis
+    latest: 0.1.0
+    description: Redis.
+`,
+			wantErr: `invalid catalog package name "Redis"`,
+		},
+		{
+			name: "missing latest",
+			input: `apiVersion: dockyard.dev/catalog/v1alpha1
+registry: ghcr.io/example/packages
+packages:
+  - name: redis
+    description: Redis.
+`,
+			wantErr: `catalog package "redis" is missing latest version`,
+		},
+		{
+			name: "missing description",
+			input: `apiVersion: dockyard.dev/catalog/v1alpha1
+registry: ghcr.io/example/packages
+packages:
+  - name: redis
+    latest: 0.1.0
+`,
+			wantErr: `catalog package "redis" is missing description`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := LoadBytes([]byte(tt.input))
+			if err == nil {
+				t.Fatal("expected validation error")
+			}
+			if !strings.Contains(err.Error(), tt.wantErr) {
+				t.Fatalf("got error %q, want it to contain %q", err.Error(), tt.wantErr)
+			}
+		})
 	}
 }
 
