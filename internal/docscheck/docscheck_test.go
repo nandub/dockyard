@@ -58,6 +58,37 @@ func TestAIPlaybooksHaveRequiredSections(t *testing.T) {
 	}
 }
 
+func TestAIPromptsIncludeOperatingInstructions(t *testing.T) {
+	root := repoRoot(t)
+	promptsDir := filepath.Join(root, ".ai", "prompts")
+
+	entries, err := os.ReadDir(promptsDir)
+	if err != nil {
+		t.Fatalf("read prompts dir: %v", err)
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".md" {
+			continue
+		}
+		t.Run(entry.Name(), func(t *testing.T) {
+			content := readFile(t, filepath.Join(promptsDir, entry.Name()))
+			required := map[string][]string{
+				"AGENTS.md":   {"AGENTS.md"},
+				"playbook":    {".ai/playbooks/", "playbook"},
+				"behavior":    {"Inspect", "current behavior"},
+				"assumptions": {"assumption", "assumptions", "Unknown", "unverified", "uncertainty"},
+				"validation":  {"validation"},
+			}
+			for name, terms := range required {
+				if !containsAny(content, terms) {
+					t.Fatalf("missing prompt instruction for %s; expected one of %v", name, terms)
+				}
+			}
+		})
+	}
+}
+
 func TestNoStaleAIOnboardingReferences(t *testing.T) {
 	root := repoRoot(t)
 	forbidden := []string{
@@ -129,6 +160,16 @@ func isLocalDocRef(ref string) bool {
 	}
 	for _, prefix := range prefixes {
 		if strings.HasPrefix(ref, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+func containsAny(s string, terms []string) bool {
+	lower := strings.ToLower(s)
+	for _, term := range terms {
+		if strings.Contains(lower, strings.ToLower(term)) {
 			return true
 		}
 	}

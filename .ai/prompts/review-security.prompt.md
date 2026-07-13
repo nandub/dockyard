@@ -6,4 +6,4 @@ Perform a review-only security analysis unless remediation is explicitly request
 
 Identify trust boundaries, credential handling, token storage, OCI authentication, TLS delegation, filesystem trust, package verification, signature verification, SBOM generation, dependency verification, supply-chain protections, temporary files, privilege boundaries, shell execution, and network boundaries.
 
-Classify findings as Verified, Observed, Inferred, or Unknown. Return risks with evidence and do not apply fixes.
+Classify findings as Verified, Observed, Inferred, or Unknown. Return risks with evidence, validation performed or skipped, remaining uncertainty, and do not apply fixes.
