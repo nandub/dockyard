@@ -118,3 +118,60 @@ func TestManifestValidateRejectsDuplicateDependencyAliases(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
+
+func TestManifestValidateRejectsDuplicateDependencyNames(t *testing.T) {
+	manifest := validManifest()
+	manifest.Dependencies = []Dependency{
+		{Name: "postgres", Source: "oci://ghcr.io/nandub/dockyard/postgres:0.1.0"},
+		{Name: "postgres", Source: "oci://ghcr.io/nandub/dockyard/postgres:0.2.0"},
+	}
+
+	err := manifest.Validate()
+	if err == nil {
+		t.Fatal("expected duplicate dependency name validation error")
+	}
+	if err.Error() != `duplicate dependency name "postgres"` {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestManifestValidateRejectsInvalidDependencyAlias(t *testing.T) {
+	manifest := validManifest()
+	manifest.Dependencies = []Dependency{
+		{Name: "postgres", Alias: "../db", Source: "oci://ghcr.io/nandub/dockyard/postgres:0.1.0"},
+	}
+
+	err := manifest.Validate()
+	if err == nil {
+		t.Fatal("expected invalid dependency alias validation error")
+	}
+	if err.Error() != "dependencies[0].alias must match ^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$" {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestManifestValidateRejectsDependencySourceWhitespace(t *testing.T) {
+	manifest := validManifest()
+	manifest.Dependencies = []Dependency{
+		{Name: "postgres", Source: " oci://ghcr.io/nandub/dockyard/postgres:0.1.0"},
+	}
+
+	err := manifest.Validate()
+	if err == nil {
+		t.Fatal("expected dependency source whitespace validation error")
+	}
+	if err.Error() != "dependencies[0].source must not contain surrounding or embedded whitespace" {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func validManifest() Manifest {
+	return Manifest{
+		APIVersion: "dockyard.dev/v1alpha1",
+		Name:       "app",
+		Version:    "0.1.0",
+		Compose: ComposeConfig{
+			Base: "compose.yaml",
+		},
+	}
+}

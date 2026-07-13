@@ -83,3 +83,65 @@ func TestLoadForProcessRejectsDuplicate(t *testing.T) {
 		t.Fatal("expected duplicate key to fail")
 	}
 }
+
+func TestParseFileIgnoresBlankLinesCommentsAndExport(t *testing.T) {
+	t.Parallel()
+	path := t.TempDir() + "/test.env"
+	content := "\n# comment\nexport APP_PORT=8080\nAPP_NAME=Dockyard\n"
+	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	parsed, err := ParseFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(parsed) != 2 {
+		t.Fatalf("expected 2 entries, got %d: %#v", len(parsed), parsed)
+	}
+	if parsed["APP_PORT"] != "8080" || parsed["APP_NAME"] != "Dockyard" {
+		t.Fatalf("unexpected parsed values: %#v", parsed)
+	}
+}
+
+func TestParseFileRejectsInvalidNamesAndUnterminatedQuotes(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name    string
+		content string
+		want    string
+	}{
+		{
+			name:    "invalid name",
+			content: "1BAD=value\n",
+			want:    "invalid environment variable name",
+		},
+		{
+			name:    "unterminated double quote",
+			content: "APP_NAME=\"dockyard\n",
+			want:    "unterminated double-quoted value",
+		},
+		{
+			name:    "unterminated single quote",
+			content: "APP_NAME='dockyard\n",
+			want:    "unterminated single-quoted value",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			path := t.TempDir() + "/test.env"
+			if err := os.WriteFile(path, []byte(tt.content), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			_, err := ParseFile(path)
+			if err == nil {
+				t.Fatal("expected parse error")
+			}
+			if !strings.Contains(err.Error(), tt.want) {
+				t.Fatalf("got error %q, want it to contain %q", err.Error(), tt.want)
+			}
+		})
+	}
+}
