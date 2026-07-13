@@ -24,6 +24,24 @@ func TestLintDetectsPrivilegedService(t *testing.T) {
 	}
 }
 
+func TestLintRejectsMalformedComposeAndNonObjectServices(t *testing.T) {
+	if _, err := LintCompose([]byte("services:\n  - ["), dockpkg.SecurityPolicy{}); err == nil {
+		t.Fatal("expected malformed compose error")
+	}
+
+	findings, err := LintCompose([]byte("name: app\n"), dockpkg.SecurityPolicy{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	assertFinding(t, findings, SeverityHigh, "", "compose file must define services")
+
+	findings, err = LintCompose([]byte("services:\n  web: nginx\n"), dockpkg.SecurityPolicy{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	assertFinding(t, findings, SeverityHigh, "web", "service definition must be an object")
+}
+
 func TestLintPassesSecureService(t *testing.T) {
 	compose := []byte(`services:
   web:
@@ -97,6 +115,53 @@ func TestLintDetectsMissingHardeningSettings(t *testing.T) {
 	assertFinding(t, findings, SeverityMedium, "web", "service should drop all Linux capabilities with cap_drop: [ALL]")
 	if !HasHighFindings(findings) {
 		t.Fatal("expected high findings")
+	}
+}
+
+func TestLintAcceptsStructuredBindAndHardeningListValues(t *testing.T) {
+	compose := []byte(`services:
+  web:
+    image: nginx:1.27
+    user: "1000:1000"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    volumes:
+      - type: bind
+        source: named-volume
+        target: /data
+`)
+	findings, err := LintCompose(compose, dockpkg.SecurityPolicy{
+		RequireNonRoot:                true,
+		RequireReadOnlyRootFilesystem: true,
+		RequireNoNewPrivileges:        true,
+		RequireCapDropAll:             true,
+		DisallowHostPathMounts:        true,
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(findings) != 0 {
+		t.Fatalf("expected no findings, got %#v", findings)
+	}
+}
+
+func TestUsesLatestTagAndPolicyCatalog(t *testing.T) {
+	if !usesLatestTag("nginx") || !usesLatestTag("docker.io/library/nginx:latest") {
+		t.Fatal("expected missing and latest tags to be treated as latest")
+	}
+	if usesLatestTag("registry:5000/nginx:1.27") {
+		t.Fatal("did not expect explicit non-latest tag to be treated as latest")
+	}
+
+	catalog := Catalog()
+	if len(catalog) == 0 {
+		t.Fatal("expected policy catalog entries")
+	}
+	if !HasHighFindings(catalog) {
+		t.Fatal("expected policy catalog to contain high severity findings")
 	}
 }
 

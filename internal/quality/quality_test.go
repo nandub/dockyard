@@ -158,6 +158,77 @@ func TestLintPackageAllowsAdvisoryLicenseWarning(t *testing.T) {
 	}
 }
 
+func TestCheckValuesAndSchemaReportsSchemaQuality(t *testing.T) {
+	dir := t.TempDir()
+	writeQualityFile(t, dir, "values.yaml", `database:
+  password: changeme
+app:
+  port: 8080
+`)
+	writeQualityFile(t, dir, "values.schema.json", `{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "database": {
+      "type": "object",
+      "properties": {
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "app": {
+      "type": "object",
+      "properties": {
+        "port": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}`)
+
+	checks := checkValuesAndSchema(dir, true)
+	assertChecksContain(t, checks, "values.yaml", SeverityOK)
+	assertChecksContain(t, checks, "values.schema.json", SeverityOK)
+	assertChecksContain(t, checks, "schema descriptions", SeverityFail)
+	assertChecksContain(t, checks, "schema sensitive markers", SeverityFail)
+}
+
+func TestCheckDefaultRenderReportsPolicyFindings(t *testing.T) {
+	dir := t.TempDir()
+	writeQualityFile(t, dir, "values.yaml", "{}\n")
+	writeQualityFile(t, dir, "compose.yaml", `services:
+  web:
+    image: nginx:latest
+    privileged: true
+`)
+	manifest := &dockpkg.Manifest{
+		Compose: dockpkg.ComposeConfig{Base: "compose.yaml"},
+		Security: dockpkg.SecurityPolicy{
+			DisallowPrivileged: true,
+			DisallowLatestTag:  true,
+		},
+	}
+
+	checks := checkDefaultRender(dir, manifest)
+	assertChecksContain(t, checks, "default render", SeverityOK)
+	assertChecksContain(t, checks, "policy lint", SeverityFail)
+}
+
+func assertChecksContain(t *testing.T, checks []Check, name string, severity Severity) {
+	t.Helper()
+	for _, check := range checks {
+		if check.Name == name {
+			if check.Severity != severity {
+				t.Fatalf("expected check %q severity %s, got %s: %#v", name, severity, check.Severity, check)
+			}
+			return
+		}
+	}
+	t.Fatalf("missing check %q in %#v", name, checks)
+}
+
 func assertCheck(t *testing.T, report Report, name string, severity Severity) {
 	t.Helper()
 	for _, check := range report.Checks {
