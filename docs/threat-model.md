@@ -29,6 +29,8 @@ This threat model summarizes observed trust boundaries. The detailed historical 
 - Policy checks for selected Compose risks.
 - Lockfile and archive digest verification.
 - External registry authentication delegated to ORAS/Docker.
+- Restrictive file permissions are used for many generated files and release-state files where practical.
+- Temporary extraction and render directories are created with `os.MkdirTemp` and removed with `defer os.RemoveAll` on observed command paths.
 
 ## Known Risks
 
@@ -37,9 +39,12 @@ This threat model summarizes observed trust boundaries. The detailed historical 
 - Mutable tags can be used unless operators choose digest-pinned references.
 - Docker daemon access is a high-trust boundary.
 - External `docker` and `oras` binaries are trusted from `PATH`.
+- Policy and archive verification can be explicitly bypassed by flags such as `--skip-policy` and `--skip-verify`.
+- Catalog metadata can be loaded from OCI, file paths, `file://` paths, or cache. Operators should trust the configured catalog source.
+- Catalog cache storage is implemented under the operating system user home, not under `DOCKYARD_HOME`.
 
 ## Unknowns
 
 - Whether official package artifacts are intended to require signatures in the future.
 - Whether CI should enforce registry round-trip validation.
-- Whether catalog cache behavior should be tied to Dockyard home.
+- Whether catalog cache behavior should move under Dockyard home.

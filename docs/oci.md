@@ -20,12 +20,18 @@ Existing local paths, archives, and explicit `oci://` package references should 
 
 Dockyard shells out to `oras` for OCI push and pull. OCI authentication, credential storage, TLS behavior, and registry-specific auth are delegated to ORAS and the user environment.
 
+Dockyard trusts the `oras` executable resolved from `PATH`. Use normal operating-system and CI controls to ensure the expected binary is installed.
+
 ## Package Artifacts
 
 Package archives are `.dockyard.tgz` files. OCI package work intersects with archive verification, lockfiles, provenance metadata, catalog metadata, and release/package commands.
 
 ## Security Notes
 
-No OCI signature verification was observed in historical onboarding. Do not claim signature validation unless source proves it.
+No OCI signature verification is implemented in the current source. Do not claim signature validation unless source proves it.
+
+`dockyard push` verifies local archives before publishing unless `--skip-verify` is used. `dockyard pull` verifies pulled archives unless `--skip-verify` is used.
+
+Catalog metadata can be loaded from a configured OCI reference, a local YAML path, a `file://` path, or a short package name resolved through the configured catalog. The catalog cache is stored below the operating-system user home. Treat catalog configuration as a trust decision.
 
 Historical detail: `.ai/onboarding/reports/security.md` and `.ai/onboarding/reports/dependency-graph.md`.

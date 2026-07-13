@@ -67,6 +67,8 @@ dockyard.lock        # when generated before packaging
 
 Package archives reject common secret-like files such as `.env`, `*.pem`, `*.key`, `id_rsa`, and `id_ed25519`.
 
+Archive verification can be bypassed for `push` and `pull` with `--skip-verify`. Use that only for controlled troubleshooting; normal publish and consume paths should keep verification enabled.
+
 ## Lockfiles
 
 Create `dockyard.lock` for a specific render:
@@ -294,6 +296,8 @@ oras login ghcr.io
 ```
 
 Dockyard delegates authentication to `oras`. Do not pass credentials directly to Dockyard commands.
+
+Dockyard does not implement OCI package or catalog signature verification. Prefer immutable digest references or tightly controlled tags for high-trust environments.
 
 Push a verified archive:
 
