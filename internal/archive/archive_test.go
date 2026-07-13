@@ -25,6 +25,23 @@ func TestExtractArchiveRejectsPathTraversal(t *testing.T) {
 	}
 }
 
+func TestExtractArchiveRejectsUnsupportedEntryType(t *testing.T) {
+	archivePath := writeArchiveWithHeader(t, &tar.Header{
+		Name:     "link",
+		Typeflag: tar.TypeSymlink,
+		Linkname: "target",
+		Mode:     0o777,
+	})
+
+	err := ExtractArchive(archivePath, filepath.Join(t.TempDir(), "extract"))
+	if err == nil {
+		t.Fatal("expected unsupported entry type error")
+	}
+	if !strings.Contains(err.Error(), "unsupported entry type") {
+		t.Fatalf("expected unsupported entry type error, got %v", err)
+	}
+}
+
 func TestVerifyArchiveRejectsExtraFileNotListedInSHA256SUMS(t *testing.T) {
 	files := map[string]string{
 		"Dockyard.yaml": testManifest(),
@@ -149,6 +166,26 @@ func writeTestArchive(t *testing.T, files map[string]string) string {
 		if _, err := tw.Write(data); err != nil {
 			t.Fatalf("write tar body: %v", err)
 		}
+	}
+	return path
+}
+
+func writeArchiveWithHeader(t *testing.T, header *tar.Header) string {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), "package.dockyard.tgz")
+	out, err := os.Create(path)
+	if err != nil {
+		t.Fatalf("create archive: %v", err)
+	}
+	defer out.Close()
+
+	gz := gzip.NewWriter(out)
+	defer gz.Close()
+	tw := tar.NewWriter(gz)
+	defer tw.Close()
+
+	if err := tw.WriteHeader(header); err != nil {
+		t.Fatalf("write tar header: %v", err)
 	}
 	return path
 }

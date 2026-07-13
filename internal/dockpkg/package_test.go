@@ -1,6 +1,9 @@
 package dockpkg
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 func TestManifestValidateRequiresValidName(t *testing.T) {
 	manifest := Manifest{
@@ -19,6 +22,15 @@ func TestManifestValidateRequiresValidName(t *testing.T) {
 func TestSafeJoinRejectsEscape(t *testing.T) {
 	if _, err := SafeJoin("/tmp/pkg", "../secret"); err == nil {
 		t.Fatal("expected path escape to be rejected")
+	}
+}
+
+func TestSafeJoinRejectsEmptyAndAbsolutePaths(t *testing.T) {
+	if _, err := SafeJoin("/tmp/pkg", ""); err == nil {
+		t.Fatal("expected empty path to be rejected")
+	}
+	if _, err := SafeJoin("/tmp/pkg", os.TempDir()); err == nil {
+		t.Fatal("expected absolute path to be rejected")
 	}
 }
 
@@ -46,6 +58,56 @@ func TestManifestValidateMissingAPIVersion(t *testing.T) {
 	}
 	if err.Error() != "dockyard.yaml is missing apiVersion; expected dockyard.dev/v1alpha1" {
 		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestManifestValidateRejectsMissingVersionBaseAndUnsupportedType(t *testing.T) {
+	tests := []struct {
+		name     string
+		manifest Manifest
+		want     string
+	}{
+		{
+			name: "missing version",
+			manifest: Manifest{
+				APIVersion: "dockyard.dev/v1alpha1",
+				Name:       "app",
+				Compose:    ComposeConfig{Base: "compose.yaml"},
+			},
+			want: "manifest version is required",
+		},
+		{
+			name: "missing compose base",
+			manifest: Manifest{
+				APIVersion: "dockyard.dev/v1alpha1",
+				Name:       "app",
+				Version:    "0.1.0",
+			},
+			want: "compose.base is required",
+		},
+		{
+			name: "unsupported type",
+			manifest: Manifest{
+				APIVersion: "dockyard.dev/v1alpha1",
+				Name:       "app",
+				Version:    "0.1.0",
+				Type:       "service",
+				Compose:    ComposeConfig{Base: "compose.yaml"},
+			},
+			want: `unsupported package type "service"`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.manifest.Validate()
+			if err == nil {
+				t.Fatal("expected validation error")
+			}
+			if err.Error() != tt.want {
+				t.Fatalf("unexpected error: %v", err)
+			}
+		})
 	}
 }
 
@@ -162,6 +224,39 @@ func TestManifestValidateRejectsDependencySourceWhitespace(t *testing.T) {
 	}
 	if err.Error() != "dependencies[0].source must not contain surrounding or embedded whitespace" {
 		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestManifestValidateRejectsMissingAndInvalidDependencyName(t *testing.T) {
+	tests := []struct {
+		name string
+		dep  Dependency
+		want string
+	}{
+		{
+			name: "missing source",
+			dep:  Dependency{Name: "postgres"},
+			want: "dependencies[0].source is required",
+		},
+		{
+			name: "invalid name",
+			dep:  Dependency{Name: "../postgres", Source: "oci://ghcr.io/nandub/dockyard/postgres:0.1.0"},
+			want: "dependencies[0].name must match ^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			manifest := validManifest()
+			manifest.Dependencies = []Dependency{tt.dep}
+			err := manifest.Validate()
+			if err == nil {
+				t.Fatal("expected dependency validation error")
+			}
+			if err.Error() != tt.want {
+				t.Fatalf("unexpected error: %v", err)
+			}
+		})
 	}
 }
 

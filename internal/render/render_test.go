@@ -126,6 +126,41 @@ func TestRenderComposeMergesOverlay(t *testing.T) {
 	}
 }
 
+func TestRenderComposeRejectsUnknownOverlay(t *testing.T) {
+	dir := t.TempDir()
+	writeRenderTestFile(t, filepath.Join(dir, "compose.yaml"), "services: {}\n")
+	manifest := &dockpkg.Manifest{
+		Compose: dockpkg.ComposeConfig{
+			Base:     "compose.yaml",
+			Overlays: map[string]string{"prod": "compose.prod.yaml"},
+		},
+	}
+
+	_, err := RenderCompose(dir, manifest, nil, "staging")
+	if err == nil {
+		t.Fatal("expected unknown overlay error")
+	}
+	if !strings.Contains(err.Error(), `unknown overlay "staging"`) {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestNormalizeYAMLProducesCanonicalYAML(t *testing.T) {
+	got, err := NormalizeYAML([]byte("services:\n  web:\n    image: nginx\n"))
+	if err != nil {
+		t.Fatalf("normalize YAML: %v", err)
+	}
+	if !strings.Contains(string(got), "services:") || !strings.Contains(string(got), "image: nginx") {
+		t.Fatalf("unexpected normalized YAML:\n%s", got)
+	}
+}
+
+func TestNormalizeYAMLRejectsInvalidYAML(t *testing.T) {
+	if _, err := NormalizeYAML([]byte("services:\n  - [")); err == nil {
+		t.Fatal("expected invalid YAML error")
+	}
+}
+
 func writeRenderTestFile(t *testing.T, path string, content string) {
 	t.Helper()
 	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
