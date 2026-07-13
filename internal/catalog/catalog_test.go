@@ -1,6 +1,7 @@
 package catalog
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -254,7 +255,7 @@ func TestGetAndResolveNameFromFile(t *testing.T) {
 }
 
 func TestLoadReferenceRejectsInvalidReferenceAndFindsIndexFile(t *testing.T) {
-	if _, err := LoadReference(nil, "not-oci"); err == nil {
+	if _, err := LoadReference(context.TODO(), "not-oci"); err == nil {
 		t.Fatal("expected invalid catalog reference error")
 	}
 
