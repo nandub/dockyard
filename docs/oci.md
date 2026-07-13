@@ -1,6 +1,6 @@
 # OCI Model
 
-Dockyard supports OCI package and catalog operations through the external `oras` CLI.
+Dockyard supports OCI package and catalog operations through the embedded ORAS Go client.
 
 Evidence:
 
@@ -18,9 +18,11 @@ Existing local paths, archives, and explicit `oci://` package references should 
 
 ## ORAS Boundary
 
-Dockyard shells out to `oras` for OCI push and pull. OCI authentication, credential storage, TLS behavior, and registry-specific auth are delegated to ORAS and the user environment.
+Dockyard links `oras.land/oras-go/v2` for OCI package push, package pull, and catalog metadata pull. Package archives are pushed as named OCI layers so pulls restore the original archive filename.
 
-Dockyard trusts the `oras` executable resolved from `PATH`. Use normal operating-system and CI controls to ensure the expected binary is installed.
+Dockyard does not store registry credentials. Registry authentication uses Docker-compatible credential configuration when available, including Docker config files and configured credential helpers. Anonymous registry access is used when no matching credentials are configured.
+
+TLS, proxy, retry, and registry protocol behavior are handled by Go's HTTP stack and the ORAS Go client rather than by an external `oras` executable.
 
 ## Package Artifacts
 

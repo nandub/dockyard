@@ -5,6 +5,7 @@
 - `dockyard catalog list`, `dockyard catalog info`, `catalog://NAME[:VERSION]`, and bare install shorthand now resolve from `catalog.yaml` pulled from `DOCKYARD_CATALOG`.
 - Default catalog metadata reference is `oci://ghcr.io/nandub/dockyard-packages/catalog:latest`.
 - Added local file catalog loading for development/tests and short-lived catalog caching under `~/.dockyard/cache/catalogs`.
+- Replaced the external `oras` CLI dependency for package push/pull and catalog pulls with the embedded ORAS Go client.
 
 # Changelog
 

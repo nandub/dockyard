@@ -13,7 +13,7 @@ Dockyard package
   -> Compose rendering
   -> policy and secrets checks
   -> lock/package/verify
-  -> OCI push/pull through ORAS
+  -> OCI push/pull through the embedded ORAS Go client
   -> dependency planning and explicit dependency installation
   -> release revision state
   -> docker compose up/down
@@ -228,7 +228,7 @@ artifact type: application/vnd.dockyard.package.v1+gzip
 archive layer: application/vnd.dockyard.package.archive.v1+gzip
 ```
 
-OCI push/pull uses the `oras` CLI. Run `dockyard doctor` to check whether `oras` is available.
+OCI push/pull is built into Dockyard through the embedded ORAS Go client. Registry authentication uses Docker-compatible credential configuration when available.
 
 ## Examples
 

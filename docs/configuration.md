@@ -1,6 +1,6 @@
 # Configuration
 
-Observed configuration sources include CLI flags, environment variables, package files, values files, schemas, lockfiles, catalog metadata, and Docker/ORAS external configuration.
+Observed configuration sources include CLI flags, environment variables, package files, values files, schemas, lockfiles, catalog metadata, Docker configuration, and Docker-compatible registry credential configuration.
 
 ## Dockyard Home
 

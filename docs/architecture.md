@@ -28,7 +28,7 @@ Evidence:
 - Keep CLI code thin.
 - Put testable behavior in `internal/*`.
 - Do not execute arbitrary package hooks or scripts.
-- Keep OCI authentication outside Dockyard; current behavior delegates to `oras`.
+- Keep OCI credentials outside Dockyard-owned state; current behavior reads Docker-compatible registry credentials through the embedded ORAS Go client.
 - Preserve Windows-safe path handling.
 - Treat package archives and package paths as untrusted input.
 

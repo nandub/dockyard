@@ -1,6 +1,6 @@
 # Development Workflow
 
-Observed local development uses Go, the Makefile, and Docker/ORAS-dependent commands for runtime or registry paths.
+Observed local development uses Go, the Makefile, Docker-dependent commands for runtime paths, and registry-dependent commands for OCI paths.
 
 ## Bootstrap
 

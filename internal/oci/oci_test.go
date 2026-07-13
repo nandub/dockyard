@@ -1,9 +1,15 @@
 package oci
 
 import (
+	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
+
+	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
+	"oras.land/oras-go/v2/content"
+	"oras.land/oras-go/v2/content/memory"
 )
 
 func TestNormalizeReferenceRequiresScheme(t *testing.T) {
@@ -46,25 +52,6 @@ func TestNormalizeReferenceAcceptsDigest(t *testing.T) {
 	_, err := NormalizeReference("oci://ghcr.io/nandub/dockyard/app@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
-	}
-}
-
-func TestPushArgsUsesDockyardArtifactType(t *testing.T) {
-	got := PushArgs("ghcr.io/nandub/dockyard/nginx:0.1.0", "nginx-0.1.0.dockyard.tgz")
-	want := []string{
-		"push",
-		"--artifact-type",
-		ArtifactType,
-		"ghcr.io/nandub/dockyard/nginx:0.1.0",
-		"nginx-0.1.0.dockyard.tgz:" + LayerMediaType,
-	}
-	if len(got) != len(want) {
-		t.Fatalf("expected %d args, got %d: %#v", len(want), len(got), got)
-	}
-	for i := range want {
-		if got[i] != want[i] {
-			t.Fatalf("arg %d: expected %q, got %q", i, want[i], got[i])
-		}
 	}
 }
 
@@ -113,4 +100,60 @@ func TestFindPulledArchiveRequiresExactlyOneArchive(t *testing.T) {
 			t.Fatal("expected multiple archive error")
 		}
 	})
+}
+
+func TestPushArchiveToTargetAndPullReferenceToDirRoundTrip(t *testing.T) {
+	ctx := context.Background()
+	dir := t.TempDir()
+	archiveName := "nginx-0.1.0.dockyard.tgz"
+	archivePath := filepath.Join(dir, archiveName)
+	archiveData := []byte("archive")
+	if err := os.WriteFile(archivePath, archiveData, 0o600); err != nil {
+		t.Fatalf("write archive: %v", err)
+	}
+
+	target := memory.New()
+	const ref = "0.1.0"
+	if err := pushArchiveToTarget(ctx, archivePath, ref, target); err != nil {
+		t.Fatalf("push archive to target: %v", err)
+	}
+
+	desc, err := target.Resolve(ctx, ref)
+	if err != nil {
+		t.Fatalf("resolve pushed reference: %v", err)
+	}
+	manifestData, err := content.FetchAll(ctx, target, desc)
+	if err != nil {
+		t.Fatalf("fetch manifest: %v", err)
+	}
+	var manifest ocispec.Manifest
+	if err := json.Unmarshal(manifestData, &manifest); err != nil {
+		t.Fatalf("decode manifest: %v", err)
+	}
+	if manifest.ArtifactType != ArtifactType {
+		t.Fatalf("expected artifact type %q, got %q", ArtifactType, manifest.ArtifactType)
+	}
+	if len(manifest.Layers) != 1 {
+		t.Fatalf("expected one archive layer, got %d", len(manifest.Layers))
+	}
+	layer := manifest.Layers[0]
+	if layer.MediaType != LayerMediaType {
+		t.Fatalf("expected layer media type %q, got %q", LayerMediaType, layer.MediaType)
+	}
+	if layer.Annotations[ocispec.AnnotationTitle] != archiveName {
+		t.Fatalf("expected layer title %q, got %q", archiveName, layer.Annotations[ocispec.AnnotationTitle])
+	}
+
+	outDir := t.TempDir()
+	if err := pullReferenceToDir(ctx, target, ref, outDir); err != nil {
+		t.Fatalf("pull reference to dir: %v", err)
+	}
+	pulledPath := filepath.Join(outDir, archiveName)
+	pulledData, err := os.ReadFile(pulledPath)
+	if err != nil {
+		t.Fatalf("read pulled archive: %v", err)
+	}
+	if string(pulledData) != string(archiveData) {
+		t.Fatalf("pulled archive data mismatch: got %q", pulledData)
+	}
 }

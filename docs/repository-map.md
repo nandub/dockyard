@@ -25,7 +25,7 @@ This map summarizes observed repository structure. Historical discovery detail i
 - `internal/runner/` - Docker and Docker Compose subprocess integration.
 - `internal/archive/` - `.dockyard.tgz` archive creation and verification.
 - `internal/lock/` - `dockyard.lock` creation and verification.
-- `internal/oci/` - ORAS-based OCI push and pull.
+- `internal/oci/` - embedded ORAS Go client integration for OCI push and pull.
 - `internal/catalog/` - catalog source resolution and metadata loading.
 - `internal/envfile/` - env-file template and validation helpers.
 - `internal/quality/` - package quality validation.

@@ -83,7 +83,7 @@ Run `dockyard package deps` to inspect declared dependencies in `Dockyard.yaml`.
 
 Run `dockyard package test` for a fuller package-author pipeline. It prepares local directories, archives, or OCI sources, runs quality checks, renders with selected values, runs policy checks, and validates the result with `docker compose config`. Add `--smoke` for examples that can be started and stopped with a temporary Compose project name.
 
-OCI push/pull uses the `oras` CLI and relies on external registry authentication. Dockyard publishes packages with:
+OCI push/pull uses the embedded ORAS Go client and reads Docker-compatible registry credentials when available. Dockyard publishes packages with:
 
 ```text
 artifact type: application/vnd.dockyard.package.v1+gzip
@@ -187,7 +187,7 @@ dockyard compat [PACKAGE_SOURCE] [--release RELEASE] [--strict] [--json]
 dockyard version [--json]
 ```
 
-`doctor` checks local prerequisites such as Docker, Docker Compose, Dockyard home, and optional `oras`.
+`doctor` checks local prerequisites such as Docker, Docker Compose, Dockyard home, and the internal OCI registry client.
 
 `compat` shows supported Dockyard format versions or checks a package/release for compatibility issues. Use `--strict` for release gates.
 

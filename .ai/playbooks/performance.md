@@ -23,7 +23,7 @@ Use for slow commands, package rendering, archive operations, schema validation,
 ## Procedure
 
 1. Measure current behavior.
-2. Separate Dockyard time from Docker, Compose, ORAS, registry, and network time.
+2. Separate Dockyard time from Docker, Compose, embedded ORAS Go client, registry, and network time.
 3. Inspect repeated filesystem, archive, render, validation, or subprocess work.
 4. Prefer targeted changes over caches that weaken trust or correctness.
 5. Add benchmark or regression tests when practical.

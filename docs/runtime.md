@@ -21,7 +21,7 @@ Runtime commands load package manifests, values files, schemas, env files, lockf
 Dockyard delegates:
 
 - Docker and Docker Compose operations to external Docker/Compose commands.
-- OCI package push/pull and catalog artifact pull to external `oras`.
+- OCI package push/pull and catalog artifact pull through the embedded ORAS Go client.
 
 ## Lifecycle
 

@@ -114,7 +114,7 @@ Package archive verification checks unsafe paths, unsupported archive entry type
 
 `dockyard push` verifies local archives before publishing unless `--skip-verify` is used. `dockyard pull` verifies pulled archives unless `--skip-verify` is used.
 
-OCI registry authentication, credential storage, TLS behavior, and registry-specific trust are delegated to the external `oras` CLI and the operator environment. Dockyard does not store registry credentials.
+OCI registry operations use the embedded ORAS Go client. Dockyard does not store registry credentials; it reads Docker-compatible registry credentials when available and otherwise uses anonymous registry access. TLS, proxy, retry, and registry-specific protocol behavior are handled by Go's HTTP stack, the ORAS Go client, and the operator environment.
 
 No package or catalog signature verification is currently implemented in source. Treat OCI package and catalog references as trusted only when the registry, tag/digest policy, and publishing process are trusted.
 

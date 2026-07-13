@@ -14,7 +14,7 @@ This document defines Dockyard domain concepts observed in source and documentat
 - Lockfile: `dockyard.lock`, generated and verified by `internal/lock`.
 - Provenance metadata: `package.provenance.json`, generated package metadata. No signature verification was observed.
 - Catalog: metadata index used for `catalog://NAME[:VERSION]` and shorthand resolution.
-- OCI package: Dockyard package archive pushed to or pulled from an OCI registry using ORAS.
+- OCI package: Dockyard package archive pushed to or pulled from an OCI registry using the embedded ORAS Go client.
 
 ## Runtime Boundary
 

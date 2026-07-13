@@ -12,7 +12,7 @@ Observed evidence:
 - CLI entry point: `cmd/dockyard/main.go`.
 - Cobra command wiring: `internal/cli/`.
 - Docker Compose delegation: `internal/runner/`.
-- OCI operations through external `oras`: `internal/oci/` and `internal/catalog/`.
+- OCI operations through the embedded ORAS Go client: `internal/oci/` and `internal/catalog/`.
 
 Dockyard is a package/deployment manager for Docker Compose workflows.
 
@@ -83,7 +83,7 @@ The `.ai/` directory is repository documentation for humans and AI tools. It is 
 - Do not weaken validation, policy checks, path safety, archive safety, or secret handling.
 - Do not manually modify generated files, vendored files, package archives, binaries, local state, or local smoke-test artifacts.
 - Do not expose credentials, tokens, secret values, or private key material in output, logs, docs examples, or errors.
-- Keep OCI credentials outside Dockyard; current behavior delegates OCI auth to `oras`.
+- Keep OCI credentials outside Dockyard-owned state; current behavior reads Docker-compatible registry credentials through the embedded ORAS Go client.
 - Treat package archives and package paths as untrusted input.
 - Preserve Windows path handling; use `filepath` for filesystem paths and `path` only for archive-internal slash paths.
 - Report commands that could not be run.

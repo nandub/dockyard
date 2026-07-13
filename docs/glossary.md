@@ -35,7 +35,7 @@ This glossary is for maintainers and AI agents. It defines repository terminolog
 : `dockyard.lock` creation and verification.
 
 `internal/oci/`
-: OCI package push/pull integration through the external `oras` CLI.
+: OCI package push/pull integration through the embedded ORAS Go client.
 
 `internal/catalog/`
 : Catalog source resolution and OCI/local catalog metadata loading.
@@ -106,10 +106,10 @@ Catalog
 : Metadata index used to resolve `catalog://NAME[:VERSION]` and bare package shorthand.
 
 OCI package
-: Dockyard package archive pushed to or pulled from an OCI registry with ORAS.
+: Dockyard package archive pushed to or pulled from an OCI registry with the embedded ORAS Go client.
 
 ORAS
-: External `oras` CLI used for OCI artifact operations. Dockyard does not link an OCI registry client library directly.
+: OCI artifact tooling and Go library used by Dockyard for registry push and pull operations.
 
 Policy check
 : Dockyard checks for selected Compose risks such as privileged mode, host networking, Docker socket mounts, host paths, and image tag concerns.

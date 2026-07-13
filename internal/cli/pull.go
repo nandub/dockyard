@@ -17,7 +17,7 @@ func newPullCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "pull OCI_REFERENCE",
-		Short: "Pull a Dockyard package archive from an OCI registry using the oras CLI",
+		Short: "Pull a Dockyard package archive from an OCI registry",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			tempDir, err := os.MkdirTemp("", "dockyard-pull-*")

@@ -7,5 +7,5 @@
 - `go test ./...` was run or skipped with a reason.
 - Build command was run or skipped with a reason.
 - Package validation was run or skipped with a reason when package behavior changed.
-- Docker, ORAS, registry, or network-dependent checks are clearly marked as run or not run.
+- Docker, registry, or network-dependent checks are clearly marked as run or not run.
 - Remaining unknowns are documented.

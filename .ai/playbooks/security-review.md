@@ -25,7 +25,7 @@ Use for trust-boundary reviews, credential handling, archive safety, OCI supply-
 ## Procedure
 
 1. Identify assets and trust boundaries.
-2. Separate Dockyard-owned controls from Docker, Compose, ORAS, registry, OS, and CI responsibilities.
+2. Separate Dockyard-owned controls from Docker, Compose, the embedded ORAS Go client, registry, OS, and CI responsibilities.
 3. Inspect credential, token, TLS, filesystem, archive, subprocess, and network behavior.
 4. Rate risks with source or workflow evidence.
 5. Mark unknowns instead of guessing.

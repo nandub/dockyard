@@ -50,7 +50,7 @@ Use for reported bugs, failing tests, regressions, incorrect docs examples, or i
 
 - Fix requires contract changes.
 - Reproduction requires Docker or registry access.
-- The bug appears to be in Docker Compose, ORAS, or another delegated system.
+- The bug appears to be in Docker Compose, registry infrastructure, or another delegated system.
 
 ## Required Completion Report
 

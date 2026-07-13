@@ -8,7 +8,7 @@ This document summarizes the observed Dockyard package lifecycle.
 2. Validate: lint, values/schema validation, policy checks, and Compose validation where requested.
 3. Build package archive: create `.dockyard.tgz`.
 4. Verify package archive: extract safely and validate checksums/provenance/manifest.
-5. Push OCI package: use ORAS to push package artifacts.
+5. Push OCI package: use Dockyard's embedded ORAS Go client to push package artifacts.
 6. Catalog: publish or load catalog metadata for package discovery and shorthand resolution.
 7. Pull or resolve: use explicit OCI references, catalog references, or shorthand according to precedence.
 8. Install: render Compose, validate/policy-check, write release state, and delegate to Docker Compose.

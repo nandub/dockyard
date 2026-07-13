@@ -522,10 +522,10 @@ Remove Dockyard metadata after uninstall:
 
 Dockyard can distribute the same verified `.dockyard.tgz` archive through OCI registries.
 
-Dockyard delegates registry authentication and transport to the `oras` CLI. For example, with GitHub Container Registry:
+Dockyard reads Docker-compatible registry credentials for private OCI registries. For example, with GitHub Container Registry:
 
 ```bash
-oras login ghcr.io
+docker login ghcr.io
 ```
 
 Push the package:

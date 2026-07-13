@@ -39,13 +39,13 @@ Package authors should also run image scanning and dependency scanning in their 
 
 ## OCI support
 
-OCI push and pull currently use the external `oras` CLI. Run:
+OCI push and pull use Dockyard's embedded ORAS Go client. Run:
 
 ```bash
 dockyard doctor
 ```
 
-to check whether `oras` is available.
+to check whether the internal OCI registry client is available.
 
 ## Best-effort compatibility
 

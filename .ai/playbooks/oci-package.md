@@ -6,7 +6,7 @@ Change OCI package, archive, lockfile, provenance, ORAS, or registry behavior sa
 
 ## When to Use It
 
-Use for `oci://` references, package push/pull, `.dockyard.tgz`, `dockyard.lock`, provenance metadata, ORAS command construction, or registry round trips.
+Use for `oci://` references, package push/pull, `.dockyard.tgz`, `dockyard.lock`, provenance metadata, ORAS Go client behavior, or registry round trips.
 
 ## Required Reading
 
@@ -28,8 +28,8 @@ Use for `oci://` references, package push/pull, `.dockyard.tgz`, `dockyard.lock`
 ## Procedure
 
 1. Preserve precedence for local paths, archives, explicit `oci://`, catalog references, and shorthand resolution.
-2. Keep ORAS authentication external.
-3. Do not pass absolute archive paths to ORAS.
+2. Keep registry credentials outside Dockyard-owned state.
+3. Preserve archive layer names and media types when pushing through the ORAS Go client.
 4. Preserve archive path safety and forbidden-file checks.
 5. Preserve quiet pull behavior for JSON output modes.
 6. Add tests for reference parsing, archive verification, and command construction.
@@ -45,7 +45,7 @@ Use for `oci://` references, package push/pull, `.dockyard.tgz`, `dockyard.lock`
 ## Completion Checklist
 
 - Reference precedence preserved.
-- ORAS auth remains outside Dockyard.
+- Registry credentials remain outside Dockyard-owned state.
 - Archive verification remains strict.
 - JSON output remains machine-readable.
 - Registry validation is complete or explicitly not run.

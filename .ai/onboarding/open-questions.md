@@ -7,6 +7,6 @@ These questions come from historical onboarding reports and remain unverified in
 - Should CI pin GitHub Actions and Go security tools to immutable versions?
 - Should archive extraction enforce total uncompressed size or file-count limits?
 - Should catalog cache location follow `DOCKYARD_HOME`?
-- Should Docker or ORAS executable paths be configurable or verified?
+- Should the Docker executable path be configurable or verified?
 - Should live OCI registry round-trip validation exist in CI?
 - Should coverage reporting or a coverage gate be added?

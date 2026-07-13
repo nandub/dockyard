@@ -4,11 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
+
+	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
+	"oras.land/oras-go/v2"
+	"oras.land/oras-go/v2/content/file"
+	"oras.land/oras-go/v2/registry/remote"
+	"oras.land/oras-go/v2/registry/remote/auth"
+	"oras.land/oras-go/v2/registry/remote/credentials"
+	"oras.land/oras-go/v2/registry/remote/retry"
 )
 
 const (
@@ -42,18 +48,10 @@ func NormalizeReference(input string) (string, error) {
 	return ref, nil
 }
 
-func CommandAvailable() bool {
-	_, err := exec.LookPath("oras")
-	return err == nil
-}
-
 func Push(ctx context.Context, archivePath string, ref string) error {
 	normalized, err := NormalizeReference(ref)
 	if err != nil {
 		return err
-	}
-	if !CommandAvailable() {
-		return errors.New("oras CLI was not found in PATH; install oras to use OCI push/pull")
 	}
 	cleanArchive := filepath.Clean(archivePath)
 	if _, err := os.Stat(cleanArchive); err != nil {
@@ -63,22 +61,14 @@ func Push(ctx context.Context, archivePath string, ref string) error {
 	if err != nil {
 		return fmt.Errorf("resolve package archive: %w", err)
 	}
-	archiveDir := filepath.Dir(absArchive)
-	archiveName := filepath.Base(absArchive)
-	args := PushArgs(normalized, archiveName)
-	cmd := exec.CommandContext(ctx, "oras", args...)
-	cmd.Dir = archiveDir
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return errors.New("oras push failed")
+	repo, err := newRepository(normalized)
+	if err != nil {
+		return err
+	}
+	if err := pushArchiveToTarget(ctx, absArchive, repo.Reference.Reference, repo); err != nil {
+		return fmt.Errorf("push OCI package: %w", err)
 	}
 	return nil
-}
-
-func PushArgs(normalizedRef string, archiveName string) []string {
-	layer := archiveName + ":" + LayerMediaType
-	return []string{"push", "--artifact-type", ArtifactType, normalizedRef, layer}
 }
 
 type PullOptions struct {
@@ -90,33 +80,100 @@ func Pull(ctx context.Context, ref string, outputDir string) (string, error) {
 }
 
 func PullWithOptions(ctx context.Context, ref string, outputDir string, opts PullOptions) (string, error) {
-	normalized, err := NormalizeReference(ref)
-	if err != nil {
+	if err := PullFiles(ctx, ref, outputDir, opts); err != nil {
 		return "", err
 	}
-	if !CommandAvailable() {
-		return "", errors.New("oras CLI was not found in PATH; install oras to use OCI push/pull")
-	}
-	cleanOutput := filepath.Clean(outputDir)
-	if err := os.MkdirAll(cleanOutput, 0o700); err != nil {
-		return "", fmt.Errorf("create OCI pull directory: %w", err)
-	}
-	cmd := exec.CommandContext(ctx, "oras", "pull", normalized, "-o", cleanOutput)
-	if opts.Quiet {
-		cmd.Stdout = io.Discard
-		cmd.Stderr = io.Discard
-	} else {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-	}
-	if err := cmd.Run(); err != nil {
-		return "", errors.New("oras pull failed")
-	}
-	archivePath, err := findPulledArchive(cleanOutput)
+	archivePath, err := findPulledArchive(filepath.Clean(outputDir))
 	if err != nil {
 		return "", err
 	}
 	return archivePath, nil
+}
+
+func PullFiles(ctx context.Context, ref string, outputDir string, _ PullOptions) error {
+	normalized, err := NormalizeReference(ref)
+	if err != nil {
+		return err
+	}
+	cleanOutput := filepath.Clean(outputDir)
+	if err := os.MkdirAll(cleanOutput, 0o700); err != nil {
+		return fmt.Errorf("create OCI pull directory: %w", err)
+	}
+	repo, err := newRepository(normalized)
+	if err != nil {
+		return err
+	}
+	if err := pullReferenceToDir(ctx, repo, repo.Reference.Reference, cleanOutput); err != nil {
+		return fmt.Errorf("pull OCI package: %w", err)
+	}
+	return nil
+}
+
+func newRepository(normalizedRef string) (*remote.Repository, error) {
+	repo, err := remote.NewRepository(normalizedRef)
+	if err != nil {
+		return nil, fmt.Errorf("parse OCI reference: %w", err)
+	}
+	client, err := newAuthClient()
+	if err != nil {
+		return nil, err
+	}
+	repo.Client = client
+	return repo, nil
+}
+
+func newAuthClient() (*auth.Client, error) {
+	client := &auth.Client{
+		Client: retry.DefaultClient,
+		Cache:  auth.DefaultCache,
+	}
+	client.SetUserAgent("dockyard")
+	store, err := credentials.NewStoreFromDocker(credentials.StoreOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("load Docker registry credentials: %w", err)
+	}
+	client.Credential = credentials.Credential(store)
+	return client, nil
+}
+
+func pushArchiveToTarget(ctx context.Context, archivePath string, ref string, target oras.Target) error {
+	archiveDir := filepath.Dir(archivePath)
+	archiveName := filepath.Base(archivePath)
+	store, err := file.New(archiveDir)
+	if err != nil {
+		return fmt.Errorf("create OCI file store: %w", err)
+	}
+	defer store.Close()
+	layer, err := store.Add(ctx, archiveName, LayerMediaType, archiveName)
+	if err != nil {
+		return fmt.Errorf("add package archive layer: %w", err)
+	}
+	manifest, err := oras.PackManifest(ctx, store, oras.PackManifestVersion1_1, ArtifactType, oras.PackManifestOptions{
+		Layers: []ocispec.Descriptor{layer},
+	})
+	if err != nil {
+		return fmt.Errorf("pack package manifest: %w", err)
+	}
+	if err := store.Tag(ctx, manifest, ref); err != nil {
+		return fmt.Errorf("tag package manifest: %w", err)
+	}
+	if _, err := oras.Copy(ctx, store, ref, target, ref, oras.DefaultCopyOptions); err != nil {
+		return err
+	}
+	return nil
+}
+
+func pullReferenceToDir(ctx context.Context, source oras.ReadOnlyTarget, ref string, outputDir string) error {
+	store, err := file.New(outputDir)
+	if err != nil {
+		return fmt.Errorf("create OCI output store: %w", err)
+	}
+	defer store.Close()
+	store.DisableOverwrite = true
+	if _, err := oras.Copy(ctx, source, ref, store, ref, oras.DefaultCopyOptions); err != nil {
+		return err
+	}
+	return nil
 }
 
 func findPulledArchive(dir string) (string, error) {

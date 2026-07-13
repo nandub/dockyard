@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/nandub/dockyard/internal/oci"
 	"github.com/nandub/dockyard/internal/runner"
 	"github.com/nandub/dockyard/internal/state"
 	"github.com/spf13/cobra"
@@ -43,11 +42,7 @@ func newDoctorCommand(global *globalOptions) *cobra.Command {
 				return err
 			}
 			fmt.Println("OK: Docker daemon reachable")
-			if oci.CommandAvailable() {
-				fmt.Println("OK: oras found for OCI registry operations")
-			} else {
-				fmt.Println("WARN: oras not found; OCI push/pull commands will not work")
-			}
+			fmt.Println("OK: internal OCI registry client available")
 			return nil
 		},
 	}

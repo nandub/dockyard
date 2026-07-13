@@ -20,7 +20,7 @@ Use for Go tests, package validation, smoke tests, CI validation, coverage, benc
 ## Preconditions
 
 - Target behavior and validation level are clear.
-- Runtime prerequisites such as Docker or ORAS are known.
+- Runtime prerequisites such as Docker or OCI registry access are known.
 
 ## Procedure
 

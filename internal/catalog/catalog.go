@@ -6,15 +6,14 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
 	"time"
 
+	"github.com/nandub/dockyard/internal/oci"
 	"go.yaml.in/yaml/v4"
 )
 
@@ -242,9 +241,6 @@ func parseRef(ref string) (string, string, error) {
 }
 
 func pullIndex(ctx context.Context, ref string) (Index, error) {
-	if _, err := exec.LookPath("oras"); err != nil {
-		return Index{}, errors.New("oras CLI was not found in PATH; install oras to use catalog metadata")
-	}
 	tempRoot, err := os.MkdirTemp("", "dockyard-catalog-*")
 	if err != nil {
 		return Index{}, fmt.Errorf("create catalog temp dir: %w", err)
@@ -253,12 +249,8 @@ func pullIndex(ctx context.Context, ref string) (Index, error) {
 
 	pullCtx, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	defer cancel()
-	normalized := strings.TrimPrefix(ref, "oci://")
-	cmd := exec.CommandContext(pullCtx, "oras", "pull", normalized, "-o", tempRoot)
-	cmd.Stdout = io.Discard
-	cmd.Stderr = io.Discard
-	if err := cmd.Run(); err != nil {
-		return Index{}, fmt.Errorf("pull catalog %q: oras pull failed", ref)
+	if err := oci.PullFiles(pullCtx, ref, tempRoot, oci.PullOptions{Quiet: true}); err != nil {
+		return Index{}, fmt.Errorf("pull catalog %q: %w", ref, err)
 	}
 	path, err := findIndexFile(tempRoot)
 	if err != nil {

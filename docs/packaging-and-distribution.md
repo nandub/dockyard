@@ -278,7 +278,7 @@ Archives are verified before extraction for install, upgrade, and diff.
 
 ## OCI registry support
 
-Dockyard can push and pull `.dockyard.tgz` package archives using OCI registries through the `oras` CLI.
+Dockyard can push and pull `.dockyard.tgz` package archives using OCI registries through the embedded ORAS Go client.
 
 Dockyard publishes packages with:
 
@@ -289,13 +289,13 @@ archive layer: application/vnd.dockyard.package.archive.v1+gzip
 
 This lets registries and tooling distinguish Dockyard packages from generic ORAS blobs.
 
-Install and authenticate with `oras` before using these commands:
+Authenticate with Docker-compatible registry credentials before using private registries:
 
 ```bash
-oras login ghcr.io
+docker login ghcr.io
 ```
 
-Dockyard delegates authentication to `oras`. Do not pass credentials directly to Dockyard commands.
+Dockyard reads Docker-compatible registry credentials when available. Do not pass credentials directly to Dockyard commands.
 
 Dockyard does not implement OCI package or catalog signature verification. Prefer immutable digest references or tightly controlled tags for high-trust environments.
 
@@ -325,7 +325,7 @@ dockyard diff dashboard-prod   oci://ghcr.io/nandub/dockyard/team-dashboard:0.1.
 dockyard upgrade dashboard-prod   oci://ghcr.io/nandub/dockyard/team-dashboard:0.1.1   -f ../deploy-values/dashboard-prod.yaml   --require-lock
 ```
 
-`dockyard doctor` reports whether `oras` is available. OCI references must include an explicit tag or digest.
+`dockyard doctor` reports that the internal OCI registry client is available. OCI references must include an explicit tag or digest.
 
 ## Publish official examples
 
@@ -343,7 +343,7 @@ dockyard verify ../dockyard-artifacts/nginx-0.1.0.dockyard.tgz --require-lock
 Push to GHCR:
 
 ```bash
-oras login ghcr.io
+docker login ghcr.io
 dockyard push ../dockyard-artifacts/nginx-0.1.0.dockyard.tgz   oci://ghcr.io/nandub/dockyard/nginx:0.1.0
 ```
 
@@ -361,6 +361,8 @@ Dockyard catalog metadata is distributed as an OCI artifact. Publish a `catalog.
 ```bash
 oras push --artifact-type application/vnd.dockyard.catalog.v1+yaml ghcr.io/nandub/dockyard-packages/catalog:latest catalog.yaml:application/vnd.dockyard.catalog.index.v1+yaml
 ```
+
+Dockyard can read catalog metadata from OCI, but it does not currently provide a dedicated catalog publish command; the example above uses the external `oras` CLI for that manual catalog publishing step.
 
 Operators can then run:
 

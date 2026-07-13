@@ -13,7 +13,7 @@ func newPushCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "push PACKAGE_ARCHIVE OCI_REFERENCE",
-		Short: "Push a Dockyard package archive to an OCI registry using the oras CLI",
+		Short: "Push a Dockyard package archive to an OCI registry",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			archivePath := args[0]
