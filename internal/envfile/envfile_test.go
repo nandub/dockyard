@@ -31,6 +31,54 @@ func TestGenerateTemplateMasksSensitive(t *testing.T) {
 	}
 }
 
+func TestGenerateTemplateSupportsPrefixAndSensitiveOnly(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	if err := os.WriteFile(dir+"/values.yaml", []byte(`app:
+  port: 8080
+database:
+  password: supersecret
+  username: dockyard
+`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := GenerateTemplate(dir, TemplateOptions{Prefix: "dockyard app", SensitiveOnly: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := string(data)
+	if !strings.Contains(out, "DOCKYARD_APP_DATABASE_PASSWORD=") {
+		t.Fatalf("expected prefixed sensitive variable:\n%s", out)
+	}
+	if strings.Contains(out, "APP_PORT") || strings.Contains(out, "DATABASE_USERNAME") || strings.Contains(out, "supersecret") {
+		t.Fatalf("sensitive-only template included non-sensitive or secret defaults:\n%s", out)
+	}
+}
+
+func TestGenerateTemplateQuotesValuesWhenNeeded(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	if err := os.WriteFile(dir+"/values.yaml", []byte(`app:
+  name: Dockyard App
+  multiline: "one\ntwo"
+  port: 8080
+`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := GenerateTemplate(dir, TemplateOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := string(data)
+	for _, want := range []string{`APP_NAME="Dockyard App"`, `APP_MULTILINE=one\ntwo`, `APP_PORT=8080`} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("expected %q in generated env template:\n%s", want, out)
+		}
+	}
+}
+
 func TestCheckFileDetectsDuplicateAndSecret(t *testing.T) {
 	t.Parallel()
 	path := t.TempDir() + "/test.env"
