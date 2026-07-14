@@ -8,4 +8,5 @@
 - Build command was run or skipped with a reason.
 - Package validation was run or skipped with a reason when package behavior changed.
 - Docker, registry, or network-dependent checks are clearly marked as run or not run.
+- Registry smoke validation is reported separately when OCI/catalog behavior changes.
 - Remaining unknowns are documented.
