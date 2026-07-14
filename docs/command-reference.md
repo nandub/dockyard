@@ -75,6 +75,7 @@ dockyard package PACKAGE_DIR [--locked] [-f values.yaml] -o app-0.1.0.dockyard.t
 dockyard verify PACKAGE_ARCHIVE [-f values.yaml] [--require-lock]
 dockyard push PACKAGE_ARCHIVE oci://registry/repository/name:tag
 dockyard pull oci://registry/repository/name:tag [-o PACKAGE_ARCHIVE]
+dockyard pull PACKAGE [-o PACKAGE_ARCHIVE]
 ```
 
 Run `dockyard package lint --strict` before publishing packages. It checks package documentation, forbidden local artifacts, dependency metadata, schema quality, sensitive markers, default rendering, and policy findings.
@@ -82,6 +83,8 @@ Run `dockyard package lint --strict` before publishing packages. It checks packa
 Run `dockyard package deps` to inspect declared dependencies in `Dockyard.yaml`.
 
 Run `dockyard package test` for a fuller package-author pipeline. It prepares local directories, archives, or OCI sources, runs quality checks, renders with selected values, runs policy checks, and validates the result with `docker compose config`. Add `--smoke` for examples that can be started and stopped with a temporary Compose project name.
+
+`dockyard pull` accepts explicit `oci://` references, `catalog://PACKAGE[:VERSION]` references, and known catalog package names.
 
 OCI push/pull uses the embedded ORAS Go client and reads Docker-compatible registry credentials when available. Dockyard publishes packages with:
 

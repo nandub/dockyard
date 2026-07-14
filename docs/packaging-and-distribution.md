@@ -311,6 +311,12 @@ Pull an archive:
 dockyard pull oci://ghcr.io/nandub/dockyard/team-dashboard:0.1.0   -o ../dockyard-artifacts/team-dashboard-0.1.0.dockyard.tgz
 ```
 
+Pull a known catalog package by name:
+
+```bash
+dockyard pull redis -o ../dockyard-artifacts/redis-0.2.0.dockyard.tgz
+```
+
 Install directly from an OCI reference:
 
 ```bash

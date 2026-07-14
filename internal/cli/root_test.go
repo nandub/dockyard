@@ -103,7 +103,7 @@ func TestRepresentativeCommandArgumentContracts(t *testing.T) {
 		{name: "init requires directory", cmd: func() *cobra.Command { return newInitCommand() }, args: nil},
 		{name: "lint requires package dir", cmd: func() *cobra.Command { return newLintCommand() }, args: nil},
 		{name: "render requires package dir", cmd: func() *cobra.Command { return newRenderCommand() }, args: nil},
-		{name: "pull requires OCI reference", cmd: func() *cobra.Command { return newPullCommand() }, args: nil},
+		{name: "pull requires package source", cmd: func() *cobra.Command { return newPullCommand() }, args: nil},
 		{name: "push requires archive and ref", cmd: func() *cobra.Command { return newPushCommand() }, args: []string{"archive.tgz"}},
 		{name: "install-plan requires release and source", cmd: func() *cobra.Command { return newInstallPlanCommand(&globalOptions{}) }, args: []string{"release"}},
 		{name: "rollback requires release and revision", cmd: func() *cobra.Command { return newRollbackCommand(&globalOptions{}) }, args: []string{"release"}},

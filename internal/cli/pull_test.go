@@ -3,11 +3,61 @@ package cli
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/nandub/dockyard/internal/archive"
 	"github.com/nandub/dockyard/internal/format"
 )
+
+func TestResolvePullReferenceKeepsExplicitOCIReference(t *testing.T) {
+	input := "oci://ghcr.io/example/packages/redis:0.1.0"
+	got, err := resolvePullReference(input)
+	if err != nil {
+		t.Fatalf("resolve pull reference: %v", err)
+	}
+	if got != input {
+		t.Fatalf("got %q want %q", got, input)
+	}
+}
+
+func TestResolvePullReferenceResolvesCatalogShorthand(t *testing.T) {
+	useTestCatalog(t)
+
+	got, err := resolvePullReference("redis")
+	if err != nil {
+		t.Fatalf("resolve pull reference: %v", err)
+	}
+	want := "oci://ghcr.io/example/packages/redis:0.1.0"
+	if got != want {
+		t.Fatalf("got %q want %q", got, want)
+	}
+}
+
+func TestResolvePullReferenceResolvesCatalogURL(t *testing.T) {
+	useTestCatalog(t)
+
+	got, err := resolvePullReference("catalog://postgres:0.1.0")
+	if err != nil {
+		t.Fatalf("resolve pull reference: %v", err)
+	}
+	want := "oci://ghcr.io/example/packages/postgres:0.1.0"
+	if got != want {
+		t.Fatalf("got %q want %q", got, want)
+	}
+}
+
+func TestResolvePullReferenceRejectsUnknownShorthand(t *testing.T) {
+	useTestCatalog(t)
+
+	_, err := resolvePullReference("unknown")
+	if err == nil {
+		t.Fatal("expected unknown shorthand error")
+	}
+	if !strings.Contains(err.Error(), "pull source must be an OCI reference") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
 
 func TestDefaultPulledArchiveNameUsesManifestIdentity(t *testing.T) {
 	packageDir := t.TempDir()

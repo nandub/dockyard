@@ -16,8 +16,8 @@ func newPullCommand() *cobra.Command {
 	var skipVerify bool
 
 	cmd := &cobra.Command{
-		Use:   "pull OCI_REFERENCE",
-		Short: "Pull a Dockyard package archive from an OCI registry",
+		Use:   "pull OCI_REFERENCE|PACKAGE",
+		Short: "Pull a Dockyard package archive from an OCI registry or catalog package",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			tempDir, err := os.MkdirTemp("", "dockyard-pull-*")
@@ -28,7 +28,11 @@ func newPullCommand() *cobra.Command {
 
 			ctx, cancel := context10m()
 			defer cancel()
-			pulledArchive, err := oci.Pull(ctx, args[0], tempDir)
+			ref, err := resolvePullReference(args[0])
+			if err != nil {
+				return err
+			}
+			pulledArchive, err := oci.Pull(ctx, ref, tempDir)
 			if err != nil {
 				return err
 			}
@@ -54,6 +58,17 @@ func newPullCommand() *cobra.Command {
 	cmd.Flags().StringVarP(&output, "output", "o", "", "output archive path")
 	cmd.Flags().BoolVar(&skipVerify, "skip-verify", false, "skip package verification after pull")
 	return cmd
+}
+
+func resolvePullReference(input string) (string, error) {
+	resolved, _, err := resolveCatalogPackageSource(input)
+	if err != nil {
+		return "", err
+	}
+	if !oci.IsReference(resolved) {
+		return "", fmt.Errorf("pull source must be an OCI reference, catalog:// reference, or catalog package name")
+	}
+	return resolved, nil
 }
 
 func defaultPulledArchiveName(archivePath string) (string, error) {
