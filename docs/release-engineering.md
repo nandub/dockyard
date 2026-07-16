@@ -91,6 +91,8 @@ dockyard package test ./examples/nginx --strict
 
 The smoke test remains a local/manual gate because it requires a reachable Docker daemon.
 
+For OCI or catalog releases, also run the registry smoke gate documented in `docs/validation.md`. It verifies catalog listing, catalog shorthand package pull, archive verification, and strict package testing against a public catalog package.
+
 ## Tagging
 
 ```bash

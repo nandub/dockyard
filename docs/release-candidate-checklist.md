@@ -29,6 +29,16 @@ dockyard package test ./examples/nginx --smoke
 
 Repeat the non-smoke gate for each public example package.
 
+For OCI/catalog changes, run the public registry smoke gate with artifacts outside the repository:
+
+```powershell
+New-Item -ItemType Directory -Force ..\dockyard-artifacts | Out-Null
+dockyard catalog list
+dockyard pull redis -o ..\dockyard-artifacts\redis-0.2.0.dockyard.tgz
+dockyard verify ..\dockyard-artifacts\redis-0.2.0.dockyard.tgz
+dockyard package test redis --strict
+```
+
 ## Release build
 
 For local release snapshots:

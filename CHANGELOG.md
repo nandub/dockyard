@@ -1,11 +1,17 @@
 
+## v1.8.1
+
+- Replaced the external `oras` CLI dependency for package push/pull and catalog pulls with the embedded ORAS Go client.
+- Added `dockyard pull PACKAGE` and `dockyard pull catalog://PACKAGE[:VERSION]` support through catalog resolution.
+- Documented registry smoke validation for catalog listing, package shorthand pull, archive verification, and strict package testing.
+- Expanded unit and documentation coverage across CLI command wiring, docs links, catalog validation, OCI behavior, archive safety, policy/quality reporting, render validation, state handling, and lock coverage.
+
 ## v1.8.0
 
 - Replaced the compiled-in catalog package list with an OCI-backed catalog index.
 - `dockyard catalog list`, `dockyard catalog info`, `catalog://NAME[:VERSION]`, and bare install shorthand now resolve from `catalog.yaml` pulled from `DOCKYARD_CATALOG`.
 - Default catalog metadata reference is `oci://ghcr.io/nandub/dockyard-packages/catalog:latest`.
 - Added local file catalog loading for development/tests and short-lived catalog caching under `~/.dockyard/cache/catalogs`.
-- Replaced the external `oras` CLI dependency for package push/pull and catalog pulls with the embedded ORAS Go client.
 
 # Changelog
 
