@@ -18,7 +18,7 @@ Existing local paths, archives, and explicit `oci://` package references should 
 
 ## ORAS Boundary
 
-Dockyard links `oras.land/oras-go/v2` for OCI package push, package pull, and catalog metadata pull. Package archives are pushed as named OCI layers so pulls restore the original archive filename.
+Dockyard links `oras.land/oras-go/v2` for OCI package push, package pull, catalog metadata pull, and catalog metadata publish. Package archives are pushed as named OCI layers so pulls restore the original archive filename.
 
 Dockyard does not store registry credentials. Registry authentication uses Docker-compatible credential configuration when available, including Docker config files and configured credential helpers. Anonymous registry access is used when no matching credentials are configured.
 
@@ -27,6 +27,16 @@ TLS, proxy, retry, and registry protocol behavior are handled by Go's HTTP stack
 ## Package Artifacts
 
 Package archives are `.dockyard.tgz` files. OCI package work intersects with archive verification, lockfiles, provenance metadata, catalog metadata, and release/package commands.
+
+## Catalog Artifacts
+
+`dockyard catalog publish CATALOG_YAML OCI_REFERENCE` validates the local catalog YAML before publishing it. Catalog artifacts use:
+
+```text
+artifact type: application/vnd.dockyard.catalog.v1+yaml
+catalog layer: application/vnd.dockyard.catalog.index.v1+yaml
+layer title: catalog.yaml
+```
 
 ## Security Notes
 

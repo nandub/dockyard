@@ -18,9 +18,12 @@ import (
 )
 
 const (
-	DefaultCatalogRef = "oci://ghcr.io/nandub/dockyard-packages/catalog:latest"
-	EnvCatalog        = "DOCKYARD_CATALOG"
-	APIVersion        = "dockyard.dev/catalog/v1alpha1"
+	DefaultCatalogRef     = "oci://ghcr.io/nandub/dockyard-packages/catalog:latest"
+	EnvCatalog            = "DOCKYARD_CATALOG"
+	APIVersion            = "dockyard.dev/catalog/v1alpha1"
+	ArtifactType          = "application/vnd.dockyard.catalog.v1+yaml"
+	LayerMediaType        = "application/vnd.dockyard.catalog.index.v1+yaml"
+	PublishedCatalogTitle = "catalog.yaml"
 )
 
 type Index struct {
@@ -135,6 +138,18 @@ func LoadBytes(data []byte) (Index, error) {
 		return Index{}, err
 	}
 	return idx, nil
+}
+
+func Publish(ctx context.Context, path string, ref string) error {
+	sourcePath := strings.TrimPrefix(path, "file://")
+	data, err := os.ReadFile(filepath.Clean(sourcePath))
+	if err != nil {
+		return fmt.Errorf("read catalog index: %w", err)
+	}
+	if _, err := LoadBytes(data); err != nil {
+		return err
+	}
+	return oci.PushNamedFile(ctx, sourcePath, ref, PublishedCatalogTitle, ArtifactType, LayerMediaType)
 }
 
 func ResolveWithIndex(idx Index, input string) (string, bool, error) {

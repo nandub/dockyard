@@ -22,6 +22,7 @@ ghcr.io/my-org/my-packages; Dockyard will resolve it to /catalog:latest.`,
 	}
 	cmd.AddCommand(newCatalogListCommand())
 	cmd.AddCommand(newCatalogInfoCommand())
+	cmd.AddCommand(newCatalogPublishCommand())
 	return cmd
 }
 
@@ -50,6 +51,24 @@ func newCatalogListCommand() *cobra.Command {
 		},
 	}
 	cmd.Flags().BoolVar(&jsonOut, "json", false, "output JSON")
+	return cmd
+}
+
+func newCatalogPublishCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "publish CATALOG_YAML OCI_REFERENCE",
+		Short: "Publish a catalog YAML file to an OCI registry",
+		Args:  cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx, cancel := context10m()
+			defer cancel()
+			if err := catalog.Publish(ctx, args[0], args[1]); err != nil {
+				return err
+			}
+			fmt.Printf("published %s to %s\n", args[0], args[1])
+			return nil
+		},
+	}
 	return cmd
 }
 

@@ -365,10 +365,16 @@ dockyard package test oci://ghcr.io/nandub/dockyard/nginx:0.1.0 --smoke
 Dockyard catalog metadata is distributed as an OCI artifact. Publish a `catalog.yaml` file to a catalog reference such as:
 
 ```bash
-oras push --artifact-type application/vnd.dockyard.catalog.v1+yaml ghcr.io/nandub/dockyard-packages/catalog:latest catalog.yaml:application/vnd.dockyard.catalog.index.v1+yaml
+dockyard catalog publish catalog.yaml oci://ghcr.io/nandub/dockyard-packages/catalog:latest
 ```
 
-Dockyard can read catalog metadata from OCI, but it does not currently provide a dedicated catalog publish command; the example above uses the external `oras` CLI for that manual catalog publishing step.
+Dockyard validates the catalog file before publishing it. Published catalog artifacts use:
+
+```text
+artifact type: application/vnd.dockyard.catalog.v1+yaml
+catalog layer: application/vnd.dockyard.catalog.index.v1+yaml
+layer title: catalog.yaml
+```
 
 Operators can then run:
 

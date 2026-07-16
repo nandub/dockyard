@@ -14,6 +14,7 @@ Dockyard commands are grouped around packaging, validation, release management, 
 ```bash
 dockyard catalog list [--json]
 dockyard catalog info PACKAGE [--json]
+dockyard catalog publish CATALOG_YAML oci://registry/repository/catalog:tag
 ```
 
 The default catalog metadata reference is `oci://ghcr.io/nandub/dockyard-packages/catalog:latest`. Override it with:
@@ -31,6 +32,8 @@ dockyard install redis catalog://redis:0.1.0
 ```
 
 These resolve through the live `catalog.yaml` OCI index. The catalog entry controls the package source, latest version, and available versions.
+
+`catalog publish` validates the local catalog YAML and publishes it as an OCI catalog artifact.
 
 JSON dry-run mode suppresses OCI pull progress so stdout can be consumed by scripts:
 

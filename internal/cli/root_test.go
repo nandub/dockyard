@@ -67,6 +67,15 @@ func TestPolicyCommandRegistersListAndCheckSubcommands(t *testing.T) {
 	}
 }
 
+func TestCatalogCommandRegistersSubcommands(t *testing.T) {
+	cmd := newCatalogCommand()
+	for _, name := range []string{"list", "info", "publish"} {
+		if _, _, err := cmd.Find([]string{name}); err != nil {
+			t.Fatalf("expected catalog subcommand %q: %v", name, err)
+		}
+	}
+}
+
 func TestPolicyListCommandPrintsTextAndJSON(t *testing.T) {
 	text := captureStdout(t, func() {
 		cmd := newPolicyListCommand()

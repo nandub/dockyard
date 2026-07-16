@@ -1,4 +1,8 @@
 
+## Unreleased
+
+- Added `dockyard catalog publish CATALOG_YAML OCI_REFERENCE` for publishing validated catalog metadata through the embedded ORAS Go client.
+
 ## v1.8.1
 
 - Replaced the external `oras` CLI dependency for package push/pull and catalog pulls with the embedded ORAS Go client.

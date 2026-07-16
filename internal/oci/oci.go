@@ -49,24 +49,35 @@ func NormalizeReference(input string) (string, error) {
 }
 
 func Push(ctx context.Context, archivePath string, ref string) error {
+	return PushNamedFile(ctx, archivePath, ref, filepath.Base(filepath.Clean(archivePath)), ArtifactType, LayerMediaType)
+}
+
+func PushFile(ctx context.Context, filePath string, ref string, artifactType string, layerMediaType string) error {
+	return PushNamedFile(ctx, filePath, ref, filepath.Base(filepath.Clean(filePath)), artifactType, layerMediaType)
+}
+
+func PushNamedFile(ctx context.Context, filePath string, ref string, artifactName string, artifactType string, layerMediaType string) error {
 	normalized, err := NormalizeReference(ref)
 	if err != nil {
 		return err
 	}
-	cleanArchive := filepath.Clean(archivePath)
-	if _, err := os.Stat(cleanArchive); err != nil {
-		return fmt.Errorf("stat package archive: %w", err)
+	cleanPath := filepath.Clean(filePath)
+	if strings.TrimSpace(artifactName) == "" {
+		return errors.New("OCI artifact file name is empty")
 	}
-	absArchive, err := filepath.Abs(cleanArchive)
+	if _, err := os.Stat(cleanPath); err != nil {
+		return fmt.Errorf("stat OCI artifact file: %w", err)
+	}
+	absPath, err := filepath.Abs(cleanPath)
 	if err != nil {
-		return fmt.Errorf("resolve package archive: %w", err)
+		return fmt.Errorf("resolve OCI artifact file: %w", err)
 	}
 	repo, err := newRepository(normalized)
 	if err != nil {
 		return err
 	}
-	if err := pushArchiveToTarget(ctx, absArchive, repo.Reference.Reference, repo); err != nil {
-		return fmt.Errorf("push OCI package: %w", err)
+	if err := pushFileToTarget(ctx, absPath, repo.Reference.Reference, repo, artifactName, artifactType, layerMediaType); err != nil {
+		return fmt.Errorf("push OCI artifact: %w", err)
 	}
 	return nil
 }
@@ -137,25 +148,29 @@ func newAuthClient() (*auth.Client, error) {
 }
 
 func pushArchiveToTarget(ctx context.Context, archivePath string, ref string, target oras.Target) error {
-	archiveDir := filepath.Dir(archivePath)
 	archiveName := filepath.Base(archivePath)
-	store, err := file.New(archiveDir)
+	return pushFileToTarget(ctx, archivePath, ref, target, archiveName, ArtifactType, LayerMediaType)
+}
+
+func pushFileToTarget(ctx context.Context, filePath string, ref string, target oras.Target, artifactName string, artifactType string, layerMediaType string) error {
+	fileDir := filepath.Dir(filePath)
+	store, err := file.New(fileDir)
 	if err != nil {
 		return fmt.Errorf("create OCI file store: %w", err)
 	}
 	defer store.Close()
-	layer, err := store.Add(ctx, archiveName, LayerMediaType, archiveName)
+	layer, err := store.Add(ctx, artifactName, layerMediaType, filePath)
 	if err != nil {
-		return fmt.Errorf("add package archive layer: %w", err)
+		return fmt.Errorf("add OCI artifact layer: %w", err)
 	}
-	manifest, err := oras.PackManifest(ctx, store, oras.PackManifestVersion1_1, ArtifactType, oras.PackManifestOptions{
+	manifest, err := oras.PackManifest(ctx, store, oras.PackManifestVersion1_1, artifactType, oras.PackManifestOptions{
 		Layers: []ocispec.Descriptor{layer},
 	})
 	if err != nil {
-		return fmt.Errorf("pack package manifest: %w", err)
+		return fmt.Errorf("pack OCI artifact manifest: %w", err)
 	}
 	if err := store.Tag(ctx, manifest, ref); err != nil {
-		return fmt.Errorf("tag package manifest: %w", err)
+		return fmt.Errorf("tag OCI artifact manifest: %w", err)
 	}
 	if _, err := oras.Copy(ctx, store, ref, target, ref, oras.DefaultCopyOptions); err != nil {
 		return err

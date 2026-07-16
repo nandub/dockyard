@@ -276,6 +276,21 @@ func TestLoadReferenceRejectsInvalidReferenceAndFindsIndexFile(t *testing.T) {
 	}
 }
 
+func TestPublishValidatesCatalogBeforePushing(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "catalog.yaml")
+	if err := os.WriteFile(path, []byte("apiVersion: dockyard.dev/catalog/v9\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	err := Publish(context.Background(), path, "oci://ghcr.io/example/catalog:latest")
+	if err == nil {
+		t.Fatal("expected invalid catalog error")
+	}
+	if !strings.Contains(err.Error(), "unsupported catalog apiVersion") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
 func TestCatalogCacheRoundTrip(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("USERPROFILE", home)
