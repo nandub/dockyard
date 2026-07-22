@@ -1,6 +1,8 @@
 
 ## Unreleased
 
+## v1.8.2
+
 - Added `dockyard catalog publish CATALOG_YAML OCI_REFERENCE` for publishing validated catalog metadata through the embedded ORAS Go client.
 
 ## v1.8.1
